@@ -6,7 +6,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  function norm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+  function norm(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function brl(v) { return (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
@@ -57,8 +57,38 @@
   }
 
   // ---------- Dados da família ----------
+  // Data digitada como dd/mm/aaaa (também aceita aaaa-mm-dd). Devolve aaaa-mm-dd ou '' se incompleta ou inválida.
+  function dataDigitada(txt) {
+    const t = String(txt || '').trim();
+    let m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/), iso = '';
+    if (m) iso = m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+    else if ((m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/))) iso = t;
+    if (!iso) return '';
+    const [a, mm, d] = iso.split('-').map(Number), dt = new Date(Date.UTC(a, mm - 1, d));
+    return dt.getUTCFullYear() === a && dt.getUTCMonth() === mm - 1 && dt.getUTCDate() === d ? iso : '';
+  }
+  // Põe as barras enquanto a pessoa digita: 10052015 -> 10/05/2015.
+  function mascaraData(txt) {
+    const t = String(txt || '');
+    if (/^\d{4}-/.test(t)) return t.slice(0, 10);
+    const d = t.replace(/\D/g, '').slice(0, 8);
+    return d.length > 4 ? d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4) : d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
+  }
+  function dataParaTexto(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
+  // Telefone brasileiro: (35) 99999-9999 (celular) ou (35) 3333-3333 (fixo).
+  function mascaraTelefone(txt) {
+    let d = String(txt || '').replace(/\D/g, '');
+    if (d.length > 11 && d.startsWith('55')) d = d.slice(2);
+    d = d.slice(0, 11);
+    if (d.length <= 2) return d.length ? '(' + d : '';
+    const ddd = '(' + d.slice(0, 2) + ') ', r = d.slice(2);
+    if (r.length <= 4) return ddd + r;
+    const corte = r.length >= 9 ? 5 : 4;
+    return ddd + r.slice(0, corte) + '-' + r.slice(corte);
+  }
+  function telefoneCompleto(txt) { const d = String(txt || '').replace(/\D/g, ''); return d.length === 10 || d.length === 11; }
   function novaPessoa(resp) {
-    return { nome: '', nasc: '', parentesco: resp ? 'Responsável pela família' : '', sexo: '', cpf: '', nis: '', renda: '', fonte: 'sem', estudo: 'nao', rede: 'publica', medioCompleto: false, pcd: false, gestante: false, nutriz: false, demitido: false, incontinencia: false, semDocumento: false, doencas: [] };
+    return { nome: '', nasc: '', nascTxt: '', parentesco: resp ? 'Responsável pela família' : '', sexo: '', cpf: '', nis: '', renda: '', fonte: 'sem', estudo: 'nao', rede: 'publica', medioCompleto: false, pcd: false, gestante: false, nutriz: false, demitido: false, incontinencia: false, semDocumento: false, doencas: [] };
   }
   // Doenças graves com direitos especiais (Lei 7.713/1988 art. 6º XIV; Lei 8.036/1990 art. 20; Portaria Interministerial MTP/MS 22/2022)
   // Doenças com remédio grátis na Farmácia Popular
@@ -67,14 +97,14 @@
   // Doenças que costumam usar remédios de alto custo do SUS (Farmácia de Minas / Componente Especializado)
   const DOENCAS_ALTO_CUSTO = ['renal', 'esclerose', 'hepatite', 'alzheimer', 'epilepsia', 'mental_grave', 'rara', 'parkinson'];
   function familiaVazia() {
-    return { cidade: '', bairro: '', rua: '', numero: '', complemento: '', referencia: '', endereco: '', cep: '', telefone: '', contato2Nome: '', contato2Parentesco: '', contato2Tel: '', zona: 'urbana', moradia: '', agua: '', luz: '', docsOk: {}, emails: {}, pessoas: [novaPessoa(true)], saude: { consulta: false, especialista: false, dentista: false, mental: false }, cad: '', bf: '', sit: { agricultor: false, pescador: false, indigena: false, violencia: false, rua: false, emergencia: false, justica: false } };
+    return { cidade: '', bairro: '', rua: '', numero: '', complemento: '', referencia: '', endereco: '', cep: '', telefone: '', telefoneTipo: '', contato2Nome: '', contato2Parentesco: '', contato2Tel: '', contato2Tipo: '', zona: 'urbana', moradia: '', agua: '', luz: '', docsOk: {}, emails: {}, pessoas: [novaPessoa(true)], saude: { consulta: false, especialista: false, dentista: false, mental: false }, cad: '', bf: '', sit: { agricultor: false, pescador: false, indigena: false, violencia: false, rua: false, emergencia: false, justica: false } };
   }
   // Conserta dados salvos estragados ou de versões antigas, sem perder o que estiver certo.
   function normalizarFamilia(f) {
     const base = familiaVazia();
     if (!f || typeof f !== 'object' || Array.isArray(f)) return base;
     const out = Object.assign({}, base);
-    for (const k of ['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'endereco', 'cep', 'telefone', 'contato2Nome', 'contato2Parentesco', 'contato2Tel', 'zona', 'moradia', 'agua', 'luz', 'cad', 'bf']) if (typeof f[k] === 'string') out[k] = f[k];
+    for (const k of ['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'endereco', 'cep', 'telefone', 'telefoneTipo', 'contato2Nome', 'contato2Parentesco', 'contato2Tel', 'contato2Tipo', 'zona', 'moradia', 'agua', 'luz', 'cad', 'bf']) if (typeof f[k] === 'string') out[k] = f[k];
     if (!out.rua && out.endereco) out.rua = out.endereco; // dados de versões antigas
     out.docsOk = f.docsOk && typeof f.docsOk === 'object' && !Array.isArray(f.docsOk) ? Object.fromEntries(Object.entries(f.docsOk).filter(([k, v]) => typeof k === 'string' && v === true).slice(0, 2000)) : {};
     out.emails = f.emails && typeof f.emails === 'object' && !Array.isArray(f.emails) ? Object.fromEntries(Object.entries(f.emails).filter(([k, v]) => typeof v === 'string').map(([k, v]) => [k, v.slice(0, 120)])) : {};
@@ -83,8 +113,9 @@
     const ps = Array.isArray(f.pessoas) ? f.pessoas.filter(p => p && typeof p === 'object') : [];
     out.pessoas = ps.length ? ps.map((p, i) => {
       const n = Object.assign(novaPessoa(i === 0), p);
-      for (const k of ['nome', 'nasc', 'parentesco', 'sexo', 'cpf', 'nis', 'fonte', 'estudo', 'rede']) n[k] = typeof n[k] === 'string' ? n[k] : '';
+      for (const k of ['nome', 'nasc', 'nascTxt', 'parentesco', 'sexo', 'cpf', 'nis', 'fonte', 'estudo', 'rede']) n[k] = typeof n[k] === 'string' ? n[k] : '';
       if (!n.fonte) n.fonte = 'sem';
+      if (!n.nascTxt && n.nasc) n.nascTxt = dataParaTexto(n.nasc);
       if (!n.estudo) n.estudo = 'nao';
       n.renda = typeof n.renda === 'number' ? String(n.renda) : (typeof n.renda === 'string' ? n.renda : '');
       n.doencas = Array.isArray(n.doencas) ? n.doencas.filter(d => typeof d === 'string') : [];
@@ -356,5 +387,5 @@
     return erros;
   }
 
-  return { planoPorLocal, direitosPorPessoa, DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
+  return { dataDigitada, mascaraData, dataParaTexto, mascaraTelefone, telefoneCompleto, planoPorLocal, direitosPorPessoa, DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
 });

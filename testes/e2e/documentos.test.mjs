@@ -181,3 +181,40 @@ test('Pouso Alegre: benefícios da Prefeitura aparecem no resultado e na carta d
   assert.deepEqual(erros, []);
   await ctx.close();
 });
+
+test('Data dd/mm/aaaa e telefone formatado com tipo (WhatsApp, celular, fixo)', async () => {
+  const ctx = await nav.newContext({ viewport: { width: 360, height: 740 } });
+  const pg = await ctx.newPage(); const erros = [];
+  pg.on('pageerror', e => erros.push(e.message));
+  await pg.goto(srv.url);
+  await pg.click('#comecar');
+  await pg.fill('#cidade', 'Itajubá');
+  await pg.locator('#telefone').pressSequentially('35999990000');
+  assert.equal(await pg.inputValue('#telefone'), '(35) 99999-0000');
+  await pg.selectOption('#telefoneTipo', 'whatsapp');
+  await pg.locator('#contato2Tel').pressSequentially('3536211234');
+  assert.equal(await pg.inputValue('#contato2Tel'), '(35) 3621-1234');
+  await pg.selectOption('#contato2Tipo', 'fixo');
+  await pg.click('#avancar');
+  await pg.fill('#p0_nome', 'Ana Souza');
+  await pg.locator('#p0_nasc').pressSequentially('25031980');
+  assert.equal(await pg.inputValue('#p0_nasc'), '25/03/1980');
+  assert.match(await pg.textContent('#p0_idade'), /46 anos/);
+  // Data impossível é barrada ao avançar.
+  await pg.fill('#p0_nasc', '');
+  await pg.locator('#p0_nasc').pressSequentially('31021980');
+  await pg.click('#avancar');
+  assert.match(await pg.textContent('#erro-pessoas'), /não parece certa/);
+  await pg.fill('#p0_nasc', '');
+  await pg.locator('#p0_nasc').pressSequentially('25031980');
+  await pg.click('#avancar'); await pg.click('#avancar');
+  await pg.check('input[name=cad][value=nao]'); await pg.check('input[name=bf][value=nao]');
+  await pg.click('#avancar');
+  await pg.click('#abrir-relatorio');
+  const rel = (await pg.textContent('#relatorio')).replace(/\s/g, ' ');
+  assert.match(rel, /\(35\) 99999-0000 \(WhatsApp\)/);
+  assert.match(rel, /\(35\) 3621-1234 \(fixo\)/);
+  assert.match(rel, /25\/03\/1980/);
+  assert.deepEqual(erros, []);
+  await ctx.close();
+});

@@ -25,3 +25,27 @@ test('data vazia, inválida, no futuro ou absurda vira idade desconhecida', () =
     assert.equal(idade(d, '2026-10-21'), null, 'data ' + d);
   }
 });
+
+test('data digitada no formato brasileiro dd/mm/aaaa', () => {
+  const { dataDigitada, mascaraData, dataParaTexto } = Motor;
+  assert.equal(mascaraData('10052015'), '10/05/2015');
+  assert.equal(mascaraData('1005'), '10/05');
+  assert.equal(mascaraData('10/05/2015xx'), '10/05/2015');
+  assert.equal(dataDigitada('10/05/2015'), '2015-05-10');
+  assert.equal(dataDigitada('1/5/2015'), '2015-05-01');
+  assert.equal(dataDigitada('30/02/2015'), '', '30 de fevereiro não existe');
+  assert.equal(dataDigitada('10/05'), '', 'incompleta');
+  assert.equal(dataDigitada('2015-05-10'), '2015-05-10');
+  assert.equal(dataParaTexto('2015-05-10'), '10/05/2015');
+  const f = Motor.normalizarFamilia({ pessoas: [{ nome: 'A', nasc: '1980-03-25' }] });
+  assert.equal(f.pessoas[0].nascTxt, '25/03/1980', 'dados antigos ganham o texto da data');
+});
+test('telefone com DDD: celular, fixo e com +55', () => {
+  const { mascaraTelefone, telefoneCompleto } = Motor;
+  assert.equal(mascaraTelefone('35999990000'), '(35) 99999-0000');
+  assert.equal(mascaraTelefone('3536211234'), '(35) 3621-1234');
+  assert.equal(mascaraTelefone('+55 35 99999-0000'), '(35) 99999-0000');
+  assert.equal(mascaraTelefone('35'), '(35');
+  assert.equal(mascaraTelefone('abc'), '');
+  assert.ok(telefoneCompleto('(35) 99999-0000') && telefoneCompleto('(35) 3621-1234') && !telefoneCompleto('(35) 9999'));
+});

@@ -66,7 +66,7 @@
   function exemplo() {
     const y = new Date().getFullYear(); const np = M.novaPessoa;
     return M.normalizarFamilia({
-      cidade: 'Itajubá', bairro: 'Centro', rua: 'Rua das Flores', numero: '120', complemento: 'Casa 2', referencia: 'Perto da escola estadual', cep: '37500-000', contato2Nome: 'Rosa', contato2Parentesco: 'Mãe', contato2Tel: '(35) 98888-0000', telefone: '(35) 99999-0000', zona: 'urbana', moradia: 'alugada', agua: 'copasa', luz: 'familia',
+      cidade: 'Itajubá', bairro: 'Centro', rua: 'Rua das Flores', numero: '120', complemento: 'Casa 2', referencia: 'Perto da escola estadual', cep: '37500-000', contato2Nome: 'Rosa', contato2Parentesco: 'Mãe', contato2Tel: '(35) 98888-0000', telefone: '(35) 99999-0000', telefoneTipo: 'whatsapp', contato2Tipo: 'celular', zona: 'urbana', moradia: 'alugada', agua: 'copasa', luz: 'familia',
       pessoas: [
         Object.assign(np(true), { nome: 'Maria Aparecida (exemplo)', nasc: (y - 38) + '-03-10', sexo: 'F', renda: '800', fonte: 'informal', doencas: ['pressao'] }),
         Object.assign(np(false), { nome: 'Pedro (exemplo)', nasc: (y - 16) + '-07-22', parentesco: 'Filho(a)', sexo: 'M', estudo: 'medio', rede: 'publica' }),
@@ -125,14 +125,14 @@
       'As respostas servem só para preencher o aplicativo Meus Direitos MG, que guarda os dados apenas no aparelho de quem está ajudando.', '');
     L.push('*PARTE 1: ONDE VOCÊS MORAM*');
     q('CEP (se souber)'); q('Cidade'); q('Bairro'); q('Rua, avenida ou estrada'); q('Número da casa (se não tiver, escreva S/N)');
-    q('Complemento (casa, apartamento, bloco, fundos...)'); q('Ponto de referência (algo perto que ajude a achar a casa)'); q('Seu telefone');
-    q('Outro telefone para recado: nome, quem é (mãe, marido, filho, vizinho...) e número');
+    q('Complemento (casa, apartamento, bloco, fundos...)'); q('Ponto de referência (algo perto que ajude a achar a casa)'); q('Seu telefone, com DDD. Ex.: (35) 99999-9999', TIPOS_FONE.slice(1));
+    q('Outro telefone para recado: nome, quem é (mãe, marido, filho, vizinho...), número com DDD e se é WhatsApp, celular ou fixo');
     q('A casa fica:', ['Na cidade', 'Na roça (zona rural)']);
     q('A casa é:', ['Própria (já paga)', 'Própria, ainda pagando', 'Alugada', 'Emprestada (cedida)', 'Ocupação', 'Não tenho casa / moro na rua']);
     q('De quem é a água? (olhe na conta de água)', ['Copasa', 'SAAE ou outra empresa', 'Não sei / não tenho conta de água']);
     q('A conta de luz está no nome de quem?', ['De alguém que mora na casa', 'De outra pessoa (dono da casa, parente)', 'Não tenho conta de luz']);
     L.push('', '*PARTE 2: QUEM MORA NA CASA*', 'Responda as perguntas abaixo para *cada pessoa* que mora na casa e divide as despesas, inclusive bebês. Comece por você.');
-    q('Nome completo'); q('Data de nascimento'); q('Sexo:', SEXOS.slice(1));
+    q('Nome completo'); q('Data de nascimento (dia/mês/ano, ex.: 25/03/1980)'); q('Sexo:', SEXOS.slice(1));
     q('O que é seu (filho, esposa, mãe, neto...)? Para você mesmo, escreva "eu".');
     q('De onde vem o dinheiro desta pessoa?', FONTES);
     q('Quanto ganha por mês *antes dos descontos* (valor bruto do contracheque)? Se o valor muda, diga a média. Não conte o Bolsa Família.');
@@ -186,6 +186,9 @@
       '<button type="button" class="link" id="esqueci">Esqueci a senha</button>' +
       '<div id="confirma-limpar" hidden class="card stack tight"><p><b>Sem a senha não é possível abrir os dados.</b> Quer apagar tudo e começar de novo?</p><div class="btns"><button type="button" class="go danger" id="limpar-sim">Apagar e começar de novo</button><button type="button" id="limpar-nao">Não</button></div></div></div>';
   }
+  const TIPOS_FONE = [['', 'Escolha'], ['whatsapp', 'Celular com WhatsApp'], ['celular', 'Celular sem WhatsApp'], ['fixo', 'Telefone fixo']];
+  const selTipoFone = (id, atual) => '<select id="' + id + '">' + TIPOS_FONE.map(([v, l]) => '<option value="' + v + '"' + (atual === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>';
+  const fone = (num, tipo) => num ? num + (tipo === 'whatsapp' ? ' (WhatsApp)' : tipo === 'fixo' ? ' (fixo)' : tipo === 'celular' ? ' (celular, sem WhatsApp)' : '') : '';
   function telaCasa() {
     return '<div class="stack"><h2>1. Onde vocês moram</h2>' +
       '<label class="q">CEP<small>Se souber. Com internet, a rua, o bairro e a cidade aparecem sozinhos (só o CEP é consultado no site ViaCEP).</small><input type="text" id="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" value="' + esc(F.cep) + '" placeholder="00000-000"></label>' +
@@ -197,11 +200,13 @@
       '<div class="grid2"><label class="q">Número<small>Se não tiver, escreva S/N</small><input type="text" id="numero" maxlength="10" value="' + esc(F.numero) + '"></label>' +
       '<label class="q">Complemento<small>Casa, apartamento, bloco, fundos...</small><input type="text" id="complemento" maxlength="60" value="' + esc(F.complemento) + '"></label></div>' +
       '<label class="q">Ponto de referência<small>Algo perto que ajude a achar a casa. Ex.: perto da escola, em frente à padaria.</small><input type="text" id="referencia" maxlength="120" value="' + esc(F.referencia) + '"></label>' +
-      '<label class="q">Seu telefone<input type="tel" id="telefone" maxlength="20" autocomplete="tel" value="' + esc(F.telefone) + '"></label>' +
+      '<div class="grid2"><label class="q">Seu telefone<small>Com DDD. Ex.: (35) 99999-9999</small><input type="tel" id="telefone" maxlength="15" autocomplete="tel" placeholder="(35) 99999-9999" value="' + esc(F.telefone) + '"></label>' +
+      '<label class="q">Este número é<small>Para o atendimento saber como chamar</small>' + selTipoFone('telefoneTipo', F.telefoneTipo) + '</label></div>' +
       '<fieldset class="card stack mid"><legend><b>Outro telefone para recado</b><br><small class="sub">De alguém que sempre consegue falar com você</small></legend>' +
       '<div class="grid2"><label class="q">Nome<input type="text" id="contato2Nome" maxlength="80" value="' + esc(F.contato2Nome) + '"></label>' +
       '<label class="q">Quem é<select id="contato2Parentesco"><option value="">Escolha</option>' + CONTATOS.map(c => '<option' + (F.contato2Parentesco === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></label></div>' +
-      '<label class="q">Telefone<input type="tel" id="contato2Tel" maxlength="20" value="' + esc(F.contato2Tel) + '"></label></fieldset>' +
+      '<div class="grid2"><label class="q">Telefone<input type="tel" id="contato2Tel" maxlength="15" placeholder="(35) 99999-9999" value="' + esc(F.contato2Tel) + '"></label>' +
+      '<label class="q">Este número é' + selTipoFone('contato2Tipo', F.contato2Tipo) + '</label></div></fieldset>' +
       '<fieldset class="card choices"><legend><b>A casa fica</b></legend>' + radio('zona', 'urbana', 'Na cidade', F.zona) + radio('zona', 'rural', 'Na roça (zona rural)', F.zona) + '</fieldset>' +
       '<fieldset class="card choices"><legend><b>A casa é</b></legend>' +
       radio('moradia', 'propria', 'Própria (já paga)', F.moradia) + radio('moradia', 'financiada', 'Própria, ainda pagando', F.moradia) + radio('moradia', 'alugada', 'Alugada', F.moradia) + radio('moradia', 'cedida', 'Emprestada (cedida)', F.moradia) + radio('moradia', 'ocupacao', 'Ocupação', F.moradia) + radio('moradia', 'rua', 'Não tenho casa / moro na rua', F.moradia) + '</fieldset>' +
@@ -217,7 +222,7 @@
     return '<section class="card person stack mid">' +
       '<div class="person-head"><h3>' + (i === 0 ? 'Responsável pela família' : 'Pessoa ' + (i + 1)) + (p.nome ? ': ' + esc(p.nome.split(' ')[0]) : '') + '</h3>' + (i > 0 ? '<button type="button" class="small" data-remover="' + i + '">Tirar esta pessoa</button>' : '') + '</div>' +
       '<label class="q">Nome completo<input type="text" id="' + pre + 'nome" data-p="' + i + '" data-k="nome" maxlength="100" autocomplete="off" value="' + esc(p.nome) + '"></label>' +
-      '<div class="grid2"><label class="q">Data de nascimento' + (id != null ? '<small>' + id + ' anos</small>' : '') + '<input type="date" id="' + pre + 'nasc" data-p="' + i + '" data-k="nasc" min="1900-01-01" max="' + hoje + '" value="' + esc(p.nasc) + '"></label>' +
+      '<div class="grid2"><label class="q">Data de nascimento<small id="' + pre + 'idade">' + (id != null ? id + ' anos' : 'dia/mês/ano, ex.: 25/03/1980') + '</small><input type="text" inputmode="numeric" autocomplete="off" id="' + pre + 'nasc" data-p="' + i + '" data-k="nascTxt" maxlength="10" placeholder="dd/mm/aaaa" value="' + esc(p.nascTxt || M.dataParaTexto(p.nasc)) + '"></label>' +
       '<label class="q">Sexo' + sel('sexo', SEXOS, p.sexo) + '</label></div>' +
       (i > 0 ? '<label class="q">O que é do responsável' + sel('parentesco', [['', 'Escolha']].concat(PARENTESCOS.slice(1).map(x => [x, x])), p.parentesco) + '</label>' : '') +
       '<label class="q">De onde vem o dinheiro desta pessoa' + sel('fonte', FONTES, p.fonte) + '</label>' +
@@ -361,7 +366,7 @@
     return 'Ao(À) ' + (c.nome || g.canal) + (F.cidade ? ' de ' + F.cidade + '/MG' : '') + '\n' +
       'Assunto: Pedido de verificação de direitos da família de ' + (resp.nome || '__________') + '\n\n' +
       'Prezados(as),\n\n' +
-      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', moro em ' + (enderecoCompleto() || '________________________') + (F.referencia ? ' (ponto de referência: ' + F.referencia + ')' : '') + '. Meu telefone é ' + (F.telefone || '______________') + (F.contato2Tel ? ' e o telefone para recado é ' + F.contato2Tel + (F.contato2Nome ? ' (' + F.contato2Nome + (F.contato2Parentesco ? ', ' + F.contato2Parentesco.toLowerCase() : '') + ')' : '') : '') + '.\n\n' +
+      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', moro em ' + (enderecoCompleto() || '________________________') + (F.referencia ? ' (ponto de referência: ' + F.referencia + ')' : '') + '. Meu telefone é ' + (fone(F.telefone, F.telefoneTipo) || '______________') + (F.contato2Tel ? ' e o telefone para recado é ' + fone(F.contato2Tel, F.contato2Tipo) + (F.contato2Nome ? ' (' + F.contato2Nome + (F.contato2Parentesco ? ', ' + F.contato2Parentesco.toLowerCase() : '') + ')' : '') : '') + '.\n\n' +
       'SITUAÇÃO DA FAMÍLIA\n' +
       'Somos ' + fx.n + ' pessoa(s) morando juntas:\n' + F.pessoas.map((x, i) => '- ' + linhaPessoa(x, i)).join('\n') + '\n' +
       'Renda total da família: ' + brl(fx.rendaTotal) + ' por mês (' + brl(fx.rpc) + ' por pessoa), valores brutos.\n' +
@@ -435,8 +440,8 @@
       '<article class="doc" id="relatorio"><h1>Relatório de direitos da família</h1>' +
       '<p class="meta">Feito em ' + hoje + ' com o aplicativo Meus Direitos MG · Regras versão ' + esc(REGRAS.versao) + ' (' + dataBR(REGRAS.atualizadoEm) + ') · Salário mínimo usado: ' + brl(p.salarioMinimo) + '</p>' +
       '<h2>1. Dados da família</h2>' +
-      '<p><b>Responsável:</b> ' + esc(resp.nome) + ' &nbsp; <b>Telefone:</b> ' + esc(F.telefone) +
-      (F.contato2Tel ? '<br><b>Telefone para recado:</b> ' + esc(F.contato2Tel) + (F.contato2Nome ? ' (' + esc(F.contato2Nome) + (F.contato2Parentesco ? ', ' + esc(F.contato2Parentesco.toLowerCase()) : '') + ')' : '') : '') +
+      '<p><b>Responsável:</b> ' + esc(resp.nome) + ' &nbsp; <b>Telefone:</b> ' + esc(fone(F.telefone, F.telefoneTipo)) +
+      (F.contato2Tel ? '<br><b>Telefone para recado:</b> ' + esc(fone(F.contato2Tel, F.contato2Tipo)) + (F.contato2Nome ? ' (' + esc(F.contato2Nome) + (F.contato2Parentesco ? ', ' + esc(F.contato2Parentesco.toLowerCase()) : '') + ')' : '') : '') +
       '<br><b>Endereço:</b> ' + esc(endereco) + ' (' + (F.zona === 'rural' ? 'zona rural' : 'zona urbana') + ')' +
       (F.referencia ? '<br><b>Ponto de referência:</b> ' + esc(F.referencia) : '') + '<br>' +
       '<b>Pessoas na casa:</b> ' + fx.n + ' &nbsp; <b>Renda total (bruta):</b> <span id="rel-renda">' + brl(fx.rendaTotal) + '</span> &nbsp; <b>Renda por pessoa:</b> <span id="rel-rpc">' + brl(fx.rpc) + '</span><br>' +
@@ -484,7 +489,7 @@
         const s2 = document.getElementById('cep-status'); if (s2) { s2.textContent = 'Endereço encontrado. Confira e coloque o número.'; s2.hidden = false; }
         const n = document.getElementById(txtOk(r.logradouro) ? 'numero' : 'rua'); if (n) n.focus();
       }
-    } catch (e) { if (meu === cepPedido) msg('Não foi possível procurar o CEP agora. Preencha à mão.'); }
+    } catch (e) { if (meu === cepPedido) msg(EM_MOLDURA ? 'Nesta prévia o acesso à internet fica bloqueado, por isso o CEP não é procurado. No aplicativo instalado (site) a busca funciona. Preencha à mão.' : 'Não foi possível procurar o CEP agora (sem conexão com o site dos Correios). Preencha à mão.'); }
   }
 
   function render() {
@@ -508,6 +513,13 @@
     const el = e.target;
     if (el.dataset.p !== undefined) {
       const p = F.pessoas[+el.dataset.p]; if (!p) return;
+      if (el.dataset.k === 'nascTxt') {
+        const v = M.mascaraData(el.value); if (el.value !== v) el.value = v;
+        p.nascTxt = v; p.nasc = M.dataDigitada(v);
+        const id = idade(p.nasc), sm = document.getElementById('p' + el.dataset.p + '_idade');
+        if (sm) sm.textContent = id != null ? id + ' anos' : (v.length === 10 ? 'Data não parece certa' : 'dia/mês/ano, ex.: 25/03/1980');
+        salvar(); return;
+      }
       if (el.dataset.doenca) { const s = new Set(p.doencas); el.checked ? s.add(el.dataset.doenca) : s.delete(el.dataset.doenca); p.doencas = [...s]; }
       else if (el.type === 'checkbox') p[el.dataset.k] = el.checked;
       else p[el.dataset.k] = String(el.value).slice(0, 120);
@@ -534,7 +546,8 @@
     if (el.type === 'radio') { F[el.name] = el.value; salvar(); return; }
     if (PASSOS[passo] === 'saude' && el.dataset.k) { F.saude[el.dataset.k] = el.checked; salvar(); return; }
     if (PASSOS[passo] === 'situacao' && el.dataset.k) { F.sit[el.dataset.k] = el.checked; salvar(); return; }
-    if (['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'telefone', 'contato2Nome', 'contato2Parentesco', 'contato2Tel'].includes(el.id)) { F[el.id] = String(el.value).slice(0, 120); salvar(); }
+    if (el.id === 'telefone' || el.id === 'contato2Tel') { const v = M.mascaraTelefone(el.value); if (el.value !== v) el.value = v; }
+    if (['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'telefone', 'telefoneTipo', 'contato2Nome', 'contato2Parentesco', 'contato2Tel', 'contato2Tipo'].includes(el.id)) { F[el.id] = String(el.value).slice(0, 120); salvar(); }
     if (el.id === 'cep') {
       const dig = el.value.replace(/\D/g, '').slice(0, 8);
       const fmt = dig.length > 5 ? dig.slice(0, 5) + '-' + dig.slice(5) : dig;
@@ -650,7 +663,7 @@
           if (semNome >= 0) { erro.textContent = 'Falta o nome da pessoa ' + (semNome + 1) + '. Escreva o nome ou toque em "Tirar esta pessoa".'; erro.hidden = false; return; }
           const semRenda = F.pessoas.findIndex(p => p.fonte !== 'sem' && !numero(p.renda));
           if (semRenda >= 0) { erro.textContent = 'Falta quanto ' + F.pessoas[semRenda].nome.split(' ')[0] + ' ganha por mês. Se não tem renda, escolha "Não tem renda".'; erro.hidden = false; return; }
-          const nascRuim = F.pessoas.findIndex(p => p.nasc && idade(p.nasc) === null);
+          const nascRuim = F.pessoas.findIndex(p => (p.nascTxt && !p.nasc) || (p.nasc && idade(p.nasc) === null));
           if (nascRuim >= 0) { erro.textContent = 'A data de nascimento de ' + F.pessoas[nascRuim].nome.split(' ')[0] + ' não parece certa. Confira o dia, mês e ano.'; erro.hidden = false; return; }
         }
         irPara(passo + 1); break;
@@ -691,22 +704,25 @@
     } finally { clearTimeout(t); }
   }
   let verificando = false;
+  function statusAtualizacao(t) { const el = document.getElementById('status-atualizacao'); if (el) { el.textContent = t; el.hidden = !t; } }
   async function verificarAtualizacao(manual) {
     if (verificando) return;
-    if (!navigator.onLine) { if (manual) toast('Sem internet agora. Tente de novo quando estiver conectado.'); return; }
+    const avisar = t => { if (manual) { toast(t); statusAtualizacao(t); } };
+    if (!navigator.onLine) { avisar('Sem internet agora. Tente de novo quando estiver conectado.'); return; }
     verificando = true;
+    if (manual) statusAtualizacao('Procurando atualização...');
     try {
       const marca = Date.now();
       const [texto, assinatura] = await Promise.all([baixarTexto('regras.json?t=' + marca, 15000), baixarTexto('regras.json.sig?t=' + marca, 15000)]);
       const r = await aceitarRegras(texto, assinatura, 'internet');
       ultimoResultado.motivo = r;
       store.set('md_ultima_verificacao', Date.now());
-      if (r === 'ok') { render(); toast('Regras atualizadas para a versão ' + REGRAS.versao + '.'); }
-      else if (r === 'versão não é mais nova') { if (manual) toast('Você já tem as regras mais novas.'); renderFoot(); }
-      else { if (manual) toast('A atualização recebida não passou na conferência de segurança e foi ignorada.'); renderFoot(); }
+      if (r === 'ok') { render(); toast('Regras atualizadas para a versão ' + REGRAS.versao + '.'); statusAtualizacao('Regras atualizadas para a versão ' + REGRAS.versao + '.'); }
+      else if (r === 'versão não é mais nova') { renderFoot(); avisar('Você já tem as regras mais novas (versão ' + REGRAS.versao + ').'); }
+      else { renderFoot(); avisar('A atualização recebida não passou na conferência de segurança e foi ignorada.'); }
     } catch (err) {
       ultimoResultado.motivo = 'falha de rede';
-      if (manual) toast('Não foi possível procurar atualização agora.');
+      avisar(EM_MOLDURA ? 'Nesta prévia o acesso à internet fica bloqueado. No aplicativo instalado (site) a busca de atualização funciona.' : 'Não foi possível procurar atualização agora. Confira a internet e tente de novo.');
     } finally { verificando = false; }
   }
   function renderFoot() {
@@ -714,6 +730,7 @@
     const el = document.getElementById('foot');
     el.innerHTML = (avisoArmazenamento ? '<p class="hint" id="aviso-armazenamento" role="alert">Este aparelho não está deixando guardar as respostas. O aplicativo funciona, mas tudo some ao fechar. Imprima o relatório antes de sair.</p>' : '') + '<span>Regras de ' + dataBR(REGRAS.atualizadoEm) + ' (versão ' + esc(REGRAS.versao) + '), ' + REGRAS.programas.length + ' programas. ' + (typeof ult === 'number' ? 'Última verificação: ' + new Date(ult).toLocaleString('pt-BR') + '.' : '') + '</span>' +
       '<span><button type="button" class="link" id="verificar">Procurar atualização das leis e programas</button></span>' +
+      '<span class="ok" id="status-atualizacao" role="status" hidden></span>' +
       '<span>Este aplicativo não é do governo. É uma ajuda para encontrar direitos. Quem decide é sempre o órgão responsável.</span>';
     document.getElementById('verificar').onclick = () => verificarAtualizacao(true);
   }
