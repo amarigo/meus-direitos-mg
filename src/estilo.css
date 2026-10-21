@@ -103,6 +103,38 @@ details.more summary{cursor:pointer;font-weight:700;color:var(--green);padding-b
 .doc .assin{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
 .doc .assin div{border-top:1px solid #111;padding-top:4px;font-size:.85rem}
 .doc a{color:#111}
+/* Formulário em papel */
+.fp{font-size:15px;line-height:1.4}
+.fp h1{font-size:1.45rem;margin:0 0 6px}
+.fp h3{margin:0 0 8px;font-size:1.05rem;background:#eee;padding:6px 8px;border-radius:3px}
+.fp small{color:#444;font-weight:400}
+.fp-caixa{border:1.5px solid #111;border-radius:6px;padding:10px 14px;margin:12px 0}
+.fp-caixa h2{margin:0 0 6px;border:none;padding:0}
+.fp-caixa ul{margin:0;padding-left:18px}
+.fp-caixa li{margin-bottom:4px}
+.fp-leve{border-style:dashed}
+.fp-campo{display:flex;align-items:flex-end;gap:8px;margin:12px 0 4px;flex-wrap:wrap}
+.fp-rot{font-weight:700;flex:none;max-width:100%}
+.fp-linha{flex:1 1 120px;border-bottom:1.5px solid #111;min-height:1.5em}
+.fp-curta{display:inline-block;width:9em;flex:none}
+.fp-molde{display:inline-flex;align-items:flex-end;gap:2px;font-weight:700}
+.fp-casas{display:inline-flex}
+.fp-casas i{display:inline-block;width:1.25em;height:1.5em;border:1.2px solid #111;border-left-width:0}
+.fp-casas i:first-child{border-left-width:1.2px}
+.fp-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:0 18px}
+.fp-q{margin:12px 0 4px}
+.fp-ops{display:grid;gap:5px 14px;margin:4px 0 6px}
+.fp-ops.fp-1{grid-template-columns:1fr}
+.fp-ops.fp-2{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.fp-ops.fp-3{grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr))}
+.fp-ops.fp-4{grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr))}
+.fp-op{display:flex;gap:8px;align-items:flex-start;overflow-wrap:anywhere}
+.fp-cx{flex:none;width:1em;height:1em;border:1.5px solid #111;border-radius:2px;margin-top:.15em}
+.fp-inline{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin:6px 0}
+.fp-pessoa{border:1.5px solid #111;border-radius:6px;padding:10px 14px;margin:14px 0}
+.fp-assina{margin-top:22px}
+.fp-parte2{margin-top:0!important}
+.fp-rodape{font-size:.8rem;color:#444;margin-top:18px;border-top:1px solid #999;padding-top:6px}
 /* Por quê, quem tem direito, documentos e cartas */
 .porque{border-left:4px solid var(--green);background:var(--green-soft);border-radius:0 8px 8px 0;padding:10px 12px;font-size:.95rem}
 .porque p{margin:4px 0 0}
@@ -125,6 +157,21 @@ a.botao-link:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 input:invalid{border-color:var(--danger)}
 @media print{
   body{background:#fff;font-size:12pt}
+  .fp{font-size:9.5pt;line-height:1.25}
+  .fp h1{font-size:16pt}
+  .fp h2{margin-top:12px;margin-bottom:6px}
+  .fp-pessoa{break-inside:avoid;page-break-inside:avoid;padding:6px 12px;margin:8px 0}
+  .fp h3{padding:4px 8px;margin-bottom:4px}
+  .fp-casas i{height:1.35em}
+  .fp-quebra{break-before:page}
+  .fp-caixa,.fp-ops,.fp-campo,.fp-q{break-inside:avoid}
+  .fp-q{break-after:avoid;margin:8px 0 3px}
+  .fp-campo{margin:9px 0 3px}
+  .fp-ops{gap:3px 12px}
+  .fp-ops.fp-1.fp-duas{grid-template-columns:1fr 1fr}
+  .fp-ops.fp-2,.fp-ops.fp-3{grid-template-columns:repeat(3,1fr)}
+  .fp-ops.fp-4{grid-template-columns:repeat(4,1fr)}
+  .fp-2{grid-template-columns:1fr 1fr}
   body.imprimir-um main > .stack > *:not(.imprimir-este){display:none!important}
   .imprimir-este{border:none!important;padding:0!important}
   .local{break-before:page}

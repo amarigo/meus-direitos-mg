@@ -12,7 +12,8 @@ pronto para imprimir, com um pedido já escrito para cada órgão (CRAS, posto d
   Santa Rita do Sapucaí (cesta básica, Pão e Leite, natalidade, funeral, passagem), Belo Horizonte (Restaurante Popular,
   Bolsa Moradia). Em todas as cidades: benefícios eventuais, transporte para tratamento em outra cidade (TFD),
   ônibus urbano grátis para 65+ e transporte escolar na zona rural.
-- **Questionário para WhatsApp**: quem ajuda uma família manda todas as perguntas por WhatsApp e depois preenche o app.
+- **Questionário para WhatsApp** e **formulário em papel para imprimir** (A4): quem ajuda uma família manda as perguntas
+  ou entrega a folha, e depois preenche o app com as respostas.
 - Funciona **sem internet** depois de aberto uma vez, no **celular e no computador** (pode ser instalado).
 - Os dados da família **ficam só no aparelho**. Nada é enviado. Dá para proteger com **senha** (criptografia AES-256)
   e apagar tudo com um toque.

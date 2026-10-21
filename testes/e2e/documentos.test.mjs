@@ -218,3 +218,23 @@ test('Data dd/mm/aaaa e telefone formatado com tipo (WhatsApp, celular, fixo)', 
   assert.deepEqual(erros, []);
   await ctx.close();
 });
+
+test('Formulário em papel: todas as partes, quadros de pessoas escolhidos e impressão em A4', async () => {
+  const ctx = await nav.newContext({ viewport: { width: 360, height: 740 } });
+  const pg = await ctx.newPage(); const erros = [];
+  pg.on('pageerror', e => erros.push(e.message));
+  await pg.goto(srv.url);
+  await pg.click('#abrir-formulario');
+  const t = (await pg.textContent('#formulario')).replace(/\s+/g, ' ');
+  for (const trecho of ['Antes de começar', 'letra de forma', 'antes dos descontos', 'Benefício de Prestação Continuada', 'Parte 1', 'Ponto de referência', 'Celular com WhatsApp', 'Parte 2', 'Data de nascimento', 'Câncer', 'Prefiro não responder', 'Parte 3', 'Parte 4', 'CadÚnico', 'não escreva aqui', 'Parte 5', 'Assinatura']) assert.ok(t.includes(trecho), 'formulário sem: ' + trecho);
+  assert.equal(await pg.locator('.fp-pessoa').count(), 6);
+  await pg.selectOption('#folhas-pessoa', '3');
+  assert.equal(await pg.locator('.fp-pessoa').count(), 3);
+  assert.ok(await semRolagemLateral(pg), 'rolagem lateral no celular');
+  await pg.emulateMedia({ media: 'print' });
+  const pdf = await pg.pdf({ format: 'A4', margin: { top: '12mm', bottom: '12mm', left: '12mm', right: '12mm' } });
+  const paginas = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+  assert.ok(paginas >= 4 && paginas <= 6, 'páginas: ' + paginas);
+  assert.deepEqual(erros, []);
+  await ctx.close();
+});

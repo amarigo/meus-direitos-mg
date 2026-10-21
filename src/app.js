@@ -27,7 +27,7 @@
   let bloqueado = false;
   let pacoteCifrado = null;
   let passo = store.get('md_passo', 0);
-  if (!(passo === 'relatorio' || passo === 'documentos' || passo === 'questionario' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
+  if (!(passo === 'relatorio' || passo === 'documentos' || passo === 'questionario' || passo === 'formulario' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
   let tela = null;         // telas especiais: 'criar-senha', 'trocar-dados'
 
   (function iniciarDados() {
@@ -104,7 +104,7 @@
       '<ol class="plan"><li><span>Conte onde vocês moram.</span></li><li><span>Diga quem mora na casa e quanto cada um ganha.</span></li><li><span>Marque o que a família precisa (saúde, escola, moradia).</span></li><li><span>Veja os direitos e imprima o relatório.</span></li></ol></div>' +
       '<div class="btns"><button type="button" class="go" id="comecar">' + (temDados ? 'Continuar de onde parei' : 'Começar') + '</button>' +
       '<button type="button" id="ver-exemplo">Ver um exemplo pronto</button></div>' +
-      '<div class="card stack tight"><h3>Está ajudando outra família?</h3><p>Mande um questionário pelo WhatsApp com todas as perguntas. Depois preencha o aplicativo com as respostas.</p><div class="btns"><button type="button" class="small" id="abrir-questionario">Questionário para WhatsApp</button></div></div>' +
+      '<div class="card stack tight"><h3>Está ajudando outra família?</h3><p>Mande as perguntas pelo WhatsApp ou imprima o formulário em papel. Depois preencha o aplicativo com as respostas.</p><div class="btns"><button type="button" class="small" id="abrir-questionario">Questionário para WhatsApp</button><button type="button" class="small" id="abrir-formulario">Formulário em papel para imprimir</button></div></div>' +
       (!EM_MOLDURA && !instalado && eventoInstalar ? '<div class="btns"><button type="button" class="sun" id="instalar">Instalar no celular ou computador</button></div>' : '') +
       (!EM_MOLDURA && !instalado && !eventoInstalar && ehIOS ? '<p class="hint">Para instalar no iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início".</p>' : '') +
       '<section class="card stack tight" id="seguranca"><h3>Seus dados estão seguros</h3>' +
@@ -167,6 +167,72 @@
       (EM_MOLDURA ? '' : '<button type="button" id="imprimir">Imprimir</button>') + '</div>' +
       '<p class="sub noprint">O WhatsApp abre com o texto pronto: escolha a pessoa e envie. Se o texto não aparecer inteiro, use "Copiar" e cole na conversa. O aplicativo não envia nada sozinho.</p>' +
       '<pre class="carta" id="texto-questionario">' + esc(t) + '</pre></div>';
+  }
+  // Formulário em papel: as mesmas perguntas do app, para imprimir e preencher à mão.
+  let folhasPessoa = 6;
+  function telaFormulario() {
+    const cx = t => '<span class="fp-op"><span class="fp-cx" aria-hidden="true"></span>' + esc(t) + '</span>';
+    const ops = (l, cls) => '<div class="fp-ops' + (cls ? ' ' + cls : '') + '">' + l.map(o => cx(Array.isArray(o) ? o[1] : o)).join('') + '</div>';
+    const linha = (rot, dica, cls) => '<div class="fp-campo' + (cls ? ' ' + cls : '') + '"><span class="fp-rot">' + esc(rot) + (dica ? ' <small>' + esc(dica) + '</small>' : '') + '</span><span class="fp-linha"></span></div>';
+    const quad = (rot, molde, dica) => '<div class="fp-campo"><span class="fp-rot">' + esc(rot) + (dica ? ' <small>' + esc(dica) + '</small>' : '') + '</span><span class="fp-molde">' + molde + '</span></div>';
+    const casas = n => '<span class="fp-casas">' + '<i></i>'.repeat(n) + '</span>';
+    const DATA = casas(2) + '/' + casas(2) + '/' + casas(4), FONE = '(' + casas(2) + ') ' + casas(5) + '-' + casas(4);
+    const perg = (n, t, dica) => '<p class="fp-q"><b>' + n + '.</b> ' + esc(t) + (dica ? '<br><small>' + esc(dica) + '</small>' : '') + '</p>';
+    const pessoa = k => '<section class="fp-pessoa' + (k === 1 ? ' fp-quebra' : '') + '">' +
+      (k === 1 ? '<h2 class="fp-parte2">Parte 2: Quem mora na casa</h2><p class="fp-q">Preencha <b>um quadro para cada pessoa</b> que mora na casa e divide as despesas, <b>inclusive bebês</b>. Comece por você. Se faltar quadro, peça outra folha.</p>' : '') +
+      '<h3>' + (k === 1 ? 'Pessoa 1: você (responsável pela família)' : 'Pessoa ' + k) + '</h3>' +
+      linha('Nome completo', '') +
+      '<div class="fp-2">' + quad('Data de nascimento', DATA, 'dia / mês / ano') + (k > 1 ? linha('O que é seu?', 'filho, esposa, mãe, neto...') : '<div></div>') + '</div>' +
+      perg('a', 'Sexo') + ops(SEXOS.slice(1), 'fp-4') +
+      perg('b', 'De onde vem o dinheiro desta pessoa? Marque uma. (Veja as explicações na primeira página.)') + ops(FONTES, 'fp-1 fp-duas') +
+      quad('Quanto ganha por mês, antes dos descontos?', 'R$ ' + '<span class="fp-linha fp-curta"></span>', 'Se o valor muda, escreva a média. Não conte o Bolsa Família.') +
+      perg('c', 'Estuda?') + ops(ESTUDOS, 'fp-3') + '<div class="fp-inline">Se estuda, a escola é: ' + cx('Pública') + cx('Particular') + '</div>' +
+      perg('d', 'Marque o que for verdade para esta pessoa:') + ops(['Tem deficiência ou doença que impede de trabalhar ou estudar por muito tempo', 'Está grávida', 'Está amamentando bebê de até 6 meses', 'Foi mandada embora de trabalho com carteira nos últimos 4 meses', 'Precisa usar fralda (perde urina ou fezes)', 'Está sem algum documento (certidão, identidade ou CPF)', 'Já terminou o ensino médio'], 'fp-1 fp-duas') +
+      perg('e', 'Usa remédio todo mês para:') + ops(DOENCAS, 'fp-3') +
+      perg('f', 'Tem alguma destas doenças?', 'Algumas dão direito a remédio caro de graça e outros benefícios.') + ops(GRAVES, 'fp-2') +
+      '<div class="fp-2">' + linha('CPF', 'se quiser') + linha('NIS', 'número do CadÚnico, se souber') + '</div>' +
+      '</section>';
+    let n = 0; const q = () => ++n;
+    const form =
+      '<article class="doc fp" id="formulario"><header class="fp-cab"><h1>Formulário: benefícios e direitos da família</h1>' +
+      '<p>Este formulário ajuda a descobrir quais benefícios do governo e da Prefeitura a sua família pode receber, onde pedir e quais documentos levar. Depois de preenchido, quem está ajudando você passa as respostas para o aplicativo <b>Meus Direitos MG</b> e entrega a lista pronta.</p></header>' +
+      '<div class="fp-caixa"><h2>Antes de começar</h2><ul>' +
+      '<li>Escreva com <b>letra de forma</b> e caneta. Marque as respostas com um <b>X</b> no quadradinho.</li>' +
+      '<li>Se não souber alguma coisa, deixe em branco ou escreva <b>"não sei"</b>. Não tem resposta errada.</li>' +
+      '<li><b>Renda é o valor antes dos descontos</b> (bruto): no contracheque aparece como "total de vencimentos". Se ganha por dia ou por serviço, faça a média do mês.</li>' +
+      '<li><b>Aposentadoria ou pensão do INSS:</b> de quem pagou o INSS ou pensão deixada por alguém que morreu.</li>' +
+      '<li><b>Benefício de Prestação Continuada (BPC/LOAS):</b> um salário mínimo pago pelo INSS para pessoa com 65 anos ou mais, ou com deficiência, de família de baixa renda, mesmo sem nunca ter pago o INSS.</li>' +
+      '<li><b>Bico ou por conta própria:</b> faxina, venda, obra, roça, aplicativo, qualquer trabalho sem carteira assinada.</li>' +
+      '<li>O <b>CPF</b> e o <b>NIS</b> são opcionais. Só escreva se confiar em quem vai receber a folha.</li></ul></div>' +
+      '<h2>Parte 1: Onde vocês moram</h2>' +
+      '<div class="fp-2">' + quad('CEP', casas(5) + '-' + casas(3), 'se souber') + linha('Cidade', '') + '</div>' +
+      linha('Bairro', '') + linha('Rua, avenida ou estrada', '') +
+      '<div class="fp-2">' + linha('Número', 'se não tiver, escreva S/N') + linha('Complemento', 'casa, apartamento, fundos...') + '</div>' +
+      linha('Ponto de referência', 'algo perto que ajude a achar a casa') +
+      quad('Seu telefone', FONE) + '<div class="fp-inline">Este número é: ' + TIPOS_FONE.slice(1).map(t => cx(t[1])).join('') + '</div>' +
+      '<div class="fp-caixa fp-leve"><b>Outro telefone para recado</b> <small>(de alguém que sempre consegue falar com você)</small>' +
+      '<div class="fp-2">' + linha('Nome', '') + linha('Quem é', 'mãe, marido, vizinho...') + '</div>' + quad('Telefone', FONE) +
+      '<div class="fp-inline">Este número é: ' + TIPOS_FONE.slice(1).map(t => cx(t[1])).join('') + '</div></div>' +
+      perg(q(), 'A casa fica:') + ops(['Na cidade', 'Na roça (zona rural)'], 'fp-2') +
+      perg(q(), 'A casa é:') + ops(['Própria (já paga)', 'Própria, ainda pagando', 'Alugada', 'Emprestada (cedida)', 'Ocupação', 'Não tenho casa / moro na rua'], 'fp-3') +
+      perg(q(), 'De quem é a água?', 'Olhe na conta de água.') + ops(['Copasa', 'SAAE ou outra empresa', 'Não sei / não tenho conta de água'], 'fp-3') +
+      perg(q(), 'A conta de luz está no nome de quem?') + ops(['De alguém que mora na casa', 'De outra pessoa (dono da casa, parente)', 'Não tenho conta de luz'], 'fp-1') +
+      Array.from({ length: folhasPessoa }, (_, i) => pessoa(i + 1)).join('') +
+      '<h2 class="fp-quebra">Parte 3: Saúde</h2>' +
+      perg(q(), 'Alguém da casa precisa agora de: (pode marcar mais de um)') + ops(['Consulta médica ou exame', 'Médico especialista, cirurgia ou tratamento que não tem na cidade', 'Dentista ou dentadura', 'Ajuda para tristeza, ansiedade, crises, álcool ou drogas'], 'fp-1') +
+      '<h2>Parte 4: Situação da família</h2>' +
+      perg(q(), 'A família está no Cadastro Único (CadÚnico)?', 'É o cadastro feito no CRAS. Quem recebe Bolsa Família está nele.') + ops(['Sim, atualizado nos últimos 2 anos', 'Sim, mas faz mais de 2 anos', 'Não', 'Não sei'], 'fp-2') +
+      perg(q(), 'A família recebe Bolsa Família hoje?') + ops(['Sim', 'Não'], 'fp-4') +
+      perg(q(), 'Marque se alguma coisa abaixo acontece com a família:') + ops(['Trabalha na roça como agricultor familiar', 'É pescador artesanal', 'É indígena ou quilombola', 'Passa por emergência: falta comida, despejo, morte na família ou desastre (enchente, deslizamento)', 'Precisa de ajuda na Justiça (pensão, guarda, despejo, benefício negado)'], 'fp-1') +
+      '<div class="fp-caixa fp-leve"><b>Importante:</b> se alguém da casa sofre violência, <b>não escreva aqui</b>. Conte pessoalmente para quem entregou esta folha, ou ligue <b>180</b> (Central da Mulher) ou <b>100</b> (Direitos Humanos). Em perigo agora, ligue <b>190</b>.</div>' +
+      '<h2>Parte 5: Documentos para ir separando</h2><p>Não precisa entregar junto com esta folha. Vá juntando para levar no atendimento:</p>' +
+      ops(['Identidade (CIN/RG) ou CNH do responsável', 'CPF de todas as pessoas da casa', 'Certidão de nascimento ou casamento de todos', 'Comprovante de endereço recente (conta de luz ou água)', 'Comprovante de renda (contracheque, carteira de trabalho, extrato do INSS)', 'Cartão SUS', 'Folha resumo do CadÚnico, se tiver', 'Laudos e receitas médicas, se tiver'], 'fp-1') +
+      '<div class="fp-2 fp-assina">' + linha('Data', '') + linha('Assinatura de quem preencheu', '') + '</div>' +
+      '<p class="fp-rodape">Meus Direitos MG: aplicativo gratuito, não é do governo. Quem decide os benefícios é sempre o órgão responsável. Regras de ' + dataBR(REGRAS.atualizadoEm) + '.</p></article>';
+    return '<div class="stack"><div class="btns noprint"><button type="button" data-ir="0">Voltar</button>' + (EM_MOLDURA ? '' : '<button type="button" class="go" id="imprimir">Imprimir formulário</button>') + '</div>' +
+      '<div class="noprint stack tight"><h2>Formulário em papel</h2><p class="lead">Imprima e entregue para a família preencher à mão. Ele tem as mesmas perguntas do aplicativo, com explicações. Depois, passe as respostas para o aplicativo.</p>' +
+      '<label class="q">Quantos quadros de pessoas imprimir<select id="folhas-pessoa">' + [2, 3, 4, 5, 6, 8, 10].map(v => '<option value="' + v + '"' + (v === folhasPessoa ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label>' +
+      (EM_MOLDURA ? '<p class="hint">Nesta prévia o botão de imprimir fica desligado. No aplicativo instalado (site) ele aparece aqui.</p>' : '') + '</div>' + form + '</div>';
   }
   function telaCriarSenha() {
     return '<div class="stack lock"><h2>Proteger com senha</h2>' +
@@ -499,7 +565,7 @@
     else if (tela === 'criar-senha') html = telaCriarSenha();
     else {
       const t = typeof passo === 'string' ? passo : PASSOS[passo];
-      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio, documentos: telaDocumentos, questionario: telaQuestionario }[t]();
+      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio, documentos: telaDocumentos, questionario: telaQuestionario, formulario: telaFormulario }[t]();
     }
     view.innerHTML = html;
     renderFoot();
@@ -530,6 +596,7 @@
       }
       salvar(); return;
     }
+    if (el.id === 'folhas-pessoa') { folhasPessoa = Math.max(1, Math.min(10, +el.value || 6)); rerender('folhas-pessoa'); return; }
     if (el.dataset.doc) {
       if (el.checked) F.docsOk[el.dataset.doc] = true; else delete F.docsOk[el.dataset.doc];
       salvar(); contarDocs(el.closest('.local')); return;
@@ -651,6 +718,7 @@
       case 'limpar-sim': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'terminar': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'add-pessoa': if (F.pessoas.length < 20) { F.pessoas.push(M.novaPessoa(false)); salvar(); rerender('p' + (F.pessoas.length - 1) + '_nome'); } break;
+      case 'abrir-formulario': passo = 'formulario'; salvar(); render(); window.scrollTo(0, 0); break;
       case 'abrir-questionario': passo = 'questionario'; salvar(); render(); window.scrollTo(0, 0); break;
       case 'copiar-questionario': copiarTexto(document.getElementById('texto-questionario'), 'Questionário copiado. Cole na conversa do WhatsApp.'); break;
       case 'abrir-documentos': passo = 'documentos'; salvar(); render(); window.scrollTo(0, 0); break;
