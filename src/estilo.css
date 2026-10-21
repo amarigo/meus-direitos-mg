@@ -102,8 +102,34 @@ details.more summary{cursor:pointer;font-weight:700;color:var(--green);padding-b
 .doc .assin{margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
 .doc .assin div{border-top:1px solid #111;padding-top:4px;font-size:.85rem}
 .doc a{color:#111}
+/* Por quê, quem tem direito, documentos e cartas */
+.porque{border-left:4px solid var(--green);background:var(--green-soft);border-radius:0 8px 8px 0;padding:10px 12px;font-size:.95rem}
+.porque p{margin:4px 0 0}
+.pessoa-direitos{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.pessoa-direitos h3{margin:0 0 6px}
+.pessoa-direitos ul{margin:0;padding-left:20px}
+.pessoa-direitos li{margin-bottom:8px;overflow-wrap:anywhere}
+.local h3{margin:0}
+.local ul{margin:6px 0 0;padding-left:20px}
+.checklist{display:flex;flex-direction:column;gap:10px}
+.doc-item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.doc-item p{margin:0;overflow-wrap:anywhere}
+.doc-item .choice{padding:8px 12px}
+.conta-docs{font-weight:700}
+pre.carta{white-space:pre-wrap;overflow-wrap:anywhere;font-family:Georgia,"Times New Roman",serif;font-size:.95rem;line-height:1.5;background:var(--card);color:var(--ink);border:1px dashed var(--muted);border-radius:8px;padding:14px;margin:10px 0;max-width:100%}
+.carta-bloco summary{padding:6px 0}
+a.botao-link{display:inline-block;padding:12px 18px;border-radius:8px;background:var(--green);color:var(--on-green);font-weight:700;text-decoration:none}
+a.botao-link:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+input:invalid{border-color:var(--danger)}
 @media print{
   body{background:#fff;font-size:12pt}
+  body.imprimir-um main > .stack > *:not(.imprimir-este){display:none!important}
+  .imprimir-este{border:none!important;padding:0!important}
+  .local{break-before:page}
+  .local:first-of-type{break-before:auto}
+  .doc-item{break-inside:avoid;border-color:#999}
+  .doc-item .choice{border:none;padding:2px 0;background:none}
+  pre.carta{background:#fff;color:#000;border:none;padding:0;break-before:page;font-size:11.5pt}
   .noprint,.top,.steps,.foot,.toast{display:none!important}
   .wrap{max-width:none;padding:0}
   .doc{border:none;padding:0}

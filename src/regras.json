@@ -1,5 +1,5 @@
 {
-  "versao": "2026.10.4",
+  "versao": "2026.10.5",
   "atualizadoEm": "2026-10-21",
   "observacao": "Regras usadas para estimar direitos. A decisão final é sempre do órgão responsável. Para atualizar, edite este arquivo, mude 'versao' e 'atualizadoEm' e publique junto com o aplicativo.",
   "parametros": {
@@ -122,26 +122,121 @@
     }
   },
   "documentos": {
-    "foto": "Documento com foto (Identidade/CIN, CNH ou Carteira de Trabalho) do responsável",
-    "cpf_todos": "CPF de todas as pessoas da casa",
-    "certidoes": "Certidão de nascimento ou casamento de todas as pessoas",
-    "endereco": "Comprovante de endereço (conta de luz ou de água)",
-    "renda": "Comprovante de renda de quem trabalha (contracheque, carteira de trabalho ou declaração)",
-    "ctps": "Carteira de Trabalho (física ou digital)",
-    "escola": "Declaração da escola das crianças e jovens que estudam",
-    "vacina": "Cartão de vacina das crianças",
-    "prenatal": "Cartão da gestante (pré-natal)",
-    "laudo": "Laudos e exames médicos da pessoa com deficiência ou doença",
-    "receita": "Receita médica dentro da validade",
-    "sus": "Cartão SUS ou CPF",
-    "nis": "Número do NIS (aparece na folha do CadÚnico)",
-    "conta_luz": "Conta de luz no nome de alguém da família",
-    "conta_agua": "Conta de água da casa",
-    "cad_folha": "Folha resumo do CadÚnico (pedir no CRAS)",
-    "rescisao": "Termo de rescisão do contrato de trabalho",
-    "terra": "Documento da terra ou contrato (arrendamento, comodato)",
-    "lme": "Laudo para remédio especial (LME) preenchido pelo médico, com receita e exames",
-    "laudo_doenca": "Laudo médico com o nome da doença e o código (CID), assinado e com data"
+    "foto": {
+      "texto": "Documento oficial com foto (Identidade/CIN, CNH ou Carteira de Trabalho)",
+      "quem": "responsavel"
+    },
+    "foto_beneficiario": {
+      "texto": "Documento oficial com foto (Identidade/CIN, CNH ou Carteira de Trabalho)",
+      "quem": "beneficiario"
+    },
+    "cpf_todos": {
+      "texto": "CPF",
+      "quem": "todos",
+      "obs": "Pode ser o cartão do CPF ou a Identidade nova (CIN), que já traz o número. O responsável pela família também pode usar o título de eleitor no CadÚnico."
+    },
+    "cpf_beneficiario": {
+      "texto": "CPF",
+      "quem": "beneficiario"
+    },
+    "certidoes": {
+      "texto": "Certidão de nascimento ou de casamento",
+      "quem": "todos"
+    },
+    "certidao_bebe": {
+      "texto": "Certidão de nascimento do bebê (depois que nascer)",
+      "quem": "beneficiario"
+    },
+    "endereco": {
+      "texto": "Comprovante de endereço recente (conta de luz, água ou telefone)",
+      "quem": "casa",
+      "obs": "Se não tiver, o CRAS aceita uma declaração de endereço."
+    },
+    "renda": {
+      "texto": "Comprovante de renda (contracheque, carteira de trabalho, extrato do benefício ou declaração de quem trabalha por conta própria)",
+      "quem": "com_renda"
+    },
+    "ctps": {
+      "texto": "Carteira de Trabalho (física ou digital)",
+      "quem": "beneficiario"
+    },
+    "escola": {
+      "texto": "Declaração de matrícula ou frequência da escola",
+      "quem": "estudantes"
+    },
+    "vacina": {
+      "texto": "Cartão de vacina",
+      "quem": "criancas"
+    },
+    "prenatal": {
+      "texto": "Cartão da gestante (pré-natal)",
+      "quem": "gestantes"
+    },
+    "laudo": {
+      "texto": "Laudos, exames e relatórios médicos (os mais recentes)",
+      "quem": "beneficiario"
+    },
+    "receita": {
+      "texto": "Receita médica dentro da validade",
+      "quem": "beneficiario"
+    },
+    "sus": {
+      "texto": "Cartão SUS (ou CPF)",
+      "quem": "beneficiario"
+    },
+    "sus_todos": {
+      "texto": "Cartão SUS (ou CPF)",
+      "quem": "todos"
+    },
+    "nis": {
+      "texto": "Número do NIS (está na folha resumo do CadÚnico)",
+      "quem": "responsavel"
+    },
+    "conta_luz": {
+      "texto": "Última conta de luz, no nome de alguém da família",
+      "quem": "casa"
+    },
+    "conta_agua": {
+      "texto": "Última conta de água",
+      "quem": "casa"
+    },
+    "cad_folha": {
+      "texto": "Folha resumo do CadÚnico atualizada (pegue no CRAS ou veja no aplicativo Meu CadÚnico)",
+      "quem": "casa"
+    },
+    "rescisao": {
+      "texto": "Termo de rescisão do contrato de trabalho",
+      "quem": "beneficiario"
+    },
+    "terra": {
+      "texto": "Documento da terra (escritura, contrato de arrendamento ou comodato) ou CAF",
+      "quem": "casa"
+    },
+    "lme": {
+      "texto": "Laudo para remédio especial (LME) preenchido pelo médico, com receita e exames",
+      "quem": "beneficiario"
+    },
+    "laudo_doenca": {
+      "texto": "Laudo médico com o nome da doença e o código (CID), assinado e com data",
+      "quem": "beneficiario"
+    },
+    "biometria": {
+      "texto": "Documento com biometria (Identidade nova/CIN, CNH ou título de eleitor com digital cadastrada)",
+      "quem": "beneficiario",
+      "obs": "O INSS exige biometria para pedir e manter o BPC."
+    },
+    "rgp": {
+      "texto": "Registro Geral da Pesca (RGP) em dia",
+      "quem": "responsavel"
+    },
+    "docs_caso": {
+      "texto": "Papéis do problema (cartas, notificações, decisões, contas, contrato)",
+      "quem": "casa"
+    },
+    "certidao_beneficiario": {
+      "texto": "Dados da certidão que falta (nome dos pais, cidade e cartório onde foi registrado, se souber)",
+      "quem": "beneficiario"
+    }
   },
   "programas": [
     {
@@ -188,7 +283,8 @@
         "url": "https://www.gov.br/mds/pt-br/acoes-e-programas/cadastro-unico"
       },
       "baseLegal": "Decreto 11.016/2022",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda da família é {rpc$} por pessoa ({rendaTotal$} no total, {n} pessoas). O CadÚnico é para famílias com até meio salário mínimo por pessoa ({meioSM$}) ou até 3 salários mínimos no total ({tresSM$}), e é exigido pelos outros programas."
     },
     {
       "id": "bolsa_familia",
@@ -237,7 +333,9 @@
         "url": "https://www.gov.br/mds/pt-br/acoes-e-programas/bolsa-familia"
       },
       "baseLegal": "Lei 14.601/2023",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda da família é {rpc$} por pessoa, dentro do limite de {linhaPobrezaBF$} por pessoa.",
+      "porqueTalvez": "A renda é {rpc$} por pessoa, acima de {linhaPobrezaBF$}, mas a família já recebe e está abaixo de meio salário mínimo por pessoa ({meioSM$}): pode continuar pela Regra de Proteção."
     },
     {
       "id": "bpc_idoso",
@@ -310,10 +408,12 @@
         "Pode ser pedido biometria (foto) em documento como CIN, CNH ou título de eleitor."
       ],
       "documentos": [
-        "foto",
+        "foto_beneficiario",
+        "biometria",
         "cpf_todos",
         "cad_folha",
-        "endereco"
+        "endereco",
+        "renda"
       ],
       "requerCadUnico": true,
       "prioridade": 2,
@@ -322,7 +422,9 @@
         "url": "https://meu.inss.gov.br"
       },
       "baseLegal": "Lei 8.742/1993 (LOAS), art. 20",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos (65 ou mais) e a renda por pessoa considerada para o BPC é {rpcBPC$}, dentro do limite de 1/4 do salário mínimo ({quartoSM$}).",
+      "porqueTalvez": "{nome} tem {idade} anos, mas a renda por pessoa para o BPC é {rpcBPC$}, acima de 1/4 do salário mínimo ({quartoSM$}) e abaixo de meio ({meioSM$}). O INSS ou a Justiça podem aceitar se houver gastos com saúde ou cuidador."
     },
     {
       "id": "bpc_pcd",
@@ -391,11 +493,13 @@
         "O INSS vai marcar perícia médica e avaliação social. Leve todos os laudos."
       ],
       "documentos": [
-        "foto",
+        "foto_beneficiario",
+        "biometria",
         "cpf_todos",
         "cad_folha",
         "laudo",
-        "endereco"
+        "endereco",
+        "renda"
       ],
       "requerCadUnico": true,
       "prioridade": 2,
@@ -404,7 +508,9 @@
         "url": "https://meu.inss.gov.br"
       },
       "baseLegal": "Lei 8.742/1993 (LOAS), art. 20",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem deficiência ou doença de longo prazo e a renda por pessoa considerada para o BPC é {rpcBPC$}, dentro do limite de {quartoSM$}.",
+      "porqueTalvez": "{nome} tem deficiência ou doença de longo prazo, mas a renda por pessoa para o BPC é {rpcBPC$}, entre {quartoSM$} e {meioSM$}. Pode ser aceito conforme os gastos da família."
     },
     {
       "id": "auxilio_inclusao",
@@ -434,7 +540,7 @@
         "Peça pelo Meu INSS ou ligando 135."
       ],
       "documentos": [
-        "foto",
+        "foto_beneficiario",
         "ctps",
         "cad_folha"
       ],
@@ -445,7 +551,8 @@
         "url": "https://meu.inss.gov.br"
       },
       "baseLegal": "Lei 14.176/2021",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem deficiência, recebe BPC e trabalha com carteira assinada."
     },
     {
       "id": "tarifa_social_luz",
@@ -491,7 +598,8 @@
         "url": "https://www.gov.br/aneel"
       },
       "baseLegal": "Lei 12.212/2010, alterada pela Lei 15.235/2025",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda da família é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), ou alguém da casa recebe BPC."
     },
     {
       "id": "desconto_social_luz",
@@ -538,7 +646,8 @@
         "url": "https://www.gov.br/aneel"
       },
       "baseLegal": "Lei 15.235/2025",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda da família é {rpc$} por pessoa, entre meio ({meioSM$}) e um salário mínimo ({umSM$})."
     },
     {
       "id": "gas_do_povo",
@@ -577,7 +686,7 @@
         "Se for escolhido, retire o botijão numa revenda credenciada com o cartão do Bolsa Família, cartão da Caixa ou CPF com código no celular."
       ],
       "documentos": [
-        "cpf_todos",
+        "cpf_beneficiario",
         "nis"
       ],
       "requerCadUnico": true,
@@ -587,7 +696,9 @@
         "url": "https://www.gov.br/mme"
       },
       "baseLegal": "Programa Gás do Povo (2025)",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), e a família tem {n} pessoas.",
+      "porqueTalvez": "A renda é {rpc$} por pessoa, até meio salário mínimo, mas famílias de 1 pessoa têm menos prioridade."
     },
     {
       "id": "pe_de_meia",
@@ -662,7 +773,7 @@
         "O dinheiro cai numa conta da Caixa no nome do estudante (veja no Caixa Tem)."
       ],
       "documentos": [
-        "cpf_todos",
+        "cpf_beneficiario",
         "escola",
         "cad_folha"
       ],
@@ -673,7 +784,8 @@
         "url": "https://www.gov.br/mec/pt-br/pe-de-meia"
       },
       "baseLegal": "Lei 14.818/2024",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos, estuda em escola pública (ensino médio ou EJA) e a renda da família é {rpc$} por pessoa, até {meioSM$}."
     },
     {
       "id": "farmacia_popular",
@@ -696,8 +808,8 @@
       ],
       "documentos": [
         "receita",
-        "foto",
-        "cpf_todos"
+        "foto_beneficiario",
+        "cpf_beneficiario"
       ],
       "requerCadUnico": false,
       "prioridade": 2,
@@ -706,7 +818,8 @@
         "url": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
       },
       "baseLegal": "Programa Farmácia Popular do Brasil",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} usa remédio contínuo para uma doença atendida pela Farmácia Popular. Não depende de renda."
     },
     {
       "id": "fralda",
@@ -746,8 +859,8 @@
       "documentos": [
         "receita",
         "laudo",
-        "foto",
-        "cpf_todos"
+        "foto_beneficiario",
+        "cpf_beneficiario"
       ],
       "requerCadUnico": false,
       "prioridade": 3,
@@ -756,7 +869,8 @@
         "url": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
       },
       "baseLegal": "Programa Farmácia Popular do Brasil",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos ou deficiência e precisa de fralda."
     },
     {
       "id": "absorvente",
@@ -842,8 +956,8 @@
         "Leve a autorização, documento com foto e CPF na farmácia credenciada."
       ],
       "documentos": [
-        "foto",
-        "cpf_todos"
+        "foto_beneficiario",
+        "cpf_beneficiario"
       ],
       "requerCadUnico": true,
       "prioridade": 4,
@@ -852,7 +966,9 @@
         "url": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
       },
       "baseLegal": "Lei 14.214/2021",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos e a família tem renda de {rpc$} por pessoa (limite {linhaPobrezaBF$}) ou está em situação de rua.",
+      "porqueTalvez": "{nome} tem {idade} anos e estuda na rede pública; estudantes de baixa renda também podem ter direito."
     },
     {
       "id": "sus_basico",
@@ -879,7 +995,7 @@
         "Para ver resultados, vacinas e filas, use o aplicativo Meu SUS Digital."
       ],
       "documentos": [
-        "sus",
+        "sus_todos",
         "endereco",
         "foto"
       ],
@@ -890,7 +1006,9 @@
         "url": "https://www.gov.br/saude"
       },
       "baseLegal": "Constituição Federal, art. 196; Lei 8.080/1990",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "Todo mundo tem direito ao SUS, e alguém da família precisa de atendimento agora.",
+      "porqueTalvez": "Todo mundo tem direito ao SUS. Vale cadastrar a família na UBS."
     },
     {
       "id": "sus_especialista",
@@ -912,9 +1030,8 @@
         "Acompanhe a fila pelo Meu SUS Digital."
       ],
       "documentos": [
-        "sus",
+        "sus_todos",
         "laudo",
-        "foto",
         "endereco"
       ],
       "requerCadUnico": false,
@@ -924,7 +1041,8 @@
         "url": "https://www.gov.br/saude"
       },
       "baseLegal": "Portaria SAS/MS 55/1999 (TFD)",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "Alguém da família precisa de especialista ou tem doença que exige tratamento especializado."
     },
     {
       "id": "sus_dentista",
@@ -943,8 +1061,7 @@
         "Peça na UBS para marcar com a equipe de saúde bucal."
       ],
       "documentos": [
-        "sus",
-        "foto"
+        "sus_todos"
       ],
       "requerCadUnico": false,
       "prioridade": 4,
@@ -953,7 +1070,8 @@
         "url": "https://www.gov.br/saude"
       },
       "baseLegal": "Política Nacional de Saúde Bucal (Lei 14.572/2023)",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "Alguém da família precisa de dentista."
     },
     {
       "id": "sus_mental",
@@ -973,8 +1091,7 @@
         "Em crise ou risco de vida, ligue 192 (SAMU) ou 188 (CVV, ligação grátis)."
       ],
       "documentos": [
-        "sus",
-        "foto"
+        "sus_todos"
       ],
       "requerCadUnico": false,
       "prioridade": 2,
@@ -983,7 +1100,8 @@
         "url": "https://www.gov.br/saude"
       },
       "baseLegal": "Lei 10.216/2001",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "Alguém da família precisa de cuidado em saúde mental."
     },
     {
       "id": "prenatal",
@@ -1005,7 +1123,7 @@
       ],
       "documentos": [
         "sus",
-        "foto"
+        "foto_beneficiario"
       ],
       "requerCadUnico": false,
       "prioridade": 1,
@@ -1014,7 +1132,8 @@
         "url": "https://www.gov.br/saude"
       },
       "baseLegal": "Rede Alyne (Portaria GM/MS 5.350/2024)",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} está grávida."
     },
     {
       "id": "salario_maternidade",
@@ -1067,9 +1186,9 @@
         "Os outros casos pedem pelo Meu INSS ou ligando 135."
       ],
       "documentos": [
-        "foto",
+        "foto_beneficiario",
         "ctps",
-        "certidoes"
+        "certidao_bebe"
       ],
       "requerCadUnico": false,
       "prioridade": 3,
@@ -1078,7 +1197,9 @@
         "url": "https://meu.inss.gov.br"
       },
       "baseLegal": "Lei 8.213/1991, art. 71",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} está grávida ou teve bebê e trabalha com carteira ou perdeu o emprego há pouco tempo.",
+      "porqueTalvez": "{nome} está grávida ou teve bebê; depende de ter contribuído para o INSS."
     },
     {
       "id": "seguro_desemprego",
@@ -1099,7 +1220,7 @@
         "Tenha em mãos o termo de rescisão."
       ],
       "documentos": [
-        "foto",
+        "foto_beneficiario",
         "ctps",
         "rescisao"
       ],
@@ -1110,7 +1231,8 @@
         "url": "https://www.gov.br/trabalho-e-emprego"
       },
       "baseLegal": "Lei 7.998/1990",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} foi mandado(a) embora de trabalho com carteira assinada nos últimos 4 meses."
     },
     {
       "id": "pessoa_idosa_viagem",
@@ -1142,8 +1264,8 @@
         "Peça a carteira no CRAS ou pelo site da Carteira da Pessoa Idosa."
       ],
       "documentos": [
-        "foto",
-        "cpf_todos",
+        "foto_beneficiario",
+        "cpf_beneficiario",
         "nis"
       ],
       "requerCadUnico": true,
@@ -1153,7 +1275,8 @@
         "url": "https://www.gov.br/mds"
       },
       "baseLegal": "Estatuto da Pessoa Idosa (Lei 10.741/2003), art. 40",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos (60 ou mais) e renda própria de até 2 salários mínimos ({doisSM$})."
     },
     {
       "id": "id_jovem",
@@ -1191,7 +1314,7 @@
       ],
       "documentos": [
         "nis",
-        "cpf_todos"
+        "cpf_beneficiario"
       ],
       "requerCadUnico": true,
       "prioridade": 5,
@@ -1200,7 +1323,8 @@
         "url": "https://www.gov.br/secretariageral"
       },
       "baseLegal": "Estatuto da Juventude (Lei 12.852/2013)",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos (15 a 29) e a renda total da família é {rendaTotal$}, até 2 salários mínimos ({doisSM$})."
     },
     {
       "id": "passe_livre_pcd",
@@ -1237,7 +1361,7 @@
         "Para levar acompanhante de graça, precisa de laudo dizendo que precisa."
       ],
       "documentos": [
-        "foto",
+        "foto_beneficiario",
         "laudo",
         "nis"
       ],
@@ -1248,7 +1372,8 @@
         "url": "https://www.gov.br/antt"
       },
       "baseLegal": "Lei 8.899/1994; Portarias Interministeriais 2 e 3/2026",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem deficiência e recebe BPC ou a renda por pessoa é {rpc$}, até 1 salário mínimo ({umSM$})."
     },
     {
       "id": "mcmv",
@@ -1294,7 +1419,8 @@
       },
       "baseLegal": "Lei 14.620/2023",
       "aviso": "O limite de renda da Faixa 1 em 2026 deve ser confirmado na Prefeitura ou na Caixa.",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda total da família é {rendaTotal$}, até {mcmvFaixa1$} (Faixa 1), e a família não tem casa própria quitada."
     },
     {
       "id": "isencao_taxas",
@@ -1330,7 +1456,8 @@
         "Na inscrição do ENEM ou do concurso, marque a opção de isenção e informe o NIS."
       ],
       "documentos": [
-        "nis"
+        "nis",
+        "cpf_beneficiario"
       ],
       "requerCadUnico": true,
       "prioridade": 6,
@@ -1339,7 +1466,8 @@
         "url": "https://www.gov.br/inep"
       },
       "baseLegal": "Lei 13.656/2018",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos e a renda da família é {rpc$} por pessoa, até meio salário mínimo ({meioSM$})."
     },
     {
       "id": "garantia_safra",
@@ -1372,7 +1500,8 @@
         "url": "https://www.gov.br/mda"
       },
       "baseLegal": "Lei 10.420/2002",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A família trabalha na agricultura familiar."
     },
     {
       "id": "seguro_defeso",
@@ -1394,7 +1523,8 @@
       "documentos": [
         "foto",
         "cpf_todos",
-        "nis"
+        "nis",
+        "rgp"
       ],
       "requerCadUnico": true,
       "prioridade": 4,
@@ -1403,7 +1533,8 @@
         "url": "https://meu.inss.gov.br"
       },
       "baseLegal": "Lei 10.779/2003",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "Alguém da família é pescador artesanal."
     },
     {
       "id": "documentos_gratis",
@@ -1425,7 +1556,7 @@
         "Identidade (CIN): agende no site MG App, na UAI ou na Polícia Civil."
       ],
       "documentos": [
-        "certidoes"
+        "certidao_beneficiario"
       ],
       "requerCadUnico": false,
       "prioridade": 1,
@@ -1434,7 +1565,8 @@
         "url": "https://www.gov.br/governodigital/pt-br/identidade"
       },
       "baseLegal": "Lei 9.534/1997; Decreto 10.977/2022",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} está sem algum documento."
     },
     {
       "id": "copasa_social",
@@ -1504,7 +1636,9 @@
         "url": "https://diariodocomercio.com.br/economia/nova-tarifa-social-copasa-oferece-65-desconto-beneficiarios/"
       },
       "baseLegal": "Resolução ARSAE-MG; vigente desde 22/01/2026",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A água é da Copasa e a renda é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), ou alguém recebe BPC.",
+      "porqueTalvez": "A renda é {rpc$} por pessoa, mas não sabemos se a água é da Copasa."
     },
     {
       "id": "trilhas_futuro",
@@ -1548,8 +1682,8 @@
         "Faça a inscrição pela internet; a escola pode ajudar."
       ],
       "documentos": [
-        "foto",
-        "cpf_todos",
+        "foto_beneficiario",
+        "cpf_beneficiario",
         "escola"
       ],
       "requerCadUnico": false,
@@ -1560,7 +1694,8 @@
       },
       "baseLegal": "Programa estadual Trilhas de Futuro",
       "aviso": "As regras mudam a cada edital. Confira o edital aberto.",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos e está no ensino médio ou já terminou."
     },
     {
       "id": "beneficio_eventual",
@@ -1623,7 +1758,9 @@
         "url": "https://www.planalto.gov.br/ccivil_03/leis/l8742.htm"
       },
       "baseLegal": "Lei 8.742/1993, art. 22",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda é {rpc$} por pessoa (até 1/4 do salário mínimo, {quartoSM$}), ou há gestante, ou a família passa por emergência.",
+      "porqueTalvez": "A renda é {rpc$} por pessoa, até meio salário mínimo; cada cidade define o limite."
     },
     {
       "id": "creche",
@@ -1658,7 +1795,8 @@
         "certidoes",
         "vacina",
         "endereco",
-        "cpf_todos"
+        "cpf_beneficiario",
+        "sus"
       ],
       "requerCadUnico": false,
       "prioridade": 3,
@@ -1667,7 +1805,8 @@
         "url": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm"
       },
       "baseLegal": "CF art. 208, IV; ECA art. 54",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos e ainda não está na creche ou pré-escola."
     },
     {
       "id": "violencia",
@@ -1696,7 +1835,8 @@
         "url": "https://www.gov.br/mulheres"
       },
       "baseLegal": "Lei 11.340/2006; ECA; Estatuto da Pessoa Idosa",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "Foi informado que alguém sofre violência em casa."
     },
     {
       "id": "situacao_rua",
@@ -1724,7 +1864,8 @@
         "url": "https://www.gov.br/mdh"
       },
       "baseLegal": "Decreto 7.053/2009",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A família está sem moradia ou em situação de rua."
     },
     {
       "id": "defensoria",
@@ -1760,7 +1901,8 @@
         "foto",
         "cpf_todos",
         "endereco",
-        "renda"
+        "renda",
+        "docs_caso"
       ],
       "requerCadUnico": false,
       "prioridade": 3,
@@ -1770,7 +1912,9 @@
       },
       "baseLegal": "Constituição Federal, art. 134",
       "aviso": "O limite de renda é uma referência; a Defensoria analisa cada caso.",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "A família precisa de ajuda na Justiça e a renda total é {rendaTotal$}, até 3 salários mínimos ({tresSM$}).",
+      "porqueTalvez": "A família precisa de ajuda na Justiça; a Defensoria avalia a renda e os gastos de cada caso."
     },
     {
       "id": "tratamento_cancer",
@@ -1796,7 +1940,7 @@
       "documentos": [
         "sus",
         "laudo_doenca",
-        "foto",
+        "foto_beneficiario",
         "endereco"
       ],
       "requerCadUnico": false,
@@ -1806,7 +1950,8 @@
         "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2012/lei/l12732.htm"
       },
       "baseLegal": "Lei 12.732/2012 (60 dias); Lei 13.896/2019 (30 dias para exames)",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem câncer."
     },
     {
       "id": "doenca_grave_direitos",
@@ -1831,8 +1976,8 @@
       ],
       "documentos": [
         "laudo_doenca",
-        "foto",
-        "cpf_todos",
+        "foto_beneficiario",
+        "cpf_beneficiario",
         "ctps"
       ],
       "requerCadUnico": false,
@@ -1842,7 +1987,8 @@
         "url": "https://meu.inss.gov.br"
       },
       "baseLegal": "Lei 8.213/1991 art. 26 e 151; Lei 7.713/1988 art. 6º XIV; Lei 8.036/1990 art. 20",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem uma doença grave que dá direitos especiais por lei."
     },
     {
       "id": "farmacia_minas",
@@ -1866,8 +2012,8 @@
       ],
       "documentos": [
         "lme",
-        "foto",
-        "cpf_todos",
+        "foto_beneficiario",
+        "cpf_beneficiario",
         "sus",
         "endereco"
       ],
@@ -1879,7 +2025,8 @@
       },
       "baseLegal": "Componente Especializado da Assistência Farmacêutica (Portaria de Consolidação GM/MS 2/2017)",
       "aviso": "Nem todo remédio está na lista. O médico ou a farmácia confirmam se o seu está.",
-      "verificadoEm": "2026-10-21"
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem uma doença que costuma usar remédio de alto custo do SUS."
     }
   ],
   "municipios": {

@@ -27,7 +27,7 @@
   let bloqueado = false;
   let pacoteCifrado = null;
   let passo = store.get('md_passo', 0);
-  if (!(passo === 'relatorio' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
+  if (!(passo === 'relatorio' || passo === 'documentos' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
   let tela = null;         // telas especiais: 'criar-senha', 'trocar-dados'
 
   (function iniciarDados() {
@@ -83,7 +83,7 @@
   function irPara(i) { passo = Math.max(0, Math.min(PASSOS.length - 1, i)); salvar(); render(); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} }
   function renderSteps() {
     const el = document.getElementById('steps');
-    if (bloqueado || tela || passo === 0 || passo === 'relatorio') { el.innerHTML = ''; return; }
+    if (bloqueado || tela || passo === 0 || typeof passo === 'string') { el.innerHTML = ''; return; }
     el.innerHTML = PASSOS.slice(1).map((_, i) => '<span class="' + (i < passo ? 'on' : '') + '"></span>').join('');
   }
   function radio(name, val, label, atual) { return '<label class="choice"><input type="radio" name="' + name + '" value="' + val + '"' + (atual === val ? ' checked' : '') + '><span>' + label + '</span></label>'; }
@@ -213,30 +213,9 @@
       '</div>' + navBtns(true, 'Ver meus direitos') + '</div>';
   }
 
-  function docRelevante(d) {
-    const ps = F.pessoas.map(p => Object.assign({ id: idade(p.nasc) }, p));
-    if (d === 'prenatal') return ps.some(p => p.gestante);
-    if (d === 'vacina') return ps.some(p => p.id != null && p.id <= 7);
-    if (d === 'escola') return ps.some(p => p.estudo && p.estudo !== 'nao');
-    if (d === 'laudo') return ps.some(p => p.pcd || p.incontinencia) || !!F.saude.especialista;
-    if (d === 'renda') return ps.some(p => p.fonte && p.fonte !== 'sem');
-    if (d === 'ctps') return ps.some(p => p.fonte === 'formal' || p.demitido);
-    if (d === 'rescisao') return ps.some(p => p.demitido);
-    return true;
-  }
   const nomeCanal = c => (REGRAS.canais[c] || {}).nome || c;
   const curto = c => nomeCanal(c).split(' (')[0];
-  function planoPorCanal(res) {
-    const ordem = [], mapa = {};
-    const urg = res.filter(r => r.pr.prioridade === 0);
-    for (const r of urg.concat(res)) {
-      const c = r.pr.ondeIr[0];
-      if (!mapa[c]) { mapa[c] = { canal: c, progs: [], docs: new Set() }; ordem.push(mapa[c]); }
-      if (!mapa[c].progs.includes(r)) mapa[c].progs.push(r);
-      r.pr.documentos.filter(docRelevante).forEach(d => mapa[c].docs.add(d));
-    }
-    return ordem;
-  }
+  const plano = calc => M.planoPorLocal(calc, REGRAS);
   function dadosCidade() {
     const cidade = MUN_POR_NOME.get(norm(F.cidade));
     return (cidade && REGRAS.municipios && REGRAS.municipios[cidade.codigo]) || null;
@@ -248,6 +227,9 @@
     return '<div class="' + classe + '" id="cras-cidade"><b>CRAS em ' + esc(F.cidade) + ':</b><ul>' + lista.map(c => '<li><b>' + esc(c.nome) + '</b>: ' + esc(c.endereco) + (c.telefone ? ' · Tel. ' + esc(c.telefone) : '') + '</li>').join('') + '</ul>' +
       '<small>' + esc(m.aviso || '') + ' Fonte: ' + esc(m.fonte ? m.fonte.nome : '') + ', conferido em ' + dataBR(m.verificadoEm) + '.</small></div>';
   }
+  function htmlMotivos(r) {
+    return '<div class="porque"><b>Por quê:</b><ul>' + r.motivos.map(m => '<li>' + esc(m.texto) + '</li>').join('') + '</ul></div>';
+  }
   function cartaoPrograma(r) {
     const pr = r.pr, p = P(); const esf = { federal: 'Brasil', estadual: 'Minas Gerais', municipal: 'Prefeitura' }[pr.esfera] || pr.esfera;
     const url = linkSeguro(pr.fonte.url);
@@ -255,6 +237,7 @@
       '<div class="tags"><span class="tag ' + r.status + '">' + (r.status === 'sim' ? 'Provável direito' : 'Pode ter direito') + '</span><span class="tag">' + esc(esf) + '</span>' + (r.precisaCad ? '<span class="tag cad">Precisa do CadÚnico</span>' : '') + '</div>' +
       '<h3>' + esc(pr.titulo) + '</h3><p>' + esc(preencher(pr.resumo, p)) + '</p>' +
       (r.quem.length ? '<p class="who">Para: ' + esc(r.quem.join(', ')) + '</p>' : '') +
+      htmlMotivos(r) +
       (r.valor ? '<p class="valor">' + esc(r.valor) + '</p>' : '') +
       (r.nota ? '<p class="hint">' + esc(r.nota) + '</p>' : '') +
       r.avisos.map(a => '<p class="hint">' + esc(a) + '</p>').join('') +
@@ -262,11 +245,19 @@
       '<p class="who mt">Onde: ' + pr.ondeIr.map(c => esc(nomeCanal(c))).join(' · ') + '</p>' +
       '<p class="who">Fonte: ' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(pr.fonte.nome) + '</a>' : esc(pr.fonte.nome)) + ' · ' + esc(pr.baseLegal || '') + '</p></details></article>';
   }
+  function htmlQuemTemDireito(calc, classe) {
+    const { pessoas, familia } = M.direitosPorPessoa(calc);
+    const item = i => '<li><b>' + esc(i.titulo) + '</b>' + (i.status === 'talvez' ? ' <span class="tag talvez">confirmar</span>' : '') + '<br><span class="sub">' + esc(i.motivo) + '</span></li>';
+    return '<div class="' + classe + '" id="quem-tem-direito">' +
+      pessoas.map(p => '<div class="pessoa-direitos"><h3>' + esc(p.nome) + (p.idade !== null ? ' (' + p.idade + ' anos)' : '') + '</h3>' +
+        (p.itens.length ? '<ul>' + p.itens.map(item).join('') + '</ul>' : '<p class="sub">Nenhum programa só desta pessoa. Ela entra nos programas da família abaixo.</p>') + '</div>').join('') +
+      (familia.length ? '<div class="pessoa-direitos"><h3>Família toda</h3><ul>' + familia.map(item).join('') + '</ul></div>' : '') + '</div>';
+  }
   function telaResultado() {
-    const { fx, res } = M.calcular(F, REGRAS);
+    const calc = M.calcular(F, REGRAS); const { fx, res } = calc;
     const sims = res.filter(r => r.status === 'sim'), talvez = res.filter(r => r.status === 'talvez');
     const mensal = sims.reduce((s, r) => s + (r.mensal || 0), 0);
-    const plano = planoPorCanal(res);
+    const pl = plano(calc);
     return '<div class="stack"><h2>Direitos da sua família</h2>' +
       '<div class="summary-band">' +
       '<div class="stat"><b id="n-sim">' + sims.length + '</b><span>direitos prováveis</span></div>' +
@@ -274,12 +265,13 @@
       '<div class="stat"><b id="rpc">' + brl(fx.rpc) + '</b><span>renda por pessoa</span></div>' +
       (mensal ? '<div class="stat"><b id="mensal">' + brl(mensal) + '</b><span>dinheiro por mês (estimativa)</span></div>' : '') +
       '</div>' +
-      '<div class="btns noprint"><button type="button" class="go" id="abrir-relatorio">Ver relatório para imprimir</button><button type="button" data-ir="1">Corrigir respostas</button></div>' +
+      '<div class="btns noprint"><button type="button" class="go" id="abrir-documentos">Documentos e cartas</button><button type="button" class="sun" id="abrir-relatorio">Relatório completo para imprimir</button><button type="button" data-ir="1">Corrigir respostas</button></div>' +
       '<section class="card stack tight"><h3>Seu plano: onde ir, nesta ordem</h3><ol class="plan">' +
-      plano.map(g => '<li><div><b>' + esc(nomeCanal(g.canal)) + '</b><br><span class="who">Pedir: ' + esc(g.progs.map(r => r.pr.titulo.split(' (')[0]).join('; ')) + '</span></div></li>').join('') +
+      pl.map(g => '<li><div><b>' + esc(nomeCanal(g.canal)) + '</b><br><span class="who">Pedir: ' + esc(g.programas.map(r => r.pr.titulo.split(' (')[0]).join('; ')) + '</span></div></li>').join('') +
       '</ol></section>' +
       htmlCras('hint') +
       extrasCidade().map(e => '<div class="hint"><b>' + esc(e.titulo) + '</b><br>' + esc(e.texto) + '</div>').join('') +
+      '<details class="card"><summary class="toggle">Quem da família tem direito a quê, e por quê</summary>' + htmlQuemTemDireito(calc, 'stack mid mt') + '</details>' +
       (sims.length ? '<h3>Provável direito</h3>' + sims.map(cartaoPrograma).join('') : '<p>Com as respostas dadas, não encontramos direito provável. Veja os itens para confirmar abaixo e procure o CRAS.</p>') +
       (talvez.length ? '<h3>Pode ter direito: vale perguntar</h3>' + talvez.map(cartaoPrograma).join('') : '') +
       '<p class="who">Este resultado é uma estimativa feita com as regras de ' + dataBR(REGRAS.atualizadoEm) + '. Quem decide é o órgão responsável.</p>' +
@@ -289,23 +281,100 @@
     const ruaNum = [F.rua || F.endereco, F.numero].filter(Boolean).join(', ');
     return [ruaNum, F.complemento, F.bairro, F.cidade ? F.cidade + ' - MG' : '', F.cep ? 'CEP ' + F.cep : ''].filter(Boolean).join(', ');
   }
-  function textoPedido(g, fx, resp, endereco, hoje) {
-    const c = REGRAS.canais[g.canal] || {};
-    return 'A(o) ' + (c.nome || g.canal) + (F.cidade ? ' de ' + F.cidade + '/MG' : '') + '\n\n' +
-      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', morador(a) em ' + (endereco || '________________________') + ', telefone ' + (F.telefone || '______________') + (F.contato2Tel ? ' (recado: ' + F.contato2Tel + (F.contato2Nome ? ', ' + F.contato2Nome : '') + ')' : '') + (F.referencia ? ', ponto de referência: ' + F.referencia : '') + ', responsável por uma família de ' + fx.n + ' pessoa(s), com renda total de ' + brl(fx.rendaTotal) + ' por mês (' + brl(fx.rpc) + ' por pessoa), venho solicitar:\n\n' +
-      g.progs.map(r => '- ' + r.pr.titulo + (r.quem.length ? ' (para ' + r.quem.join(', ') + ')' : '')).join('\n') +
-      '\n\nAs informações da família estão no quadro deste relatório. Trago os documentos listados.\n\n' + (F.cidade || '__________') + ', ' + hoje + '.';
+  const ROTULO_FONTE = f => ((FONTES.find(e => e[0] === f) || [])[1] || '').split(' (')[0].toLowerCase();
+  function linhaPessoa(x, i) {
+    const id = idade(x.nasc);
+    const partes = [x.nome + (id !== null ? ', ' + id + ' anos' : '') + (i === 0 ? ' (responsável)' : x.parentesco ? ' (' + x.parentesco.toLowerCase() + ')' : '')];
+    const fonte = x.fonte && x.fonte !== 'sem' ? ROTULO_FONTE(x.fonte) + ', ' + brl(numero(x.renda)) + ' por mês' : 'sem renda';
+    partes.push(fonte);
+    if (x.estudo && x.estudo !== 'nao') partes.push('estuda: ' + ((ESTUDOS.find(e => e[0] === x.estudo) || [])[1] || '').toLowerCase() + (x.rede === 'publica' ? ' em escola pública' : ''));
+    if (x.pcd) partes.push('tem deficiência ou doença de longo prazo');
+    if (x.gestante) partes.push('está grávida');
+    if (x.nutriz) partes.push('amamenta bebê de até 6 meses');
+    if (x.demitido) partes.push('foi demitido(a) recentemente');
+    if (x.doencas.length) partes.push('saúde: ' + x.doencas.map(d => ((DOENCAS.concat(GRAVES).find(z => z[0] === d) || [, d])[1]).toLowerCase()).join(', '));
+    if (x.incontinencia) partes.push('usa fralda');
+    if (x.semDocumento) partes.push('está sem algum documento');
+    return partes.join('; ');
+  }
+  const MORADIA = { propria: 'casa própria quitada', financiada: 'casa própria ainda sendo paga', alugada: 'casa alugada', cedida: 'casa emprestada (cedida)', ocupacao: 'ocupação', rua: 'sem moradia / situação de rua' };
+  // Carta de cada local: explica a situação, pede a verificação e lista os documentos.
+  function cartaLocal(g, calc) {
+    const { fx } = calc; const c = REGRAS.canais[g.canal] || {};
+    const resp = F.pessoas[0] || {}; const hoje = new Date().toLocaleDateString('pt-BR');
+    const t = F.sit || {};
+    const outras = [t.violencia ? 'há situação de violência em casa' : '', t.emergencia ? 'a família passa por uma emergência (falta de comida, despejo, morte ou desastre)' : '', t.agricultor ? 'trabalhamos na agricultura familiar' : '', t.pescador ? 'há pescador artesanal na família' : '', t.indigena ? 'somos família indígena ou quilombola' : '', t.justica ? 'precisamos de ajuda na Justiça' : ''].filter(Boolean);
+    const docs = g.itens.map(i => '- ' + i.texto + (i.pessoas ? ': ' + i.pessoas.map(p => p.nome).join(', ') : ''));
+    return 'Ao(À) ' + (c.nome || g.canal) + (F.cidade ? ' de ' + F.cidade + '/MG' : '') + '\n' +
+      'Assunto: Pedido de verificação de direitos da família de ' + (resp.nome || '__________') + '\n\n' +
+      'Prezados(as),\n\n' +
+      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', moro em ' + (enderecoCompleto() || '________________________') + (F.referencia ? ' (ponto de referência: ' + F.referencia + ')' : '') + '. Meu telefone é ' + (F.telefone || '______________') + (F.contato2Tel ? ' e o telefone para recado é ' + F.contato2Tel + (F.contato2Nome ? ' (' + F.contato2Nome + (F.contato2Parentesco ? ', ' + F.contato2Parentesco.toLowerCase() : '') + ')' : '') : '') + '.\n\n' +
+      'SITUAÇÃO DA FAMÍLIA\n' +
+      'Somos ' + fx.n + ' pessoa(s) morando juntas:\n' + F.pessoas.map((x, i) => '- ' + linhaPessoa(x, i)).join('\n') + '\n' +
+      'Renda total da família: ' + brl(fx.rendaTotal) + ' por mês (' + brl(fx.rpc) + ' por pessoa), valores brutos.\n' +
+      'Moradia: ' + (MORADIA[F.moradia] || 'não informada') + ', ' + (F.zona === 'rural' ? 'zona rural' : 'zona urbana') + '.\n' +
+      'CadÚnico: ' + ({ sim: 'cadastro atualizado nos últimos 2 anos', velho: 'cadastro com mais de 2 anos, precisa atualizar', nao: 'ainda não temos cadastro', naosei: 'não sabemos se temos cadastro' }[F.cad] || 'não informado') + '. Bolsa Família: ' + (F.bf === 'sim' ? 'recebemos' : 'não recebemos') + '.\n' +
+      (outras.length ? 'Também informo que ' + outras.join('; ') + '.\n' : '') + '\n' +
+      'PEDIDO\n' +
+      'Peço a verificação dos requisitos e, se tivermos direito, a inscrição, atualização ou concessão de:\n' +
+      g.programas.map((r, k) => (k + 1) + '. ' + r.pr.titulo + (r.status === 'talvez' ? ' (peço avaliação do caso)' : '') + '\n   Motivo: ' + r.motivos.map(m => m.texto).join(' ')).join('\n') + '\n\n' +
+      (docs.length ? 'DOCUMENTOS QUE APRESENTO\n' + docs.join('\n') + '\n\n' : '') +
+      'Fico à disposição para entrevista, visita domiciliar ou para apresentar outros documentos, se necessário. Peço que me informem o número do protocolo deste pedido.\n\n' +
+      (F.cidade || '__________') + ', ' + hoje + '.\n\n\n' +
+      '______________________________\n' + (resp.nome || 'Assinatura do(a) responsável');
+  }
+  const EMAIL_OK = /^[^\s@<>"'(),;:]{1,64}@[A-Za-z0-9.-]{1,180}\.[A-Za-z]{2,24}$/;
+  function linkEmail(email, carta) {
+    const para = EMAIL_OK.test(email) ? email : '';
+    const assunto = 'Pedido de verificação de direitos - ' + ((F.pessoas[0] || {}).nome || '');
+    return 'mailto:' + para + '?subject=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(carta + '\n\n(Seguem em anexo as fotos dos documentos.)');
+  }
+  function chaveDoc(g, k, p) { return g.canal + '|' + g.itens[k].id + '|' + (p ? p.indice : 'casa'); }
+  function telaDocumentos() {
+    const calc = M.calcular(F, REGRAS);
+    const pl = plano(calc);
+    return '<div class="stack">' +
+      '<div class="btns noprint"><button type="button" data-ir="5">Voltar ao resultado</button>' + (EM_MOLDURA ? '' : '<button type="button" class="go" id="imprimir">Imprimir tudo</button>') + '</div>' +
+      '<h2>Documentos e cartas</h2>' +
+      '<p class="lead">Para cada lugar: a lista do que levar (marque o que você já separou) e uma carta pronta explicando a situação da família e pedindo a verificação. Você pode imprimir a carta para entregar com os documentos ou enviar por e-mail.</p>' +
+      (EM_MOLDURA ? '<p class="hint noprint">Nesta prévia os botões de imprimir e de e-mail podem não funcionar. No aplicativo instalado eles funcionam.</p>' : '') +
+      pl.map((g, i) => {
+        const c = REGRAS.canais[g.canal] || {};
+        const total = g.itens.reduce((s, it) => s + (it.pessoas ? it.pessoas.length : 1), 0);
+        const feitos = g.itens.reduce((s, it, k) => s + (it.pessoas ? it.pessoas.filter(p => F.docsOk[chaveDoc(g, k, p)]).length : (F.docsOk[chaveDoc(g, k, null)] ? 1 : 0)), 0);
+        const carta = cartaLocal(g, calc);
+        const email = (F.emails && F.emails[g.canal]) || '';
+        const mailto = linkEmail(email, carta);
+        return '<section class="card stack mid local" id="local-' + esc(g.canal) + '" data-canal="' + esc(g.canal) + '">' +
+          '<h3>Passo ' + (i + 1) + ': ' + esc(c.nome || g.canal) + '</h3>' +
+          '<p class="sub">' + esc(c.como || '') + (c.telefone ? '<br>Telefone: ' + esc(c.telefone) : '') + (c.site ? '<br>Site: ' + esc(c.site) : '') + '</p>' +
+          (g.canal === 'cras' ? htmlCras('hint') : '') +
+          '<div><b>O que pedir aqui</b><ul>' + g.programas.map(r => '<li>' + esc(r.pr.titulo) + (r.status === 'talvez' ? ' <span class="tag talvez">confirmar</span>' : '') + (r.pr.ondeIr.length > 1 ? ' <span class="sub">(depois: ' + esc(r.pr.ondeIr.slice(1).map(curto).join(', ')) + ')</span>' : '') + '</li>').join('') + '</ul></div>' +
+          (g.itens.length ? '<div class="checklist"><b>Documentos para levar</b> <span class="sub conta-docs">' + feitos + ' de ' + total + ' separados</span>' +
+            g.itens.map((it, k) => '<div class="doc-item"><p><b>' + esc(it.texto) + '</b><br><span class="sub">Para: ' + esc(it.para.join(', ')) + '</span>' + (it.obs ? '<br><span class="sub">' + esc(it.obs) + '</span>' : '') + '</p>' +
+              (it.pessoas ? it.pessoas.map(p => { const ch = chaveDoc(g, k, p); return '<label class="choice"><input type="checkbox" data-doc="' + esc(ch) + '"' + (F.docsOk[ch] ? ' checked' : '') + '><span>' + esc(p.nome) + '</span></label>'; }).join('')
+                : (() => { const ch = chaveDoc(g, k, null); return '<label class="choice"><input type="checkbox" data-doc="' + esc(ch) + '"' + (F.docsOk[ch] ? ' checked' : '') + '><span>Separado</span></label>'; })()) +
+              '</div>').join('') + '</div>' : '<p class="sub">Não precisa levar documentos para este atendimento.</p>') +
+          '<details class="carta-bloco"' + (i === 0 ? ' open' : '') + '><summary class="toggle">Carta para ' + esc(curto(g.canal)) + '</summary>' +
+          '<pre class="carta" data-carta="' + esc(g.canal) + '">' + esc(carta) + '</pre>' +
+          '<div class="btns noprint">' + (EM_MOLDURA ? '' : '<button type="button" class="small go" data-imprimir="' + esc(g.canal) + '">Imprimir carta e lista</button>') +
+          '<button type="button" class="small" data-copiar="' + esc(g.canal) + '">Copiar a carta</button></div>' +
+          '<div class="stack tight noprint"><label class="q">E-mail do ' + esc(curto(g.canal)) + '<small>Se o atendimento aceitar pedido por e-mail. Pergunte o endereço no telefone acima.</small><input type="email" data-email="' + esc(g.canal) + '" maxlength="120" autocomplete="off" value="' + esc(email) + '" placeholder="atendimento@exemplo.gov.br"></label>' +
+          '<p><a class="botao-link" data-mailto="' + esc(g.canal) + '" href="' + esc(mailto) + '">Abrir no meu e-mail</a></p>' +
+          '<p class="sub">A carta abre no seu programa de e-mail, enviada pela sua conta. Anexe fotos legíveis dos documentos antes de enviar. O aplicativo não envia nada sozinho.</p></div>' +
+          '</details></section>';
+      }).join('') + '</div>';
   }
   function telaRelatorio() {
-    const { fx, res } = M.calcular(F, REGRAS); const p = P();
-    const plano = planoPorCanal(res);
+    const calc = M.calcular(F, REGRAS); const { fx, res } = calc; const p = P();
+    const pl = plano(calc);
     const resp = F.pessoas[0] || {};
     const hoje = new Date().toLocaleDateString('pt-BR');
     const endereco = enderecoCompleto();
     const linhas = F.pessoas.map((x, i) => {
       const id = idade(x.nasc); const est = (ESTUDOS.find(e => e[0] === x.estudo) || [])[1] || ''; const fonte = (FONTES.find(e => e[0] === x.fonte) || [])[1] || '';
       const sit = [x.pcd ? 'Pessoa com deficiência' : '', x.gestante ? 'Gestante' : '', x.nutriz ? 'Amamentando' : '', x.demitido ? 'Demitido(a) recentemente' : '', x.doencas.length ? 'Saúde: ' + x.doencas.map(d => (DOENCAS.concat(GRAVES).find(z => z[0] === d) || [, d])[1]).join(', ') : '', x.incontinencia ? 'Usa fralda' : ''].filter(Boolean).join('; ');
-      return '<tr><td>' + esc(x.nome) + '</td><td>' + (i === 0 ? 'Responsável' : esc(x.parentesco)) + '</td><td>' + (x.nasc ? esc(dataBR(x.nasc)) + (id != null ? ' (' + id + ')' : '') : '') + '</td><td>' + esc(x.cpf) + '</td><td>' + esc(x.nis) + '</td><td>' + esc(fonte) + (x.fonte !== 'sem' ? '<br>' + brl(numero(x.renda)) : '') + '</td><td>' + esc(est) + (x.estudo !== 'nao' ? ' (' + (x.rede === 'publica' ? 'pública' : 'particular') + ')' : '') + '</td><td>' + esc(sit) + '</td></tr>';
+      return '<tr><td>' + esc(x.nome) + '</td><td>' + (i === 0 ? 'Responsável' : esc(x.parentesco)) + '</td><td>' + (x.nasc ? esc(dataBR(x.nasc)) + (id != null ? ' (' + id + ')' : '') : '') + '</td><td>' + esc(x.cpf) + '</td><td>' + esc(x.nis) + '</td><td>' + esc(fonte.split(' (')[0]) + (x.fonte !== 'sem' ? '<br>' + brl(numero(x.renda)) : '') + '</td><td>' + esc(est) + (x.estudo !== 'nao' ? ' (' + (x.rede === 'publica' ? 'pública' : 'particular') + ')' : '') + '</td><td>' + esc(sit) + '</td></tr>';
     }).join('');
     return '<div class="stack">' +
       '<div class="btns noprint">' + (EM_MOLDURA ? '' : '<button type="button" class="go" id="imprimir">Imprimir relatório</button>') + '<button type="button" data-ir="5">Voltar ao resultado</button></div>' +
@@ -317,22 +386,23 @@
       (F.contato2Tel ? '<br><b>Telefone para recado:</b> ' + esc(F.contato2Tel) + (F.contato2Nome ? ' (' + esc(F.contato2Nome) + (F.contato2Parentesco ? ', ' + esc(F.contato2Parentesco.toLowerCase()) : '') + ')' : '') : '') +
       '<br><b>Endereço:</b> ' + esc(endereco) + ' (' + (F.zona === 'rural' ? 'zona rural' : 'zona urbana') + ')' +
       (F.referencia ? '<br><b>Ponto de referência:</b> ' + esc(F.referencia) : '') + '<br>' +
-      '<b>Pessoas na casa:</b> ' + fx.n + ' &nbsp; <b>Renda total:</b> <span id="rel-renda">' + brl(fx.rendaTotal) + '</span> &nbsp; <b>Renda por pessoa:</b> <span id="rel-rpc">' + brl(fx.rpc) + '</span><br>' +
+      '<b>Pessoas na casa:</b> ' + fx.n + ' &nbsp; <b>Renda total (bruta):</b> <span id="rel-renda">' + brl(fx.rendaTotal) + '</span> &nbsp; <b>Renda por pessoa:</b> <span id="rel-rpc">' + brl(fx.rpc) + '</span><br>' +
       '<b>CadÚnico:</b> ' + ({ sim: 'Sim, atualizado', velho: 'Sim, precisa atualizar', nao: 'Não', naosei: 'Não sabe' }[F.cad] || 'Não informado') + ' &nbsp; <b>Bolsa Família:</b> ' + (F.bf === 'sim' ? 'Recebe' : 'Não recebe') + '</p>' +
       '<div class="tw"><table><thead><tr><th>Nome</th><th>Parentesco</th><th>Nascimento</th><th>CPF</th><th>NIS</th><th>Renda</th><th>Estudo</th><th>Situação</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
-      '<h2>2. Onde ir e o que pedir</h2>' +
-      plano.map((g, i) => {
+      '<h2>2. Quem tem direito a quê, e por quê</h2>' + htmlQuemTemDireito(calc, 'quem') +
+      '<h2>3. Onde ir, documentos e cartas</h2>' +
+      pl.map((g, i) => {
         const c = REGRAS.canais[g.canal] || {};
         return '<div class="box" data-canal="' + esc(g.canal) + '"><h3>Passo ' + (i + 1) + ': ' + esc(c.nome) + '</h3>' +
           '<p>' + esc(c.como) + (c.telefone ? '<br><b>Telefone:</b> ' + esc(c.telefone) : '') + (c.site ? '<br><b>Site:</b> ' + esc(c.site) : '') + '</p>' +
           (g.canal === 'cras' ? htmlCras('p6') : '') +
-          '<p class="p6"><b>Pedir:</b></p><ul class="chk">' + g.progs.map(r => '<li>' + esc(r.pr.titulo) + (r.status === 'talvez' ? ' (confirmar)' : '') + (r.quem.length ? ' — ' + esc(r.quem.join(', ')) : '') + (r.pr.ondeIr.length > 1 ? ' <i>(depois: ' + esc(r.pr.ondeIr.slice(1).map(curto).join(', ')) + ')</i>' : '') + '</li>').join('') + '</ul>' +
-          (g.docs.size ? '<p><b>Levar:</b></p><ul class="chk">' + [...g.docs].map(d => '<li>' + esc(REGRAS.documentos[d] || d) + '</li>').join('') + '</ul>' : '') +
-          '<p><b>Pedido pronto (pode entregar ou ler no atendimento):</b></p><div class="carta">' + esc(textoPedido(g, fx, resp, endereco, hoje)) + '</div></div>';
+          '<p class="p6"><b>Pedir:</b></p><ul class="chk">' + g.programas.map(r => '<li>' + esc(r.pr.titulo) + (r.status === 'talvez' ? ' (confirmar)' : '') + (r.quem.length ? ' — ' + esc(r.quem.join(', ')) : '') + (r.pr.ondeIr.length > 1 ? ' <i>(depois: ' + esc(r.pr.ondeIr.slice(1).map(curto).join(', ')) + ')</i>' : '') + '</li>').join('') + '</ul>' +
+          (g.itens.length ? '<p><b>Levar:</b></p><ul class="chk">' + g.itens.map(it => '<li>' + esc(it.texto) + (it.pessoas ? ' — ' + esc(it.pessoas.map(x => x.nome).join(', ')) : '') + '</li>').join('') + '</ul>' : '') +
+          '<p><b>Carta (pode entregar junto com os documentos):</b></p><div class="carta">' + esc(cartaLocal(g, calc)) + '</div></div>';
       }).join('') +
-      '<h2>3. Detalhe de cada direito</h2>' +
-      res.map(r => '<div class="box"><h3>' + esc(r.pr.titulo) + ' — ' + (r.status === 'sim' ? 'provável direito' : 'pode ter direito') + '</h3><p>' + esc(preencher(r.pr.resumo, p)) + '</p>' + (r.quem.length ? '<p><b>Para:</b> ' + esc(r.quem.join(', ')) + '</p>' : '') + (r.valor ? '<p><b>Valor:</b> ' + esc(r.valor) + '</p>' : '') + (r.nota ? '<p><i>' + esc(r.nota) + '</i></p>' : '') + r.avisos.map(a => '<p><i>' + esc(a) + '</i></p>').join('') + '<p><b>Como pedir:</b> ' + esc(r.pr.comoPedir.join(' ')) + '</p><p class="meta">Base legal: ' + esc(r.pr.baseLegal || '') + ' · Fonte: ' + esc(r.pr.fonte.nome) + ' (' + esc(r.pr.fonte.url) + ') · Conferido em ' + dataBR(r.pr.verificadoEm) + '</p></div>').join('') +
-      '<h2>4. Declaração</h2><p>Declaro que as informações acima são verdadeiras. Sei que este relatório é uma estimativa e que cada órgão confere os dados e decide sobre o benefício. Nenhum atendimento público pode cobrar para fazer o cadastro ou liberar benefício.</p>' +
+      '<h2>4. Detalhe de cada direito</h2>' +
+      res.map(r => '<div class="box"><h3>' + esc(r.pr.titulo) + ' — ' + (r.status === 'sim' ? 'provável direito' : 'pode ter direito') + '</h3><p>' + esc(preencher(r.pr.resumo, p)) + '</p>' + '<p><b>Por quê:</b> ' + esc(r.motivos.map(m => m.texto).join(' ')) + '</p>' + (r.valor ? '<p><b>Valor:</b> ' + esc(r.valor) + '</p>' : '') + (r.nota ? '<p><i>' + esc(r.nota) + '</i></p>' : '') + r.avisos.map(a => '<p><i>' + esc(a) + '</i></p>').join('') + '<p><b>Como pedir:</b> ' + esc(r.pr.comoPedir.join(' ')) + '</p><p class="meta">Base legal: ' + esc(r.pr.baseLegal || '') + ' · Fonte: ' + esc(r.pr.fonte.nome) + ' (' + esc(r.pr.fonte.url) + ') · Conferido em ' + dataBR(r.pr.verificadoEm) + '</p></div>').join('') +
+      '<h2>5. Declaração</h2><p>Declaro que as informações acima são verdadeiras. Sei que este relatório é uma estimativa e que cada órgão confere os dados e decide sobre o benefício. Nenhum atendimento público pode cobrar para fazer o cadastro ou liberar benefício.</p>' +
       '<div class="assin"><div>Assinatura do(a) responsável</div><div>Atendente / órgão (carimbo)</div></div></article></div>';
   }
 
@@ -370,8 +440,8 @@
     if (bloqueado) html = telaBloqueio();
     else if (tela === 'criar-senha') html = telaCriarSenha();
     else {
-      const t = passo === 'relatorio' ? 'relatorio' : PASSOS[passo];
-      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio }[t]();
+      const t = typeof passo === 'string' ? passo : PASSOS[passo];
+      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio, documentos: telaDocumentos }[t]();
     }
     view.innerHTML = html;
     renderFoot();
@@ -395,6 +465,19 @@
       }
       salvar(); return;
     }
+    if (el.dataset.doc) {
+      if (el.checked) F.docsOk[el.dataset.doc] = true; else delete F.docsOk[el.dataset.doc];
+      salvar(); contarDocs(el.closest('.local')); return;
+    }
+    if (el.dataset.email) {
+      const canal = el.dataset.email, v = String(el.value).trim().slice(0, 120);
+      if (v) F.emails[canal] = v; else delete F.emails[canal];
+      salvar();
+      const sec = el.closest('.local'), a = sec && sec.querySelector('a[data-mailto]'), pre = sec && sec.querySelector('pre[data-carta]');
+      if (a && pre) a.setAttribute('href', linkEmail(v, pre.textContent));
+      el.setCustomValidity(v && !EMAIL_OK.test(v) ? 'E-mail parece incompleto' : '');
+      return;
+    }
     if (el.type === 'radio') { F[el.name] = el.value; salvar(); return; }
     if (PASSOS[passo] === 'saude' && el.dataset.k) { F.saude[el.dataset.k] = el.checked; salvar(); return; }
     if (PASSOS[passo] === 'situacao' && el.dataset.k) { F.sit[el.dataset.k] = el.checked; salvar(); return; }
@@ -412,6 +495,31 @@
     if (e.target.id === 'senha') { e.preventDefault(); document.getElementById('desbloquear').click(); }
     if (e.target.id === 'senha2') { e.preventDefault(); document.getElementById('salvar-senha').click(); }
   });
+  function contarDocs(sec) {
+    if (!sec) return;
+    const caixas = sec.querySelectorAll('input[data-doc]'), c = sec.querySelector('.conta-docs');
+    const feitos = Array.prototype.filter.call(caixas, x => x.checked).length;
+    if (c) c.textContent = feitos + ' de ' + caixas.length + ' separados' + (feitos === caixas.length ? '. Tudo pronto!' : '');
+  }
+  function imprimirLocal(canal) {
+    const sec = document.getElementById('local-' + canal); if (!sec) return;
+    const det = sec.querySelector('details'); if (det) det.open = true;
+    document.body.classList.add('imprimir-um'); sec.classList.add('imprimir-este');
+    const limpar = () => { document.body.classList.remove('imprimir-um'); sec.classList.remove('imprimir-este'); window.removeEventListener('afterprint', limpar); };
+    window.addEventListener('afterprint', limpar);
+    try { window.print(); } catch (err) {}
+    setTimeout(limpar, 60000);
+  }
+  async function copiarCarta(canal) {
+    const pre = document.querySelector('pre[data-carta="' + (window.CSS && CSS.escape ? CSS.escape(canal) : canal) + '"]'); if (!pre) return;
+    const texto = pre.textContent;
+    try { await navigator.clipboard.writeText(texto); toast('Carta copiada. Cole no e-mail ou no WhatsApp.'); return; } catch (e) {}
+    try {
+      const r = document.createRange(); r.selectNodeContents(pre);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      toast(document.execCommand('copy') ? 'Carta copiada.' : 'A carta está selecionada. Use "Copiar" do seu aparelho.');
+    } catch (e) { toast('Selecione a carta e copie com o dedo ou o mouse.'); }
+  }
   function rerender(focoId) { const y = window.scrollY; render(); window.scrollTo(0, y); const f = focoId && document.getElementById(focoId); if (f) f.focus(); }
   function erroSenha(msg) { const el = document.getElementById('erro-senha'); if (el) { el.textContent = msg; el.hidden = false; } }
 
@@ -455,6 +563,8 @@
   view.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.ir !== undefined) { irPara(+b.dataset.ir); return; }
+    if (b.dataset.imprimir) { imprimirLocal(b.dataset.imprimir); return; }
+    if (b.dataset.copiar) { copiarCarta(b.dataset.copiar); return; }
     if (b.dataset.remover !== undefined) { F.pessoas.splice(+b.dataset.remover, 1); salvar(); rerender(); return; }
     switch (b.id) {
       case 'desbloquear': desbloquear(); break;
@@ -472,6 +582,7 @@
       case 'limpar-sim': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'terminar': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'add-pessoa': if (F.pessoas.length < 20) { F.pessoas.push(M.novaPessoa(false)); salvar(); rerender('p' + (F.pessoas.length - 1) + '_nome'); } break;
+      case 'abrir-documentos': passo = 'documentos'; salvar(); render(); window.scrollTo(0, 0); break;
       case 'abrir-relatorio': passo = 'relatorio'; salvar(); render(); window.scrollTo(0, 0); break;
       case 'imprimir': try { window.print(); } catch (err) {} break;
       case 'avancar': {
@@ -551,6 +662,10 @@
   function estadoRede() { document.getElementById('netstate').textContent = navigator.onLine ? 'Conectado · funciona também sem internet' : 'Sem internet · tudo funciona normalmente'; }
   window.addEventListener('online', () => { estadoRede(); verificarAtualizacao(false); });
   window.addEventListener('offline', estadoRede);
+  // Cartas fechadas também saem na impressão.
+  let abertasParaImprimir = [];
+  window.addEventListener('beforeprint', () => { abertasParaImprimir = Array.prototype.filter.call(document.querySelectorAll('details.carta-bloco'), d => !d.open); abertasParaImprimir.forEach(d => { d.open = true; }); });
+  window.addEventListener('afterprint', () => { abertasParaImprimir.forEach(d => { d.open = false; }); abertasParaImprimir = []; });
 
   // ---------- Início ----------
   if (!EMBUTIDAS || M.validarRegras(EMBUTIDAS).length) { view.innerHTML = '<p class="err">O arquivo de regras deste aplicativo está com defeito. Baixe o aplicativo de novo.</p>'; return; }

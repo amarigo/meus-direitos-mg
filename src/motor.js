@@ -46,10 +46,14 @@
     return p;
   }
 
+  // Troca {campo} pelo valor. {campo$} escreve em reais (R$ 1.234,56).
   function preencher(txt, p) {
-    return String(txt || '').replace(/\{(\w+)\}/g, (_, k) => p[k] !== undefined
-      ? (typeof p[k] === 'number' ? p[k].toLocaleString('pt-BR', { minimumFractionDigits: p[k] % 1 ? 2 : 0, maximumFractionDigits: 2 }) : p[k])
-      : _);
+    return String(txt || '').replace(/\{(\w+)(\$?)\}/g, (_, k, rs) => {
+      const v = p[k];
+      if (v === undefined || v === null) return _;
+      if (rs) return brl(v);
+      return typeof v === 'number' ? v.toLocaleString('pt-BR', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }) : String(v);
+    });
   }
 
   // ---------- Dados da família ----------
@@ -63,7 +67,7 @@
   // Doenças que costumam usar remédios de alto custo do SUS (Farmácia de Minas / Componente Especializado)
   const DOENCAS_ALTO_CUSTO = ['renal', 'esclerose', 'hepatite', 'alzheimer', 'epilepsia', 'mental_grave', 'rara', 'parkinson'];
   function familiaVazia() {
-    return { cidade: '', bairro: '', rua: '', numero: '', complemento: '', referencia: '', endereco: '', cep: '', telefone: '', contato2Nome: '', contato2Parentesco: '', contato2Tel: '', zona: 'urbana', moradia: '', agua: '', luz: '', pessoas: [novaPessoa(true)], saude: { consulta: false, especialista: false, dentista: false, mental: false }, cad: '', bf: '', sit: { agricultor: false, pescador: false, indigena: false, violencia: false, rua: false, emergencia: false, justica: false } };
+    return { cidade: '', bairro: '', rua: '', numero: '', complemento: '', referencia: '', endereco: '', cep: '', telefone: '', contato2Nome: '', contato2Parentesco: '', contato2Tel: '', zona: 'urbana', moradia: '', agua: '', luz: '', docsOk: {}, emails: {}, pessoas: [novaPessoa(true)], saude: { consulta: false, especialista: false, dentista: false, mental: false }, cad: '', bf: '', sit: { agricultor: false, pescador: false, indigena: false, violencia: false, rua: false, emergencia: false, justica: false } };
   }
   // Conserta dados salvos estragados ou de versões antigas, sem perder o que estiver certo.
   function normalizarFamilia(f) {
@@ -72,6 +76,8 @@
     const out = Object.assign({}, base);
     for (const k of ['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'endereco', 'cep', 'telefone', 'contato2Nome', 'contato2Parentesco', 'contato2Tel', 'zona', 'moradia', 'agua', 'luz', 'cad', 'bf']) if (typeof f[k] === 'string') out[k] = f[k];
     if (!out.rua && out.endereco) out.rua = out.endereco; // dados de versões antigas
+    out.docsOk = f.docsOk && typeof f.docsOk === 'object' && !Array.isArray(f.docsOk) ? Object.fromEntries(Object.entries(f.docsOk).filter(([k, v]) => typeof k === 'string' && v === true).slice(0, 2000)) : {};
+    out.emails = f.emails && typeof f.emails === 'object' && !Array.isArray(f.emails) ? Object.fromEntries(Object.entries(f.emails).filter(([k, v]) => typeof v === 'string').map(([k, v]) => [k, v.slice(0, 120)])) : {};
     out.saude = Object.assign({}, base.saude, f.saude && typeof f.saude === 'object' ? f.saude : {});
     out.sit = Object.assign({}, base.sit, f.sit && typeof f.sit === 'object' ? f.sit : {});
     const ps = Array.isArray(f.pessoas) ? f.pessoas.filter(p => p && typeof p === 'object') : [];
@@ -92,12 +98,12 @@
     const p = params(regras);
     const pessoas = f.pessoas.filter(x => String(x.nome || '').trim() || x.nasc || numero(x.renda));
     const n = Math.max(pessoas.length, 1);
-    const membros = pessoas.map(x => {
+    const membros = pessoas.map((x, indice) => {
       const id = idade(x.nasc, hoje);
       const renda = x.fonte === 'sem' ? 0 : numero(x.renda);
       const estuda = !!x.estudo && x.estudo !== 'nao';
       return {
-        nome: String(x.nome || '').trim() || 'Pessoa sem nome', idade: id, sexo: x.sexo, pcd: !!x.pcd,
+        indice, nome: String(x.nome || '').trim() || 'Pessoa sem nome', idade: id, sexo: x.sexo, pcd: !!x.pcd,
         gestante: !!x.gestante && x.sexo !== 'M', nutriz: !!x.nutriz && x.sexo !== 'M',
         estudo: x.estudo || 'nao', redePublica: x.rede === 'publica' && estuda, medioCompleto: !!x.medioCompleto, renda, fonte: x.fonte,
         recebeBPC: x.fonte === 'bpc', trabalhoFormal: x.fonte === 'formal', demitido: !!x.demitido, incontinencia: !!x.incontinencia,
@@ -187,12 +193,17 @@
       const avisos = [];
       if (pr.aviso) avisos.push(pr.aviso);
       if (pr.avisoSe && avaliar(pr.avisoSe, fx, {})) avisos.push(pr.avisoSe.texto);
-      res.push({ pr, status, quem: quem.map(m => m.nome), valor, mensal, precisaCad: !!pr.requerCadUnico && !fx.cadOk, avisos, nota: status === 'talvez' ? (pr.notaTalvez || '') : '' });
+      const modelo = status === 'talvez' && pr.porqueTalvez ? pr.porqueTalvez : pr.porque;
+      const motivos = pr.porMembro
+        ? quem.map(m => ({ nome: m.nome, texto: preencher(modelo, Object.assign({}, fx, { nome: m.nome, idade: m.idade === null ? '?' : m.idade })) }))
+        : [{ nome: null, texto: preencher(modelo, fx) }];
+      res.push({ pr, status, quem: quem.map(m => m.nome), quemIdx: quem.map(m => m.indice), motivos, valor, mensal, precisaCad: !!pr.requerCadUnico && !fx.cadOk, avisos, nota: status === 'talvez' ? (pr.notaTalvez || '') : '' });
     }
     // Uma pessoa que pode receber BPC como idosa e como pessoa com deficiência só recebe um BPC.
     const bi = res.find(r => r.pr.id === 'bpc_idoso'), bd = res.find(r => r.pr.id === 'bpc_pcd');
     if (bi && bd) {
-      bd.quem = bd.quem.filter(n => !bi.quem.includes(n));
+      const fica = bd.quemIdx.map((ix, k) => !bi.quemIdx.includes(ix) ? k : -1).filter(k => k >= 0);
+      bd.quem = fica.map(k => bd.quem[k]); bd.motivos = fica.map(k => bd.motivos[k]); bd.quemIdx = fica.map(k => bd.quemIdx[k]);
       if (!bd.quem.length) res.splice(res.indexOf(bd), 1);
       else if (bd.status === 'sim') bd.mensal = fx.salarioMinimo * bd.quem.length;
     }
@@ -201,12 +212,68 @@
     let cad = res.find(r => r.pr.id === 'cadunico');
     if (precisa && !cad) {
       const pr = regras.programas.find(p => p.id === 'cadunico');
-      if (pr) { cad = { pr, status: 'sim', quem: [], valor: pr.valor, mensal: 0, precisaCad: false, avisos: [], nota: '' }; res.push(cad); }
+      if (pr) { cad = { pr, status: 'sim', quem: [], quemIdx: [], motivos: [{ nome: null, texto: 'Outros programas da lista pedem que a família esteja no CadÚnico com os dados atualizados.' }], valor: pr.valor, mensal: 0, precisaCad: false, avisos: [], nota: '' }; res.push(cad); }
     }
     if (cad && fx.cadOk) cad.avisos.push('Vocês já estão no CadÚnico. Atualize sempre que mudar renda, endereço ou alguém entrar ou sair da casa.');
     if (cad && fx.cadunico === 'velho') cad.avisos.push('O cadastro tem mais de 2 anos. Atualize logo: cadastro velho bloqueia os benefícios.');
     res.sort((a, b) => (a.status === b.status ? 0 : a.status === 'sim' ? -1 : 1) || (a.pr.prioridade - b.pr.prioridade));
     return { fx, res };
+  }
+
+  // ---------- Onde ir, o que pedir e o que levar ----------
+  const QUEM_DOC = ['todos', 'responsavel', 'beneficiario', 'casa', 'com_renda', 'estudantes', 'criancas', 'gestantes'];
+  function pessoasDoDocumento(quem, r, fx) {
+    const ms = fx.membros;
+    switch (quem) {
+      case 'casa': return null;
+      case 'todos': return ms;
+      case 'responsavel': return ms.slice(0, 1);
+      case 'beneficiario': return r.quemIdx && r.quemIdx.length ? ms.filter(m => r.quemIdx.includes(m.indice)) : ms.slice(0, 1);
+      case 'com_renda': return ms.filter(m => m.renda > 0);
+      case 'estudantes': return ms.filter(m => m.estudo !== 'nao');
+      case 'criancas': return ms.filter(m => m.idade !== null && m.idade <= 7);
+      case 'gestantes': return ms.filter(m => m.gestante);
+    }
+    return ms.slice(0, 1);
+  }
+  // Agrupa os programas pelo primeiro lugar onde pedir e monta a lista de documentos de cada lugar,
+  // dizendo de quem é cada documento e para qual programa serve.
+  function planoPorLocal(calc, regras) {
+    const { fx, res } = calc;
+    const ordem = [], mapa = {};
+    const urg = res.filter(r => r.pr.prioridade === 0);
+    for (const r of urg.concat(res.filter(r => r.pr.prioridade !== 0))) {
+      const c = r.pr.ondeIr[0];
+      if (!mapa[c]) { mapa[c] = { canal: c, programas: [], itens: [], _por: {} }; ordem.push(mapa[c]); }
+      const g = mapa[c];
+      if (g.programas.includes(r)) continue;
+      g.programas.push(r);
+      for (const id of r.pr.documentos) {
+        const def = regras.documentos[id]; if (!def) continue;
+        const d = typeof def === 'string' ? { texto: def, quem: 'casa' } : def;
+        const pessoas = pessoasDoDocumento(d.quem || 'casa', r, fx);
+        if (pessoas && !pessoas.length) continue;
+        const chave = d.texto;
+        let item = g._por[chave];
+        if (!item) { item = g._por[chave] = { id, texto: d.texto, obs: d.obs || '', pessoas: pessoas ? [] : null, para: [] }; g.itens.push(item); }
+        if (pessoas) for (const m of pessoas) if (!item.pessoas.some(x => x.indice === m.indice)) item.pessoas.push({ indice: m.indice, nome: m.nome });
+        const titulo = r.pr.titulo.split(' (')[0];
+        if (!item.para.includes(titulo)) item.para.push(titulo);
+      }
+    }
+    for (const g of ordem) { delete g._por; g.itens.forEach(i => i.pessoas && i.pessoas.sort((a, b) => a.indice - b.indice)); }
+    return ordem;
+  }
+  // Para cada pessoa, os programas em que ela aparece e o motivo; e os que valem para a família toda.
+  function direitosPorPessoa(calc) {
+    const { fx, res } = calc;
+    const pessoas = fx.membros.map(m => ({ indice: m.indice, nome: m.nome, idade: m.idade, itens: [] }));
+    const familia = [];
+    for (const r of res) {
+      if (r.pr.porMembro) r.quemIdx.forEach((ix, k) => { const p = pessoas.find(x => x.indice === ix); if (p) p.itens.push({ titulo: r.pr.titulo, status: r.status, motivo: r.motivos[k] ? r.motivos[k].texto : '' }); });
+      else familia.push({ titulo: r.pr.titulo, status: r.status, motivo: r.motivos[0] ? r.motivos[0].texto : '' });
+    }
+    return { pessoas, familia };
   }
 
   // ---------- Validação do arquivo de regras ----------
@@ -227,6 +294,11 @@
     if (typeof p.salarioMinimo === 'number' && (p.salarioMinimo < 1000 || p.salarioMinimo > 10000)) erros.push('salarioMinimo fora do esperado');
     if (!r.canais || typeof r.canais !== 'object') erros.push('canais ausente');
     if (!r.documentos || typeof r.documentos !== 'object') erros.push('documentos ausente');
+    else for (const [k, d] of Object.entries(r.documentos)) {
+      if (typeof d === 'string') continue;
+      if (!d || typeof d.texto !== 'string' || !d.texto.trim()) erros.push('documento ' + k + ': falta texto');
+      else if (d.quem !== undefined && !QUEM_DOC.includes(d.quem)) erros.push('documento ' + k + ': quem inválido');
+    }
     if (!Array.isArray(r.programas) || r.programas.length < 5) { erros.push('lista de programas ausente ou curta'); return erros; }
     const nomesParam = new Set(Object.keys(p).concat(LIMITES));
     const ids = new Set();
@@ -261,6 +333,8 @@
       if (!pr.fonte || typeof pr.fonte.url !== 'string' || !/^https:\/\//.test(pr.fonte.url)) erros.push(onde + ': fonte sem link https');
       if (pr.calculo && !CALCULOS[pr.calculo]) erros.push(onde + ': cálculo desconhecido ' + pr.calculo);
       if (!pr.valor && !pr.calculo) erros.push(onde + ': falta valor');
+      if (typeof pr.porque !== 'string' || !pr.porque.trim()) erros.push(onde + ': falta porque');
+      if (!pr.porMembro && /\{(nome|idade)\}/.test((pr.porque || '') + (pr.porqueTalvez || ''))) erros.push(onde + ': porque usa {nome} sem ser porMembro');
     });
     if (!ids.has('cadunico')) erros.push('falta o programa cadunico');
     if (r.municipios && typeof r.municipios === 'object') {
@@ -274,5 +348,5 @@
     return erros;
   }
 
-  return { DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
+  return { planoPorLocal, direitosPorPessoa, DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
 });

@@ -28,6 +28,15 @@ test('Texto de ataque digitado em todos os campos não executa código e aparece
   assert.equal(await pg.evaluate(() => window.__xss), undefined);
   assert.equal(await pg.$$eval('#relatorio img, #relatorio script, #relatorio svg, #relatorio iframe', e => e.length), 0);
   assert.ok((await pg.textContent('#relatorio')).includes('<img src=x onerror="window.__xss=1">'));
+  // Página de documentos e cartas: o ataque vira texto na carta e no e-mail.
+  await pg.click('[data-ir="5"]');
+  await pg.click('#abrir-documentos');
+  await pg.fill('input[data-email] >> nth=0', '"><img src=x onerror="window.__xss=2">');
+  assert.equal(await pg.evaluate(() => window.__xss), undefined);
+  assert.equal(await pg.$$eval('main img, main script, main svg, main iframe', e => e.length), 0);
+  assert.ok((await pg.textContent('pre.carta >> nth=0')).includes('<img src=x onerror="window.__xss=1">'));
+  const href = await pg.getAttribute('a[data-mailto] >> nth=0', 'href');
+  assert.ok(href.startsWith('mailto:?subject='), 'e-mail inválido não pode entrar no endereço: ' + href.slice(0, 60));
   assert.deepEqual(erros, []);
   await ctx.close();
 });

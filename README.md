@@ -4,6 +4,10 @@ Aplicativo gratuito que ajuda famílias de Minas Gerais a descobrir **quais bene
 (Brasil, Minas Gerais e Prefeitura), **onde pedir** e **quais documentos levar**. No final, gera um relatório
 pronto para imprimir, com um pedido já escrito para cada órgão (CRAS, posto de saúde, INSS, Copasa...).
 
+- Mostra **quem da família tem direito a quê, e por quê** (com os números da própria família).
+- Página **Documentos e cartas**: para cada lugar, a lista do que levar com o nome de cada pessoa (marque o que já separou)
+  e uma **carta pronta** explicando a situação e pedindo a verificação. A carta pode ser impressa sozinha, copiada
+  ou aberta no e-mail da própria pessoa.
 - Funciona **sem internet** depois de aberto uma vez, no **celular e no computador** (pode ser instalado).
 - Os dados da família **ficam só no aparelho**. Nada é enviado. Dá para proteger com **senha** (criptografia AES-256)
   e apagar tudo com um toque.

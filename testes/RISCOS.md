@@ -22,10 +22,7 @@ Nota = Impacto (1–5) × Probabilidade (1–5). Quanto maior, mais testes e mai
 | R12 | Regra morta (programa que nunca aparece) ou regra mal escrita no arquivo | 3 | 3 | 9 | Integração: validação do arquivo e cobertura de todos os programas |
 | R13 | Relatório impresso sem dados ou cortado | 3 | 2 | 6 | E2E imprime em PDF e confere |
 | R14 | Tela quebrada no celular pequeno ou no computador | 2 | 3 | 6 | E2E em 360 px, 390 px e 1366 px sem rolagem lateral |
-
-## Pirâmide
-- **Unidade** (`testes/unidade`, Node): motor de cálculo, leitura de números e datas, segurança (criptografia e assinatura). Muitos testes, rápidos.
-- **Integração** (`testes/integracao`, Node): arquivo de regras real + motor com famílias-modelo; propriedades com famílias aleatórias; saída do build.
-- **Ponta a ponta** (`testes/e2e`, Playwright): o app de verdade no navegador, celular e computador, com servidor que injeta falhas (caos).
-
-Rodar tudo: `npm test`.
+| R15 | Lista de documentos errada (falta documento, ou pede de quem não precisa) e a família volta para casa sem atendimento | 4 | 3 | **12** | Unidade (`planoPorLocal`: nomes certos, sem repetir), E2E da página de documentos |
+| R16 | Carta ou "por quê" com dado errado ou campo vazio (`{nome}`) | 3 | 3 | 9 | Unidade (`direitosPorPessoa`, motivos sem campo vazio), E2E conferindo a carta |
+| R17 | Texto de ataque ou e-mail malicioso entrando na carta ou no link de e-mail | 4 | 2 | 8 | E2E: ataque vira texto na carta, e-mail inválido não entra no link |
+| R18 | Marcações da lista perdidas ao fechar o app | 2 | 3 | 6 | E2E: marcar, recarregar e conferir |
