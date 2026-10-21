@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-previa/
+validade.md
+*.jwk
+test-results/

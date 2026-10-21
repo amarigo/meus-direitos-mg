@@ -1,0 +1,19 @@
+{
+  "name": "meus-direitos-mg",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicativo offline que encontra programas sociais e direitos de famílias em Minas Gerais.",
+  "type": "module",
+  "scripts": {
+    "build": "node ferramentas/build.mjs",
+    "test:unidade": "node --test testes/unidade/*.test.mjs",
+    "test:integracao": "node --test testes/integracao/*.test.mjs",
+    "test:e2e": "node --test --test-concurrency=1 testes/e2e/*.test.mjs",
+    "test": "npm run build && npm run test:unidade && npm run test:integracao && npm run test:e2e",
+    "assinar": "node ferramentas/assinar-regras.mjs",
+    "icones": "node ferramentas/icones.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

@@ -1,0 +1,508 @@
+// Telas do aplicativo Meus Direitos MG. O cálculo fica em motor.js e a criptografia em seguranca.js.
+(function () {
+  'use strict';
+  const M = window.Motor, S = window.Seguranca;
+  const { esc, brl, numero, idade, norm, cmpVersao, preencher } = M;
+
+  // ---------- Armazenamento (nunca quebra o app) ----------
+  let avisoArmazenamento = false;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { if (!avisoArmazenamento) { avisoArmazenamento = true; setTimeout(() => { try { renderFoot(); } catch (e2) {} }, 0); } return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  function lerJSON(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } }
+
+  const EMBUTIDAS = lerJSON('regras-embutidas');
+  const MUNICIPIOS = lerJSON('municipios-mg') || [];
+  const CHAVE_PUBLICA = lerJSON('chave-publica');
+  const MUN_POR_NOME = new Map(MUNICIPIOS.map(([c, n]) => [norm(n), { codigo: c, nome: n }]));
+  const EM_MOLDURA = (function () { try { return window.self !== window.top; } catch (e) { return true; } })();
+  let REGRAS = EMBUTIDAS;
+  const P = () => M.params(REGRAS);
+
+  // ---------- Estado ----------
+  let F = null;            // dados da família (só na memória enquanto o app está aberto)
+  let sessao = null;       // chave de criptografia, se a família usa senha
+  let bloqueado = false;
+  let pacoteCifrado = null;
+  let passo = store.get('md_passo', 0);
+  if (!(passo === 'relatorio' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
+  let tela = null;         // telas especiais: 'criar-senha', 'trocar-dados'
+
+  (function iniciarDados() {
+    const bruto = store.get('md_familia', null);
+    if (S.ehCifrado(bruto)) { bloqueado = true; pacoteCifrado = bruto; F = null; }
+    else F = M.normalizarFamilia(bruto);
+  })();
+
+  let timerSalvar = null;
+  function salvar() {
+    store.set('md_passo', passo);
+    if (!F) return;
+    if (sessao) {
+      clearTimeout(timerSalvar);
+      timerSalvar = setTimeout(async () => { try { const pac = await S.cifrar(F, sessao); pacoteCifrado = pac; store.set('md_familia', pac); } catch (e) {} }, 250);
+    } else store.set('md_familia', F);
+  }
+  function apagarTudo() {
+    ['md_familia', 'md_passo'].forEach(k => store.del(k));
+    sessao = null; bloqueado = false; pacoteCifrado = null; F = M.familiaVazia(); passo = 0; tela = null;
+  }
+
+  // ---------- Utilidades de tela ----------
+  function dataBR(iso) { const d = new Date((iso || '') + 'T12:00:00'); return isNaN(d) ? String(iso || '') : d.toLocaleDateString('pt-BR'); }
+  function linkSeguro(u) { return /^https:\/\/[^\s"'<>\\]+$/.test(String(u || '')) ? u : ''; }
+  function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 4000); }
+
+  const PARENTESCOS = ['Responsável pela família', 'Esposa / marido / companheiro(a)', 'Filho(a)', 'Enteado(a)', 'Neto(a)', 'Pai / mãe', 'Sogro(a)', 'Irmão / irmã', 'Avô / avó', 'Outro parente', 'Não é parente'];
+  const FONTES = [['sem', 'Não tem renda'], ['formal', 'Trabalho com carteira assinada'], ['informal', 'Trabalho sem carteira / bico / autônomo'], ['aposentadoria', 'Aposentadoria ou pensão'], ['bpc', 'BPC / LOAS'], ['outro', 'Outra renda (aluguel, ajuda de parente, pensão alimentícia)']];
+  const ESTUDOS = [['nao', 'Não estuda'], ['creche', 'Creche ou pré-escola'], ['fundamental', 'Ensino fundamental (1º ao 9º ano)'], ['medio', 'Ensino médio'], ['eja', 'EJA (supletivo)'], ['superior', 'Faculdade ou curso técnico']];
+  const DOENCAS = [['pressao', 'Pressão alta'], ['diabetes', 'Diabetes'], ['asma', 'Asma'], ['rinite', 'Rinite'], ['colesterol', 'Colesterol alto'], ['osteoporose', 'Osteoporose'], ['parkinson', 'Parkinson'], ['glaucoma', 'Glaucoma'], ['anticoncepcional', 'Usa anticoncepcional']];
+
+  function exemplo() {
+    const y = new Date().getFullYear(); const np = M.novaPessoa;
+    return M.normalizarFamilia({
+      cidade: 'Itajubá', bairro: 'Centro', endereco: 'Rua das Flores, 120', cep: '37500-000', telefone: '(35) 99999-0000', zona: 'urbana', moradia: 'alugada', agua: 'copasa', luz: 'familia',
+      pessoas: [
+        Object.assign(np(true), { nome: 'Maria Aparecida (exemplo)', nasc: (y - 38) + '-03-10', sexo: 'F', renda: '800', fonte: 'informal', doencas: ['pressao'] }),
+        Object.assign(np(false), { nome: 'Pedro (exemplo)', nasc: (y - 16) + '-07-22', parentesco: 'Filho(a)', sexo: 'M', estudo: 'medio', rede: 'publica' }),
+        Object.assign(np(false), { nome: 'Ana Clara (exemplo)', nasc: (y - 4) + '-01-05', parentesco: 'Filho(a)', sexo: 'F', estudo: 'nao' }),
+        Object.assign(np(false), { nome: 'José (exemplo)', nasc: (y - 71) + '-01-30', parentesco: 'Pai / mãe', sexo: 'M', incontinencia: true, doencas: ['diabetes'] })
+      ],
+      saude: { consulta: true, especialista: false, dentista: true, mental: false }, cad: 'velho', bf: 'nao'
+    });
+  }
+
+  // ---------- Telas ----------
+  const PASSOS = ['inicio', 'casa', 'pessoas', 'saude', 'situacao', 'resultado'];
+  const view = document.getElementById('view');
+  function irPara(i) { passo = Math.max(0, Math.min(PASSOS.length - 1, i)); salvar(); render(); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} }
+  function renderSteps() {
+    const el = document.getElementById('steps');
+    if (bloqueado || tela || passo === 0 || passo === 'relatorio') { el.innerHTML = ''; return; }
+    el.innerHTML = PASSOS.slice(1).map((_, i) => '<span class="' + (i < passo ? 'on' : '') + '"></span>').join('');
+  }
+  function radio(name, val, label, atual) { return '<label class="choice"><input type="radio" name="' + name + '" value="' + val + '"' + (atual === val ? ' checked' : '') + '><span>' + label + '</span></label>'; }
+  function check(id, label, atual, extra) { return '<label class="choice"><input type="checkbox" id="' + id + '" data-k="' + id + '"' + (atual ? ' checked' : '') + '><span>' + label + (extra ? '<br><small class="sub">' + extra + '</small>' : '') + '</span></label>'; }
+  function navBtns(voltar, avancar) { return '<div class="btns">' + (voltar ? '<button type="button" data-ir="' + (passo - 1) + '">Voltar</button>' : '') + '<button type="button" class="go" id="avancar">' + (avancar || 'Continuar') + '</button></div>'; }
+
+  let eventoInstalar = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); eventoInstalar = e; if (passo === 0 && !bloqueado) render(); });
+  const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+  const instalado = (function () { try { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone; } catch (e) { return false; } })();
+
+  function telaInicio() {
+    const temDados = F.pessoas.some(p => p.nome.trim());
+    return '<div class="stack">' +
+      '<h1>Descubra os benefícios e direitos da sua família</h1>' +
+      '<p class="lead">Responda algumas perguntas sobre quem mora na sua casa. No final você recebe uma lista do que pode pedir, onde ir e quais documentos levar, com um relatório pronto para imprimir.</p>' +
+      '<div class="card stack tight"><h3>Como funciona</h3>' +
+      '<ol class="plan"><li><span>Conte onde vocês moram.</span></li><li><span>Diga quem mora na casa e quanto cada um ganha.</span></li><li><span>Marque o que a família precisa (saúde, escola, moradia).</span></li><li><span>Veja os direitos e imprima o relatório.</span></li></ol></div>' +
+      '<div class="btns"><button type="button" class="go" id="comecar">' + (temDados ? 'Continuar de onde parei' : 'Começar') + '</button>' +
+      '<button type="button" id="ver-exemplo">Ver um exemplo pronto</button></div>' +
+      (!EM_MOLDURA && !instalado && eventoInstalar ? '<div class="btns"><button type="button" class="sun" id="instalar">Instalar no celular ou computador</button></div>' : '') +
+      (!EM_MOLDURA && !instalado && !eventoInstalar && ehIOS ? '<p class="hint">Para instalar no iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início".</p>' : '') +
+      '<section class="card stack tight" id="seguranca"><h3>Seus dados estão seguros</h3>' +
+      '<p>As respostas ficam só neste aparelho. Nada é enviado pela internet.</p>' +
+      (sessao ? '<p class="ok">Protegido com senha. Os dados estão guardados com criptografia.</p>'
+        : '<p class="sub">Em computador ou celular usado por outras pessoas (CRAS, lan house, parente), crie uma senha ou apague os dados quando terminar.</p>') +
+      '<div class="btns">' + (S.disponivel() ? (sessao ? '<button type="button" class="small" id="tirar-senha">Tirar a senha</button><button type="button" class="small" id="bloquear">Bloquear agora</button>' : '<button type="button" class="small" id="criar-senha">Proteger com senha</button>') : '') +
+      '<button type="button" class="small danger" id="limpar">Apagar todos os dados</button></div>' +
+      '<div id="confirma-limpar" hidden class="stack tight"><p><b>Apagar todos os dados da família deste aparelho?</b> Isso não pode ser desfeito.</p><div class="btns"><button type="button" class="go" id="limpar-sim">Sim, apagar</button><button type="button" id="limpar-nao">Não</button></div></div>' +
+      '</section></div>';
+  }
+  function telaCriarSenha() {
+    return '<div class="stack lock"><h2>Proteger com senha</h2>' +
+      '<p>Escolha uma senha de pelo menos 6 números ou letras. Sem ela ninguém consegue ver os dados neste aparelho.</p>' +
+      '<p class="hint">Guarde bem a senha. Se esquecer, os dados não podem ser recuperados (só apagados).</p>' +
+      '<label class="q">Senha<input type="password" id="senha1" class="pin" autocomplete="new-password" inputmode="text" maxlength="64"></label>' +
+      '<label class="q">Repita a senha<input type="password" id="senha2" class="pin" autocomplete="new-password" maxlength="64"></label>' +
+      '<p class="err" id="erro-senha" hidden></p>' +
+      '<div class="btns"><button type="button" class="go" id="salvar-senha">Proteger</button><button type="button" id="cancelar-senha">Cancelar</button></div></div>';
+  }
+  let tentativas = 0, esperaAte = 0;
+  function telaBloqueio() {
+    return '<div class="stack lock"><h2>Dados protegidos</h2><p>Digite a senha para ver as informações da família.</p>' +
+      '<label class="q">Senha<input type="password" id="senha" class="pin" autocomplete="current-password" maxlength="64"></label>' +
+      '<p class="err" id="erro-senha" hidden></p>' +
+      '<div class="btns"><button type="button" class="go" id="desbloquear">Abrir</button></div>' +
+      '<button type="button" class="link" id="esqueci">Esqueci a senha</button>' +
+      '<div id="confirma-limpar" hidden class="card stack tight"><p><b>Sem a senha não é possível abrir os dados.</b> Quer apagar tudo e começar de novo?</p><div class="btns"><button type="button" class="go danger" id="limpar-sim">Apagar e começar de novo</button><button type="button" id="limpar-nao">Não</button></div></div></div>';
+  }
+  function telaCasa() {
+    return '<div class="stack"><h2>1. Onde vocês moram</h2>' +
+      '<label class="q">Cidade<small>Comece a digitar e escolha na lista</small><input type="text" id="cidade" list="lista-cidades" autocomplete="off" maxlength="80" value="' + esc(F.cidade) + '" placeholder="Ex.: Pouso Alegre"></label>' +
+      '<datalist id="lista-cidades">' + MUNICIPIOS.map(m => '<option value="' + esc(m[1]) + '">').join('') + '</datalist>' +
+      '<div class="grid2"><label class="q">Bairro<input type="text" id="bairro" maxlength="80" value="' + esc(F.bairro) + '"></label>' +
+      '<label class="q">CEP<small>Se souber</small><input type="text" id="cep" inputmode="numeric" maxlength="9" value="' + esc(F.cep) + '"></label></div>' +
+      '<label class="q">Rua e número<input type="text" id="endereco" maxlength="120" value="' + esc(F.endereco) + '"></label>' +
+      '<label class="q">Telefone para contato<input type="tel" id="telefone" maxlength="20" value="' + esc(F.telefone) + '"></label>' +
+      '<fieldset class="card choices"><legend><b>A casa fica</b></legend>' + radio('zona', 'urbana', 'Na cidade', F.zona) + radio('zona', 'rural', 'Na roça (zona rural)', F.zona) + '</fieldset>' +
+      '<fieldset class="card choices"><legend><b>A casa é</b></legend>' +
+      radio('moradia', 'propria', 'Própria (já paga)', F.moradia) + radio('moradia', 'financiada', 'Própria, ainda pagando', F.moradia) + radio('moradia', 'alugada', 'Alugada', F.moradia) + radio('moradia', 'cedida', 'Emprestada (cedida)', F.moradia) + radio('moradia', 'ocupacao', 'Ocupação', F.moradia) + radio('moradia', 'rua', 'Não tenho casa / moro na rua', F.moradia) + '</fieldset>' +
+      '<fieldset class="card choices"><legend><b>De quem é a água?</b><br><small class="sub">Olhe na conta de água</small></legend>' + radio('agua', 'copasa', 'Copasa', F.agua) + radio('agua', 'outra', 'SAAE ou outra empresa', F.agua) + radio('agua', 'naosei', 'Não sei / não tenho conta de água', F.agua) + '</fieldset>' +
+      '<fieldset class="card choices"><legend><b>A conta de luz está no nome de quem?</b></legend>' + radio('luz', 'familia', 'De alguém que mora na casa', F.luz) + radio('luz', 'outro', 'De outra pessoa (dono da casa, parente)', F.luz) + radio('luz', 'nao', 'Não tenho conta de luz', F.luz) + '</fieldset>' +
+      navBtns(true) + '</div>';
+  }
+  function cartaoPessoa(p, i) {
+    const id = idade(p.nasc); const pre = 'p' + i + '_';
+    const sel = (k, opts, atual) => '<select id="' + pre + k + '" data-p="' + i + '" data-k="' + k + '">' + opts.map(o => { const [v, l] = Array.isArray(o) ? o : [o, o]; return '<option value="' + esc(v) + '"' + (atual === v ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('') + '</select>';
+    const chk = (k, label) => '<label class="choice"><input type="checkbox" id="' + pre + k + '" data-p="' + i + '" data-k="' + k + '"' + (p[k] ? ' checked' : '') + '><span>' + label + '</span></label>';
+    const hoje = new Date().toISOString().slice(0, 10);
+    return '<section class="card person stack mid">' +
+      '<div class="person-head"><h3>' + (i === 0 ? 'Responsável pela família' : 'Pessoa ' + (i + 1)) + (p.nome ? ': ' + esc(p.nome.split(' ')[0]) : '') + '</h3>' + (i > 0 ? '<button type="button" class="small" data-remover="' + i + '">Tirar esta pessoa</button>' : '') + '</div>' +
+      '<label class="q">Nome completo<input type="text" id="' + pre + 'nome" data-p="' + i + '" data-k="nome" maxlength="100" autocomplete="off" value="' + esc(p.nome) + '"></label>' +
+      '<div class="grid2"><label class="q">Data de nascimento' + (id != null ? '<small>' + id + ' anos</small>' : '') + '<input type="date" id="' + pre + 'nasc" data-p="' + i + '" data-k="nasc" min="1900-01-01" max="' + hoje + '" value="' + esc(p.nasc) + '"></label>' +
+      '<label class="q">Sexo' + sel('sexo', [['', 'Escolha'], ['F', 'Feminino'], ['M', 'Masculino']], p.sexo) + '</label></div>' +
+      (i > 0 ? '<label class="q">O que é do responsável' + sel('parentesco', [['', 'Escolha']].concat(PARENTESCOS.slice(1).map(x => [x, x])), p.parentesco) + '</label>' : '') +
+      '<div class="grid2"><label class="q">De onde vem o dinheiro desta pessoa' + sel('fonte', FONTES, p.fonte) + '</label>' +
+      '<label class="q">Quanto ganha por mês (R$)<small>Some tudo. Não conte o Bolsa Família.</small><input type="text" inputmode="decimal" maxlength="12" id="' + pre + 'renda" data-p="' + i + '" data-k="renda" value="' + esc(p.renda) + '" placeholder="0"' + (p.fonte === 'sem' ? ' disabled' : '') + '></label></div>' +
+      '<div class="grid2"><label class="q">Estuda?' + sel('estudo', ESTUDOS, p.estudo) + '</label>' +
+      (p.estudo !== 'nao' ? '<label class="q">Escola' + sel('rede', [['publica', 'Pública (do governo)'], ['particular', 'Particular']], p.rede) + '</label>' : '') + '</div>' +
+      '<div class="choices">' + chk('pcd', 'Tem alguma deficiência ou doença que impede de trabalhar ou estudar por muito tempo') +
+      (p.sexo !== 'M' ? chk('gestante', 'Está grávida') + chk('nutriz', 'Está amamentando bebê de até 6 meses') : '') +
+      chk('demitido', 'Foi mandado embora de trabalho com carteira nos últimos 4 meses') + '</div>' +
+      '<details class="more"' + (p.doencas.length || p.incontinencia || p.semDocumento || p.cpf || p.medioCompleto ? ' open' : '') + '><summary>Mais informações (saúde, documentos)</summary><div class="stack mid mt">' +
+      '<p><b>Usa remédio todo mês para:</b></p><div class="choices dz">' + DOENCAS.map(([k, l]) => '<label class="choice"><input type="checkbox" id="' + pre + 'd_' + k + '" data-p="' + i + '" data-doenca="' + k + '"' + (p.doencas.includes(k) ? ' checked' : '') + '><span>' + l + '</span></label>').join('') + '</div>' +
+      '<div class="choices">' + chk('incontinencia', 'Precisa usar fralda (perde urina ou fezes)') + chk('semDocumento', 'Está sem algum documento (certidão, identidade ou CPF)') + chk('medioCompleto', 'Já terminou o ensino médio') + '</div>' +
+      '<div class="grid2"><label class="q">CPF<small>Opcional. Vai no relatório.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'cpf" data-p="' + i + '" data-k="cpf" value="' + esc(p.cpf) + '"></label>' +
+      '<label class="q">NIS<small>Opcional. Número do CadÚnico.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'nis" data-p="' + i + '" data-k="nis" value="' + esc(p.nis) + '"></label></div>' +
+      '</div></details></section>';
+  }
+  function telaPessoas() {
+    return '<div class="stack"><h2>2. Quem mora na casa</h2>' +
+      '<p class="lead">Coloque todas as pessoas que moram com você e dividem as despesas, inclusive bebês.</p>' +
+      F.pessoas.map(cartaoPessoa).join('') +
+      (F.pessoas.length < 20 ? '<button type="button" class="sun" id="add-pessoa">+ Adicionar outra pessoa</button>' : '') +
+      '<p id="erro-pessoas" class="err" role="alert" hidden></p>' + navBtns(true) + '</div>';
+  }
+  function telaSaude() {
+    const s = F.saude;
+    return '<div class="stack"><h2>3. Saúde</h2><p class="lead">Marque o que alguém da casa precisa agora.</p>' +
+      '<div class="choices">' + check('consulta', 'Consulta médica ou exame', s.consulta) + check('especialista', 'Médico especialista, cirurgia ou tratamento que não tem na cidade', s.especialista) + check('dentista', 'Dentista ou dentadura', s.dentista) + check('mental', 'Ajuda para tristeza, ansiedade, crises, álcool ou drogas', s.mental) + '</div>' +
+      navBtns(true) + '</div>';
+  }
+  function telaSituacao() {
+    const t = F.sit;
+    return '<div class="stack"><h2>4. Situação da família</h2>' +
+      '<fieldset class="card choices"><legend><b>A família está no Cadastro Único (CadÚnico)?</b><br><small class="sub">É o cadastro feito no CRAS. Quem recebe Bolsa Família está nele.</small></legend>' +
+      radio('cad', 'sim', 'Sim, atualizado nos últimos 2 anos', F.cad) + radio('cad', 'velho', 'Sim, mas faz mais de 2 anos', F.cad) + radio('cad', 'nao', 'Não', F.cad) + radio('cad', 'naosei', 'Não sei', F.cad) + '</fieldset>' +
+      '<fieldset class="card choices"><legend><b>A família recebe Bolsa Família hoje?</b></legend>' + radio('bf', 'sim', 'Sim', F.bf) + radio('bf', 'nao', 'Não', F.bf) + '</fieldset>' +
+      '<p><b>Marque se alguma coisa abaixo acontece com a família:</b></p><div class="choices">' +
+      check('agricultor', 'Trabalha na roça como agricultor familiar', t.agricultor) + check('pescador', 'É pescador artesanal', t.pescador) + check('indigena', 'É indígena ou quilombola', t.indigena) +
+      check('emergencia', 'Passa por emergência: falta comida, despejo, morte na família ou desastre (enchente, deslizamento)', t.emergencia) +
+      check('justica', 'Precisa de ajuda na Justiça (pensão, guarda, despejo, benefício negado)', t.justica) +
+      check('violencia', 'Alguém sofre violência em casa', t.violencia, 'Se for perigo agora, ligue 190.') +
+      '</div>' + navBtns(true, 'Ver meus direitos') + '</div>';
+  }
+
+  function docRelevante(d) {
+    const ps = F.pessoas.map(p => Object.assign({ id: idade(p.nasc) }, p));
+    if (d === 'prenatal') return ps.some(p => p.gestante);
+    if (d === 'vacina') return ps.some(p => p.id != null && p.id <= 7);
+    if (d === 'escola') return ps.some(p => p.estudo && p.estudo !== 'nao');
+    if (d === 'laudo') return ps.some(p => p.pcd || p.incontinencia) || !!F.saude.especialista;
+    if (d === 'renda') return ps.some(p => p.fonte && p.fonte !== 'sem');
+    if (d === 'ctps') return ps.some(p => p.fonte === 'formal' || p.demitido);
+    if (d === 'rescisao') return ps.some(p => p.demitido);
+    return true;
+  }
+  const nomeCanal = c => (REGRAS.canais[c] || {}).nome || c;
+  const curto = c => nomeCanal(c).split(' (')[0];
+  function planoPorCanal(res) {
+    const ordem = [], mapa = {};
+    const urg = res.filter(r => r.pr.prioridade === 0);
+    for (const r of urg.concat(res)) {
+      const c = r.pr.ondeIr[0];
+      if (!mapa[c]) { mapa[c] = { canal: c, progs: [], docs: new Set() }; ordem.push(mapa[c]); }
+      if (!mapa[c].progs.includes(r)) mapa[c].progs.push(r);
+      r.pr.documentos.filter(docRelevante).forEach(d => mapa[c].docs.add(d));
+    }
+    return ordem;
+  }
+  function dadosCidade() {
+    const cidade = MUN_POR_NOME.get(norm(F.cidade));
+    return (cidade && REGRAS.municipios && REGRAS.municipios[cidade.codigo]) || null;
+  }
+  function extrasCidade() { const m = dadosCidade(); return m && Array.isArray(m.extras) ? m.extras : []; }
+  function crasCidade() { const m = dadosCidade(); return m && Array.isArray(m.cras) ? m.cras : []; }
+  function htmlCras(classe) {
+    const m = dadosCidade(), lista = crasCidade(); if (!lista.length) return '';
+    return '<div class="' + classe + '" id="cras-cidade"><b>CRAS em ' + esc(F.cidade) + ':</b><ul>' + lista.map(c => '<li><b>' + esc(c.nome) + '</b>: ' + esc(c.endereco) + (c.telefone ? ' · Tel. ' + esc(c.telefone) : '') + '</li>').join('') + '</ul>' +
+      '<small>' + esc(m.aviso || '') + ' Fonte: ' + esc(m.fonte ? m.fonte.nome : '') + ', conferido em ' + dataBR(m.verificadoEm) + '.</small></div>';
+  }
+  function cartaoPrograma(r) {
+    const pr = r.pr, p = P(); const esf = { federal: 'Brasil', estadual: 'Minas Gerais', municipal: 'Prefeitura' }[pr.esfera] || pr.esfera;
+    const url = linkSeguro(pr.fonte.url);
+    return '<article class="prog ' + r.status + '" data-programa="' + esc(pr.id) + '">' +
+      '<div class="tags"><span class="tag ' + r.status + '">' + (r.status === 'sim' ? 'Provável direito' : 'Pode ter direito') + '</span><span class="tag">' + esc(esf) + '</span>' + (r.precisaCad ? '<span class="tag cad">Precisa do CadÚnico</span>' : '') + '</div>' +
+      '<h3>' + esc(pr.titulo) + '</h3><p>' + esc(preencher(pr.resumo, p)) + '</p>' +
+      (r.quem.length ? '<p class="who">Para: ' + esc(r.quem.join(', ')) + '</p>' : '') +
+      (r.valor ? '<p class="valor">' + esc(r.valor) + '</p>' : '') +
+      (r.nota ? '<p class="hint">' + esc(r.nota) + '</p>' : '') +
+      r.avisos.map(a => '<p class="hint">' + esc(a) + '</p>').join('') +
+      '<details><summary>Como pedir</summary><ol>' + pr.comoPedir.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>' +
+      '<p class="who mt">Onde: ' + pr.ondeIr.map(c => esc(nomeCanal(c))).join(' · ') + '</p>' +
+      '<p class="who">Fonte: ' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(pr.fonte.nome) + '</a>' : esc(pr.fonte.nome)) + ' · ' + esc(pr.baseLegal || '') + '</p></details></article>';
+  }
+  function telaResultado() {
+    const { fx, res } = M.calcular(F, REGRAS);
+    const sims = res.filter(r => r.status === 'sim'), talvez = res.filter(r => r.status === 'talvez');
+    const mensal = sims.reduce((s, r) => s + (r.mensal || 0), 0);
+    const plano = planoPorCanal(res);
+    return '<div class="stack"><h2>Direitos da sua família</h2>' +
+      '<div class="summary-band">' +
+      '<div class="stat"><b id="n-sim">' + sims.length + '</b><span>direitos prováveis</span></div>' +
+      '<div class="stat"><b id="n-talvez">' + talvez.length + '</b><span>para confirmar</span></div>' +
+      '<div class="stat"><b id="rpc">' + brl(fx.rpc) + '</b><span>renda por pessoa</span></div>' +
+      (mensal ? '<div class="stat"><b id="mensal">' + brl(mensal) + '</b><span>dinheiro por mês (estimativa)</span></div>' : '') +
+      '</div>' +
+      '<div class="btns noprint"><button type="button" class="go" id="abrir-relatorio">Ver relatório para imprimir</button><button type="button" data-ir="1">Corrigir respostas</button></div>' +
+      '<section class="card stack tight"><h3>Seu plano: onde ir, nesta ordem</h3><ol class="plan">' +
+      plano.map(g => '<li><div><b>' + esc(nomeCanal(g.canal)) + '</b><br><span class="who">Pedir: ' + esc(g.progs.map(r => r.pr.titulo.split(' (')[0]).join('; ')) + '</span></div></li>').join('') +
+      '</ol></section>' +
+      htmlCras('hint') +
+      extrasCidade().map(e => '<div class="hint"><b>' + esc(e.titulo) + '</b><br>' + esc(e.texto) + '</div>').join('') +
+      (sims.length ? '<h3>Provável direito</h3>' + sims.map(cartaoPrograma).join('') : '<p>Com as respostas dadas, não encontramos direito provável. Veja os itens para confirmar abaixo e procure o CRAS.</p>') +
+      (talvez.length ? '<h3>Pode ter direito: vale perguntar</h3>' + talvez.map(cartaoPrograma).join('') : '') +
+      '<p class="who">Este resultado é uma estimativa feita com as regras de ' + dataBR(REGRAS.atualizadoEm) + '. Quem decide é o órgão responsável.</p>' +
+      '<div class="btns noprint"><button type="button" class="small danger" id="terminar">Terminei: apagar os dados deste aparelho</button></div></div>';
+  }
+  function textoPedido(g, fx, resp, endereco, hoje) {
+    const c = REGRAS.canais[g.canal] || {};
+    return 'A(o) ' + (c.nome || g.canal) + (F.cidade ? ' de ' + F.cidade + '/MG' : '') + '\n\n' +
+      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', morador(a) em ' + (endereco || '________________________') + ', telefone ' + (F.telefone || '______________') + ', responsável por uma família de ' + fx.n + ' pessoa(s), com renda total de ' + brl(fx.rendaTotal) + ' por mês (' + brl(fx.rpc) + ' por pessoa), venho solicitar:\n\n' +
+      g.progs.map(r => '- ' + r.pr.titulo + (r.quem.length ? ' (para ' + r.quem.join(', ') + ')' : '')).join('\n') +
+      '\n\nAs informações da família estão no quadro deste relatório. Trago os documentos listados.\n\n' + (F.cidade || '__________') + ', ' + hoje + '.';
+  }
+  function telaRelatorio() {
+    const { fx, res } = M.calcular(F, REGRAS); const p = P();
+    const plano = planoPorCanal(res);
+    const resp = F.pessoas[0] || {};
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const endereco = [F.endereco, F.bairro, F.cidade ? F.cidade + ' - MG' : '', F.cep].filter(Boolean).join(', ');
+    const linhas = F.pessoas.map((x, i) => {
+      const id = idade(x.nasc); const est = (ESTUDOS.find(e => e[0] === x.estudo) || [])[1] || ''; const fonte = (FONTES.find(e => e[0] === x.fonte) || [])[1] || '';
+      const sit = [x.pcd ? 'Pessoa com deficiência' : '', x.gestante ? 'Gestante' : '', x.nutriz ? 'Amamentando' : '', x.demitido ? 'Demitido(a) recentemente' : '', x.doencas.length ? 'Remédio contínuo: ' + x.doencas.map(d => (DOENCAS.find(z => z[0] === d) || [, d])[1]).join(', ') : '', x.incontinencia ? 'Usa fralda' : ''].filter(Boolean).join('; ');
+      return '<tr><td>' + esc(x.nome) + '</td><td>' + (i === 0 ? 'Responsável' : esc(x.parentesco)) + '</td><td>' + (x.nasc ? esc(dataBR(x.nasc)) + (id != null ? ' (' + id + ')' : '') : '') + '</td><td>' + esc(x.cpf) + '</td><td>' + esc(x.nis) + '</td><td>' + esc(fonte) + (x.fonte !== 'sem' ? '<br>' + brl(numero(x.renda)) : '') + '</td><td>' + esc(est) + (x.estudo !== 'nao' ? ' (' + (x.rede === 'publica' ? 'pública' : 'particular') + ')' : '') + '</td><td>' + esc(sit) + '</td></tr>';
+    }).join('');
+    return '<div class="stack">' +
+      '<div class="btns noprint">' + (EM_MOLDURA ? '' : '<button type="button" class="go" id="imprimir">Imprimir relatório</button>') + '<button type="button" data-ir="5">Voltar ao resultado</button></div>' +
+      (EM_MOLDURA ? '<p class="hint noprint">Nesta prévia o botão de imprimir fica desligado. No aplicativo instalado no celular ou computador, o botão "Imprimir relatório" aparece aqui.</p>' : '') +
+      '<article class="doc" id="relatorio"><h1>Relatório de direitos da família</h1>' +
+      '<p class="meta">Feito em ' + hoje + ' com o aplicativo Meus Direitos MG · Regras versão ' + esc(REGRAS.versao) + ' (' + dataBR(REGRAS.atualizadoEm) + ') · Salário mínimo usado: ' + brl(p.salarioMinimo) + '</p>' +
+      '<h2>1. Dados da família</h2>' +
+      '<p><b>Responsável:</b> ' + esc(resp.nome) + ' &nbsp; <b>Telefone:</b> ' + esc(F.telefone) + '<br><b>Endereço:</b> ' + esc(endereco) + ' (' + (F.zona === 'rural' ? 'zona rural' : 'zona urbana') + ')<br>' +
+      '<b>Pessoas na casa:</b> ' + fx.n + ' &nbsp; <b>Renda total:</b> <span id="rel-renda">' + brl(fx.rendaTotal) + '</span> &nbsp; <b>Renda por pessoa:</b> <span id="rel-rpc">' + brl(fx.rpc) + '</span><br>' +
+      '<b>CadÚnico:</b> ' + ({ sim: 'Sim, atualizado', velho: 'Sim, precisa atualizar', nao: 'Não', naosei: 'Não sabe' }[F.cad] || 'Não informado') + ' &nbsp; <b>Bolsa Família:</b> ' + (F.bf === 'sim' ? 'Recebe' : 'Não recebe') + '</p>' +
+      '<div class="tw"><table><thead><tr><th>Nome</th><th>Parentesco</th><th>Nascimento</th><th>CPF</th><th>NIS</th><th>Renda</th><th>Estudo</th><th>Situação</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
+      '<h2>2. Onde ir e o que pedir</h2>' +
+      plano.map((g, i) => {
+        const c = REGRAS.canais[g.canal] || {};
+        return '<div class="box" data-canal="' + esc(g.canal) + '"><h3>Passo ' + (i + 1) + ': ' + esc(c.nome) + '</h3>' +
+          '<p>' + esc(c.como) + (c.telefone ? '<br><b>Telefone:</b> ' + esc(c.telefone) : '') + (c.site ? '<br><b>Site:</b> ' + esc(c.site) : '') + '</p>' +
+          (g.canal === 'cras' ? htmlCras('p6') : '') +
+          '<p class="p6"><b>Pedir:</b></p><ul class="chk">' + g.progs.map(r => '<li>' + esc(r.pr.titulo) + (r.status === 'talvez' ? ' (confirmar)' : '') + (r.quem.length ? ' — ' + esc(r.quem.join(', ')) : '') + (r.pr.ondeIr.length > 1 ? ' <i>(depois: ' + esc(r.pr.ondeIr.slice(1).map(curto).join(', ')) + ')</i>' : '') + '</li>').join('') + '</ul>' +
+          (g.docs.size ? '<p><b>Levar:</b></p><ul class="chk">' + [...g.docs].map(d => '<li>' + esc(REGRAS.documentos[d] || d) + '</li>').join('') + '</ul>' : '') +
+          '<p><b>Pedido pronto (pode entregar ou ler no atendimento):</b></p><div class="carta">' + esc(textoPedido(g, fx, resp, endereco, hoje)) + '</div></div>';
+      }).join('') +
+      '<h2>3. Detalhe de cada direito</h2>' +
+      res.map(r => '<div class="box"><h3>' + esc(r.pr.titulo) + ' — ' + (r.status === 'sim' ? 'provável direito' : 'pode ter direito') + '</h3><p>' + esc(preencher(r.pr.resumo, p)) + '</p>' + (r.quem.length ? '<p><b>Para:</b> ' + esc(r.quem.join(', ')) + '</p>' : '') + (r.valor ? '<p><b>Valor:</b> ' + esc(r.valor) + '</p>' : '') + (r.nota ? '<p><i>' + esc(r.nota) + '</i></p>' : '') + r.avisos.map(a => '<p><i>' + esc(a) + '</i></p>').join('') + '<p><b>Como pedir:</b> ' + esc(r.pr.comoPedir.join(' ')) + '</p><p class="meta">Base legal: ' + esc(r.pr.baseLegal || '') + ' · Fonte: ' + esc(r.pr.fonte.nome) + ' (' + esc(r.pr.fonte.url) + ') · Conferido em ' + dataBR(r.pr.verificadoEm) + '</p></div>').join('') +
+      '<h2>4. Declaração</h2><p>Declaro que as informações acima são verdadeiras. Sei que este relatório é uma estimativa e que cada órgão confere os dados e decide sobre o benefício. Nenhum atendimento público pode cobrar para fazer o cadastro ou liberar benefício.</p>' +
+      '<div class="assin"><div>Assinatura do(a) responsável</div><div>Atendente / órgão (carimbo)</div></div></article></div>';
+  }
+
+  function render() {
+    renderSteps();
+    let html;
+    if (bloqueado) html = telaBloqueio();
+    else if (tela === 'criar-senha') html = telaCriarSenha();
+    else {
+      const t = passo === 'relatorio' ? 'relatorio' : PASSOS[passo];
+      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio }[t]();
+    }
+    view.innerHTML = html;
+    renderFoot();
+    const foco = bloqueado ? document.getElementById('senha') : (tela === 'criar-senha' ? document.getElementById('senha1') : null);
+    if (foco) foco.focus();
+  }
+
+  // ---------- Eventos ----------
+  view.addEventListener('input', e => {
+    if (!F || bloqueado) return;
+    const el = e.target;
+    if (el.dataset.p !== undefined) {
+      const p = F.pessoas[+el.dataset.p]; if (!p) return;
+      if (el.dataset.doenca) { const s = new Set(p.doencas); el.checked ? s.add(el.dataset.doenca) : s.delete(el.dataset.doenca); p.doencas = [...s]; }
+      else if (el.type === 'checkbox') p[el.dataset.k] = el.checked;
+      else p[el.dataset.k] = String(el.value).slice(0, 120);
+      if (el.tagName === 'SELECT' && ['fonte', 'estudo', 'sexo'].includes(el.dataset.k)) {
+        if (el.dataset.k === 'fonte' && el.value === 'sem') p.renda = '';
+        if (el.dataset.k === 'sexo' && el.value === 'M') { p.gestante = false; p.nutriz = false; }
+        salvar(); rerender(el.id); return;
+      }
+      salvar(); return;
+    }
+    if (el.type === 'radio') { F[el.name] = el.value; salvar(); return; }
+    if (PASSOS[passo] === 'saude' && el.dataset.k) { F.saude[el.dataset.k] = el.checked; salvar(); return; }
+    if (PASSOS[passo] === 'situacao' && el.dataset.k) { F.sit[el.dataset.k] = el.checked; salvar(); return; }
+    if (['cidade', 'bairro', 'endereco', 'cep', 'telefone'].includes(el.id)) { F[el.id] = String(el.value).slice(0, 120); salvar(); }
+  });
+  view.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'senha') { e.preventDefault(); document.getElementById('desbloquear').click(); }
+    if (e.target.id === 'senha2') { e.preventDefault(); document.getElementById('salvar-senha').click(); }
+  });
+  function rerender(focoId) { const y = window.scrollY; render(); window.scrollTo(0, y); const f = focoId && document.getElementById(focoId); if (f) f.focus(); }
+  function erroSenha(msg) { const el = document.getElementById('erro-senha'); if (el) { el.textContent = msg; el.hidden = false; } }
+
+  async function desbloquear() {
+    const senha = document.getElementById('senha').value;
+    if (Date.now() < esperaAte) { erroSenha('Muitas tentativas. Espere ' + Math.ceil((esperaAte - Date.now()) / 1000) + ' segundos.'); return; }
+    if (!senha) { erroSenha('Digite a senha.'); return; }
+    const b = document.getElementById('desbloquear'); b.disabled = true; b.textContent = 'Abrindo...';
+    try {
+      const { dados, ctx } = await S.abrir(pacoteCifrado, senha);
+      F = M.normalizarFamilia(dados); sessao = ctx; bloqueado = false; tentativas = 0; render(); armarBloqueioAutomatico();
+    } catch (err) {
+      tentativas++;
+      if (tentativas >= 5) { esperaAte = Date.now() + 30000 * Math.pow(2, Math.min(tentativas - 5, 5)); tentativas = 3; }
+      b.disabled = false; b.textContent = 'Abrir'; erroSenha('Senha errada. Tente de novo.');
+      const i = document.getElementById('senha'); i.value = ''; i.focus();
+    }
+  }
+  async function criarSenha() {
+    const s1 = document.getElementById('senha1').value, s2 = document.getElementById('senha2').value;
+    if (s1.length < 6) { erroSenha('A senha precisa ter pelo menos 6 números ou letras.'); return; }
+    if (s1 !== s2) { erroSenha('As duas senhas estão diferentes.'); return; }
+    const b = document.getElementById('salvar-senha'); b.disabled = true; b.textContent = 'Protegendo...';
+    try {
+      sessao = await S.novaChave(s1);
+      const pac = await S.cifrar(F, sessao); pacoteCifrado = pac;
+      if (!store.set('md_familia', pac)) throw new Error('armazenamento');
+      tela = null; render(); toast('Pronto. Os dados agora estão protegidos com senha.'); armarBloqueioAutomatico();
+    } catch (err) { sessao = null; b.disabled = false; b.textContent = 'Proteger'; erroSenha('Não foi possível proteger agora. Tente de novo.'); }
+  }
+  function bloquear() {
+    if (!sessao) return;
+    clearTimeout(timerSalvar);
+    S.cifrar(F, sessao).then(pac => { pacoteCifrado = pac; store.set('md_familia', pac); F = null; sessao = null; bloqueado = true; tela = null; render(); });
+  }
+  // Com senha, o app se fecha sozinho depois de 10 minutos sem uso.
+  let timerInativo = null;
+  function armarBloqueioAutomatico() { clearTimeout(timerInativo); if (sessao) timerInativo = setTimeout(bloquear, 10 * 60 * 1000); }
+  ['click', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, armarBloqueioAutomatico, { passive: true }));
+
+  view.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.ir !== undefined) { irPara(+b.dataset.ir); return; }
+    if (b.dataset.remover !== undefined) { F.pessoas.splice(+b.dataset.remover, 1); salvar(); rerender(); return; }
+    switch (b.id) {
+      case 'desbloquear': desbloquear(); break;
+      case 'esqueci': document.getElementById('confirma-limpar').hidden = false; break;
+      case 'criar-senha': tela = 'criar-senha'; render(); break;
+      case 'cancelar-senha': tela = null; render(); break;
+      case 'salvar-senha': criarSenha(); break;
+      case 'tirar-senha': clearTimeout(timerSalvar); sessao = null; salvar(); render(); toast('Senha retirada.'); break;
+      case 'bloquear': bloquear(); break;
+      case 'instalar': if (eventoInstalar) { eventoInstalar.prompt(); eventoInstalar.userChoice.finally(() => { eventoInstalar = null; render(); }); } break;
+      case 'comecar': irPara(1); break;
+      case 'ver-exemplo': F = exemplo(); salvar(); irPara(5); toast('Exemplo carregado. Troque pelos seus dados quando quiser.'); break;
+      case 'limpar': document.getElementById('confirma-limpar').hidden = false; break;
+      case 'limpar-nao': document.getElementById('confirma-limpar').hidden = true; break;
+      case 'limpar-sim': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
+      case 'terminar': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
+      case 'add-pessoa': if (F.pessoas.length < 20) { F.pessoas.push(M.novaPessoa(false)); salvar(); rerender('p' + (F.pessoas.length - 1) + '_nome'); } break;
+      case 'abrir-relatorio': passo = 'relatorio'; salvar(); render(); window.scrollTo(0, 0); break;
+      case 'imprimir': try { window.print(); } catch (err) {} break;
+      case 'avancar': {
+        if (PASSOS[passo] === 'pessoas') {
+          const erro = document.getElementById('erro-pessoas');
+          const semNome = F.pessoas.findIndex(p => !p.nome.trim());
+          if (semNome >= 0) { erro.textContent = 'Falta o nome da pessoa ' + (semNome + 1) + '. Escreva o nome ou toque em "Tirar esta pessoa".'; erro.hidden = false; return; }
+          const semRenda = F.pessoas.findIndex(p => p.fonte !== 'sem' && !numero(p.renda));
+          if (semRenda >= 0) { erro.textContent = 'Falta quanto ' + F.pessoas[semRenda].nome.split(' ')[0] + ' ganha por mês. Se não tem renda, escolha "Não tem renda".'; erro.hidden = false; return; }
+          const nascRuim = F.pessoas.findIndex(p => p.nasc && idade(p.nasc) === null);
+          if (nascRuim >= 0) { erro.textContent = 'A data de nascimento de ' + F.pessoas[nascRuim].nome.split(' ')[0] + ' não parece certa. Confira o dia, mês e ano.'; erro.hidden = false; return; }
+        }
+        irPara(passo + 1); break;
+      }
+    }
+  });
+
+  // ---------- Atualização das regras (com assinatura) ----------
+  const ultimoResultado = { motivo: 'nenhuma verificação' };
+  async function aceitarRegras(texto, assinatura, origem) {
+    if (typeof texto !== 'string' || texto.length > 600000) return 'arquivo grande demais';
+    if (!CHAVE_PUBLICA) return 'sem chave pública';
+    if (!(await S.conferirAssinatura(texto, assinatura, CHAVE_PUBLICA))) return 'assinatura inválida';
+    let novas; try { novas = JSON.parse(texto); } catch (e) { return 'arquivo corrompido'; }
+    const erros = M.validarRegras(novas);
+    if (erros.length) return 'regras inválidas: ' + erros[0];
+    if (cmpVersao(novas.versao, REGRAS.versao) <= 0) return 'versão não é mais nova';
+    REGRAS = novas;
+    if (origem === 'internet') store.set('md_regras', { texto, assinatura });
+    return 'ok';
+  }
+  async function carregarRegrasSalvas() {
+    const s = store.get('md_regras', null);
+    if (!s || typeof s.texto !== 'string') return;
+    const r = await aceitarRegras(s.texto, s.assinatura, 'aparelho');
+    if (r === 'ok') { if (F || bloqueado) render(); }
+    else if (r !== 'versão não é mais nova') store.del('md_regras');
+  }
+  async function baixarTexto(url, ms) {
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const t = setTimeout(() => ctrl && ctrl.abort(), ms);
+    try {
+      const r = await fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined, credentials: 'omit' });
+      if (!r.ok) throw new Error('http ' + r.status);
+      return await r.text();
+    } finally { clearTimeout(t); }
+  }
+  let verificando = false;
+  async function verificarAtualizacao(manual) {
+    if (verificando) return;
+    if (!navigator.onLine) { if (manual) toast('Sem internet agora. Tente de novo quando estiver conectado.'); return; }
+    verificando = true;
+    try {
+      const marca = Date.now();
+      const [texto, assinatura] = await Promise.all([baixarTexto('regras.json?t=' + marca, 15000), baixarTexto('regras.json.sig?t=' + marca, 15000)]);
+      const r = await aceitarRegras(texto, assinatura, 'internet');
+      ultimoResultado.motivo = r;
+      store.set('md_ultima_verificacao', Date.now());
+      if (r === 'ok') { render(); toast('Regras atualizadas para a versão ' + REGRAS.versao + '.'); }
+      else if (r === 'versão não é mais nova') { if (manual) toast('Você já tem as regras mais novas.'); renderFoot(); }
+      else { if (manual) toast('A atualização recebida não passou na conferência de segurança e foi ignorada.'); renderFoot(); }
+    } catch (err) {
+      ultimoResultado.motivo = 'falha de rede';
+      if (manual) toast('Não foi possível procurar atualização agora.');
+    } finally { verificando = false; }
+  }
+  function renderFoot() {
+    const ult = store.get('md_ultima_verificacao', null);
+    const el = document.getElementById('foot');
+    el.innerHTML = (avisoArmazenamento ? '<p class="hint" id="aviso-armazenamento" role="alert">Este aparelho não está deixando guardar as respostas. O aplicativo funciona, mas tudo some ao fechar. Imprima o relatório antes de sair.</p>' : '') + '<span>Regras de ' + dataBR(REGRAS.atualizadoEm) + ' (versão ' + esc(REGRAS.versao) + '), ' + REGRAS.programas.length + ' programas. ' + (typeof ult === 'number' ? 'Última verificação: ' + new Date(ult).toLocaleString('pt-BR') + '.' : '') + '</span>' +
+      '<span><button type="button" class="link" id="verificar">Procurar atualização das leis e programas</button></span>' +
+      '<span>Este aplicativo não é do governo. É uma ajuda para encontrar direitos. Quem decide é sempre o órgão responsável.</span>';
+    document.getElementById('verificar').onclick = () => verificarAtualizacao(true);
+  }
+  function estadoRede() { document.getElementById('netstate').textContent = navigator.onLine ? 'Conectado · funciona também sem internet' : 'Sem internet · tudo funciona normalmente'; }
+  window.addEventListener('online', () => { estadoRede(); verificarAtualizacao(false); });
+  window.addEventListener('offline', estadoRede);
+
+  // ---------- Início ----------
+  if (!EMBUTIDAS || M.validarRegras(EMBUTIDAS).length) { view.innerHTML = '<p class="err">O arquivo de regras deste aplicativo está com defeito. Baixe o aplicativo de novo.</p>'; return; }
+  estadoRede();
+  try { render(); } catch (e) { view.innerHTML = '<div class="stack"><p class="err">Não foi possível abrir as respostas salvas neste aparelho.</p><div class="btns"><button type="button" class="go" id="limpar-sim">Apagar e começar de novo</button></div></div>'; }
+  carregarRegrasSalvas().finally(() => {
+    const ult = store.get('md_ultima_verificacao', 0);
+    if (!(typeof ult === 'number' && Date.now() - ult < 24 * 3600 * 1000)) verificarAtualizacao(false);
+  });
+  if ('serviceWorker' in navigator && !EM_MOLDURA && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+  }
+  // Ganchos para os testes automáticos (não expõem os dados da família).
+  window.__md = { versaoRegras: () => REGRAS.versao, ultimoResultado, verificarAtualizacao, exemplo };
+})();

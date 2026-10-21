@@ -1,0 +1,56 @@
+name: Testes e publicação
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 11 * * 1'   # toda segunda-feira: testes + lembrete de conferir as leis
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  testar-e-publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Testes (unidade, integração, ponta a ponta, caos e segurança)
+        run: npm test
+      - name: Publicar no GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
+
+  lembrete-de-revisao:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: validade
+        run: node ferramentas/conferir-validade.mjs 90
+      - name: Abrir lembrete
+        if: steps.validade.outputs.vencidos != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const corpo = fs.readFileSync('validade.md', 'utf8');
+            const titulo = 'Revisar leis e valores dos programas';
+            const abertas = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open' });
+            if (!abertas.data.some(i => i.title === titulo)) {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title: titulo, body: corpo });
+            }

@@ -1,0 +1,1879 @@
+{
+  "versao": "2026.10.3",
+  "atualizadoEm": "2026-10-21",
+  "observacao": "Regras usadas para estimar direitos. A decisão final é sempre do órgão responsável. Para atualizar, edite este arquivo, mude 'versao' e 'atualizadoEm' e publique junto com o aplicativo.",
+  "parametros": {
+    "salarioMinimo": 1621,
+    "linhaPobrezaBF": 218,
+    "bfMinimo": 600,
+    "bfPorPessoa": 142,
+    "bfPrimeiraInfancia": 150,
+    "bfVariavel": 50,
+    "mcmvFaixa1": 3200
+  },
+  "canais": {
+    "cras": {
+      "nome": "CRAS (Centro de Referência de Assistência Social)",
+      "como": "Vá pessoalmente ao CRAS mais perto da sua casa. Se não souber onde fica, ligue para a Prefeitura ou para o Disque Social 121.",
+      "telefone": "121 (Disque Social, ligação grátis)",
+      "site": "https://www.gov.br/mds/pt-br/acoes-e-programas/cadastro-unico"
+    },
+    "ubs": {
+      "nome": "UBS (Posto de Saúde)",
+      "como": "Vá ao posto de saúde do seu bairro com o Cartão SUS ou o CPF. Peça para marcar consulta. Exames e especialistas são pedidos pelo médico do posto.",
+      "telefone": "136 (Disque Saúde)",
+      "site": "https://meususdigital.saude.gov.br"
+    },
+    "inss": {
+      "nome": "INSS",
+      "como": "Peça pelo aplicativo ou site Meu INSS, ou ligue 135. O atendimento é de graça e não precisa de advogado nem intermediário.",
+      "telefone": "135",
+      "site": "https://meu.inss.gov.br"
+    },
+    "caixa": {
+      "nome": "Caixa Econômica Federal",
+      "como": "Consulte pelo aplicativo Bolsa Família, Caixa Tem ou ligue para a Caixa.",
+      "telefone": "111 (Bolsa Família) ou 0800 726 0207",
+      "site": "https://www.caixa.gov.br"
+    },
+    "cemig": {
+      "nome": "Distribuidora de energia (na maior parte de Minas é a Cemig)",
+      "como": "O desconto costuma entrar sozinho. Se não aparecer na conta, peça pela Cemig com o NIS em mãos.",
+      "telefone": "116 (Cemig)",
+      "site": "https://atende.cemig.com.br"
+    },
+    "copasa": {
+      "nome": "Copasa (água e esgoto)",
+      "como": "Peça pelo WhatsApp da Copasa, pelo site ou numa agência. Se a água da sua cidade não é da Copasa, pergunte ao serviço de água da Prefeitura (SAAE).",
+      "telefone": "WhatsApp (31) 99770-7000",
+      "site": "https://www.copasa.com.br"
+    },
+    "escola": {
+      "nome": "Escola do estudante",
+      "como": "Confira na secretaria da escola se a matrícula, a frequência e o CPF do estudante estão certos.",
+      "telefone": "",
+      "site": "https://www.gov.br/mec/pt-br/pe-de-meia"
+    },
+    "farmacia": {
+      "nome": "Farmácia Popular credenciada",
+      "como": "Leve a receita, um documento com foto e o CPF. Procure a placa \"Aqui tem Farmácia Popular\".",
+      "telefone": "136 (Disque Saúde)",
+      "site": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
+    },
+    "prefeitura": {
+      "nome": "Prefeitura (Secretaria de Assistência Social, Habitação ou Educação)",
+      "como": "Pergunte na Prefeitura ou no CRAS qual setor cuida do assunto.",
+      "telefone": "",
+      "site": ""
+    },
+    "creas": {
+      "nome": "CREAS (atendimento para quem sofre violência ou tem direitos violados)",
+      "como": "Vá ao CREAS ou peça ao CRAS para encaminhar. Em perigo, ligue 190.",
+      "telefone": "180 (mulher) · 100 (direitos humanos) · 190 (polícia)",
+      "site": ""
+    },
+    "centropop": {
+      "nome": "Centro POP (pessoas em situação de rua)",
+      "como": "Vá ao Centro POP ou ao CRAS da cidade. Lá é possível tomar banho, guardar documentos e pedir ajuda.",
+      "telefone": "121 (Disque Social)",
+      "site": ""
+    },
+    "defensoria": {
+      "nome": "Defensoria Pública de Minas Gerais",
+      "como": "Advogado de graça para quem não pode pagar. Procure a Defensoria da sua cidade (fica perto do Fórum).",
+      "telefone": "",
+      "site": "https://defensoria.mg.def.br"
+    },
+    "antt": {
+      "nome": "ANTT (Passe Livre)",
+      "como": "Peça pelo site da ANTT. A carteirinha é digital.",
+      "telefone": "166",
+      "site": "https://www.gov.br/antt"
+    },
+    "sine": {
+      "nome": "Sine / Carteira de Trabalho Digital",
+      "como": "Peça pelo aplicativo Carteira de Trabalho Digital ou no Sine (posto de emprego).",
+      "telefone": "158",
+      "site": "https://www.gov.br/trabalho-e-emprego"
+    },
+    "cartorio": {
+      "nome": "Cartório ou Posto de Identificação (PCMG / UAI)",
+      "como": "Certidão: cartório de registro civil. Identidade (CIN): Polícia Civil ou UAI. Diga que não pode pagar para pedir gratuidade.",
+      "telefone": "",
+      "site": "https://www.mg.gov.br"
+    },
+    "emater": {
+      "nome": "Sindicato Rural, Emater-MG ou Secretaria de Agricultura",
+      "como": "Leve os documentos da terra e da família.",
+      "telefone": "",
+      "site": "https://www.emater.mg.gov.br"
+    }
+  },
+  "documentos": {
+    "foto": "Documento com foto (Identidade/CIN, CNH ou Carteira de Trabalho) do responsável",
+    "cpf_todos": "CPF de todas as pessoas da casa",
+    "certidoes": "Certidão de nascimento ou casamento de todas as pessoas",
+    "endereco": "Comprovante de endereço (conta de luz ou de água)",
+    "renda": "Comprovante de renda de quem trabalha (contracheque, carteira de trabalho ou declaração)",
+    "ctps": "Carteira de Trabalho (física ou digital)",
+    "escola": "Declaração da escola das crianças e jovens que estudam",
+    "vacina": "Cartão de vacina das crianças",
+    "prenatal": "Cartão da gestante (pré-natal)",
+    "laudo": "Laudos e exames médicos da pessoa com deficiência ou doença",
+    "receita": "Receita médica dentro da validade",
+    "sus": "Cartão SUS ou CPF",
+    "nis": "Número do NIS (aparece na folha do CadÚnico)",
+    "conta_luz": "Conta de luz no nome de alguém da família",
+    "conta_agua": "Conta de água da casa",
+    "cad_folha": "Folha resumo do CadÚnico (pedir no CRAS)",
+    "rescisao": "Termo de rescisão do contrato de trabalho",
+    "terra": "Documento da terra ou contrato (arrendamento, comodato)"
+  },
+  "programas": [
+    {
+      "id": "cadunico",
+      "titulo": "Cadastro Único (CadÚnico)",
+      "esfera": "federal",
+      "categoria": "assistencia",
+      "resumo": "É a porta de entrada. Quase todos os outros programas pedem que a família esteja no CadÚnico, com os dados atualizados nos últimos 2 anos.",
+      "condicao": {
+        "any": [
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "f": "rendaTotal",
+            "op": "<=",
+            "v": "tresSM"
+          }
+        ]
+      },
+      "valor": "Não paga dinheiro. Abre as portas para os outros programas.",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao CRAS com os documentos de todas as pessoas da casa.",
+        "Peça para fazer ou atualizar o Cadastro Único.",
+        "Guarde a folha resumo e anote o número do NIS."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "certidoes",
+        "endereco",
+        "renda",
+        "escola"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Ministério do Desenvolvimento e Assistência Social",
+        "url": "https://www.gov.br/mds/pt-br/acoes-e-programas/cadastro-unico"
+      },
+      "baseLegal": "Decreto 11.016/2022",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "bolsa_familia",
+      "titulo": "Bolsa Família",
+      "esfera": "federal",
+      "categoria": "renda",
+      "resumo": "Dinheiro todo mês para famílias com renda de até R$ {linhaPobrezaBF} por pessoa.",
+      "condicao": {
+        "f": "rpc",
+        "op": "<=",
+        "v": "linhaPobrezaBF"
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "recebeBF"
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          }
+        ]
+      },
+      "notaTalvez": "Sua renda passou do limite, mas quem já recebe pode continuar ganhando metade do valor por até 2 anos (Regra de Proteção), se a renda for de até meio salário mínimo por pessoa.",
+      "calculo": "bolsaFamilia",
+      "ondeIr": [
+        "cras",
+        "caixa"
+      ],
+      "comoPedir": [
+        "Não existe inscrição separada: estar no CadÚnico com os dados certos já coloca a família na lista.",
+        "Depois, acompanhe pelo aplicativo Bolsa Família ou pelo Caixa Tem.",
+        "Mantenha as crianças na escola, as vacinas em dia e faça o pré-natal."
+      ],
+      "documentos": [
+        "cad_folha",
+        "vacina",
+        "escola",
+        "prenatal"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "MDS - Bolsa Família",
+        "url": "https://www.gov.br/mds/pt-br/acoes-e-programas/bolsa-familia"
+      },
+      "baseLegal": "Lei 14.601/2023",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "bpc_idoso",
+      "titulo": "BPC/LOAS para pessoa idosa",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Um salário mínimo (R$ {salarioMinimo}) por mês para quem tem 65 anos ou mais e renda baixa. Não precisa ter contribuído com o INSS. Não pode ser somado com aposentadoria ou pensão do INSS da mesma pessoa.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "rpcBPC",
+            "op": "<=",
+            "v": "quartoSM"
+          },
+          {
+            "not": {
+              "f": "m.recebeBPC"
+            }
+          },
+          {
+            "not": {
+              "f": "m.fonte",
+              "op": "==",
+              "v": "aposentadoria"
+            }
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "rpcBPC",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "not": {
+              "f": "m.recebeBPC"
+            }
+          },
+          {
+            "not": {
+              "f": "m.fonte",
+              "op": "==",
+              "v": "aposentadoria"
+            }
+          }
+        ]
+      },
+      "notaTalvez": "A renda por pessoa passa de 1/4 do salário mínimo, mas o INSS ou a Justiça podem aceitar até meio salário mínimo quando há gastos com saúde, remédios ou cuidador. Vale pedir.",
+      "valor": "R$ {salarioMinimo} por mês para cada pessoa",
+      "ondeIr": [
+        "cras",
+        "inss"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico com os dados atualizados.",
+        "Peça o BPC pelo Meu INSS ou ligando 135.",
+        "Pode ser pedido biometria (foto) em documento como CIN, CNH ou título de eleitor."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "cad_folha",
+        "endereco"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "INSS - Meu INSS",
+        "url": "https://meu.inss.gov.br"
+      },
+      "baseLegal": "Lei 8.742/1993 (LOAS), art. 20",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "bpc_pcd",
+      "titulo": "BPC/LOAS para pessoa com deficiência",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Um salário mínimo (R$ {salarioMinimo}) por mês para pessoa com deficiência de longo prazo e renda baixa, de qualquer idade (inclusive crianças). Não pode ser somado com aposentadoria ou pensão do INSS da mesma pessoa.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.pcd"
+          },
+          {
+            "f": "rpcBPC",
+            "op": "<=",
+            "v": "quartoSM"
+          },
+          {
+            "not": {
+              "f": "m.recebeBPC"
+            }
+          },
+          {
+            "not": {
+              "f": "m.fonte",
+              "op": "==",
+              "v": "aposentadoria"
+            }
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "m.pcd"
+          },
+          {
+            "f": "rpcBPC",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "not": {
+              "f": "m.recebeBPC"
+            }
+          },
+          {
+            "not": {
+              "f": "m.fonte",
+              "op": "==",
+              "v": "aposentadoria"
+            }
+          }
+        ]
+      },
+      "notaTalvez": "A renda por pessoa passa de 1/4 do salário mínimo, mas pode ser aceita até meio salário mínimo conforme a deficiência e os gastos da família. Vale pedir.",
+      "valor": "R$ {salarioMinimo} por mês para cada pessoa",
+      "ondeIr": [
+        "cras",
+        "inss"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico com os dados atualizados.",
+        "Peça o BPC pelo Meu INSS ou ligando 135.",
+        "O INSS vai marcar perícia médica e avaliação social. Leve todos os laudos."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "cad_folha",
+        "laudo",
+        "endereco"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "INSS - Meu INSS",
+        "url": "https://meu.inss.gov.br"
+      },
+      "baseLegal": "Lei 8.742/1993 (LOAS), art. 20",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "auxilio_inclusao",
+      "titulo": "Auxílio-Inclusão",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Para a pessoa com deficiência que recebe BPC e começa a trabalhar com carteira assinada ganhando até 2 salários mínimos. O BPC para e entra o Auxílio-Inclusão, de meio salário mínimo.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.pcd"
+          },
+          {
+            "f": "m.recebeBPC"
+          },
+          {
+            "f": "m.trabalhoFormal"
+          }
+        ]
+      },
+      "valor": "Meio salário mínimo por mês (R$ {meioSM})",
+      "ondeIr": [
+        "inss"
+      ],
+      "comoPedir": [
+        "Peça pelo Meu INSS ou ligando 135."
+      ],
+      "documentos": [
+        "foto",
+        "ctps",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "INSS",
+        "url": "https://meu.inss.gov.br"
+      },
+      "baseLegal": "Lei 14.176/2021",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "tarifa_social_luz",
+      "titulo": "Tarifa Social de Energia (conta de luz de graça até 80 kWh)",
+      "esfera": "federal",
+      "categoria": "contas",
+      "resumo": "A família não paga os primeiros 80 kWh de luz do mês. Só paga o que passar disso.",
+      "condicao": {
+        "any": [
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "f": "algumBPC"
+          }
+        ]
+      },
+      "valor": "Conta de luz zerada até 80 kWh por mês",
+      "ondeIr": [
+        "cras",
+        "cemig"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico com o mesmo endereço da conta de luz.",
+        "A conta de luz precisa estar no nome de alguém da família.",
+        "O desconto costuma entrar sozinho. Se não aparecer, ligue para a Cemig com o NIS."
+      ],
+      "documentos": [
+        "conta_luz",
+        "nis",
+        "cpf_todos"
+      ],
+      "requerCadUnico": true,
+      "avisoSe": {
+        "f": "contaLuzOutroNome",
+        "texto": "A conta de luz está no nome de outra pessoa. Peça na Cemig para passar para o nome de alguém da família."
+      },
+      "prioridade": 2,
+      "fonte": {
+        "nome": "ANEEL",
+        "url": "https://www.gov.br/aneel"
+      },
+      "baseLegal": "Lei 12.212/2010, alterada pela Lei 15.235/2025",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "desconto_social_luz",
+      "titulo": "Desconto Social de Energia",
+      "esfera": "federal",
+      "categoria": "contas",
+      "resumo": "Para famílias com renda entre meio e um salário mínimo por pessoa. A conta fica mais barata até 120 kWh por mês.",
+      "condicao": {
+        "all": [
+          {
+            "f": "rpc",
+            "op": ">",
+            "v": "meioSM"
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "umSM"
+          },
+          {
+            "not": {
+              "f": "algumBPC"
+            }
+          }
+        ]
+      },
+      "valor": "Desconto na conta de luz até 120 kWh por mês",
+      "ondeIr": [
+        "cras",
+        "cemig"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico com o mesmo endereço da conta de luz.",
+        "O desconto costuma entrar sozinho. Se não aparecer, ligue para a Cemig com o NIS."
+      ],
+      "documentos": [
+        "conta_luz",
+        "nis"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "ANEEL",
+        "url": "https://www.gov.br/aneel"
+      },
+      "baseLegal": "Lei 15.235/2025",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "gas_do_povo",
+      "titulo": "Gás do Povo (botijão de graça)",
+      "esfera": "federal",
+      "categoria": "contas",
+      "resumo": "Recarga gratuita do botijão de 13 kg, de 4 a 6 vezes por ano, conforme o tamanho da família.",
+      "condicao": {
+        "all": [
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "f": "n",
+            "op": ">=",
+            "v": 2
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "f": "rpc",
+        "op": "<=",
+        "v": "meioSM"
+      },
+      "notaTalvez": "Famílias de 2 ou mais pessoas e quem recebe Bolsa Família têm prioridade.",
+      "valor": "De 4 a 6 botijões por ano",
+      "ondeIr": [
+        "cras",
+        "caixa"
+      ],
+      "comoPedir": [
+        "Não precisa se inscrever: a escolha é automática pelo CadÚnico.",
+        "Consulte no aplicativo Meu Social ou ligue 0800 726 0207.",
+        "Se for escolhido, retire o botijão numa revenda credenciada com o cartão do Bolsa Família, cartão da Caixa ou CPF com código no celular."
+      ],
+      "documentos": [
+        "cpf_todos",
+        "nis"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Governo Federal - Gás do Povo",
+        "url": "https://www.gov.br/mme"
+      },
+      "baseLegal": "Programa Gás do Povo (2025)",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "pe_de_meia",
+      "titulo": "Pé-de-Meia (poupança para estudante do ensino médio)",
+      "esfera": "federal",
+      "categoria": "educacao",
+      "porMembro": true,
+      "resumo": "Dinheiro para o estudante de 14 a 24 anos do ensino médio em escola pública (ou EJA de 19 a 24 anos) continuar estudando.",
+      "condicao": {
+        "all": [
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "f": "m.estudo",
+                    "op": "==",
+                    "v": "medio"
+                  },
+                  {
+                    "f": "m.idade",
+                    "op": ">=",
+                    "v": 14
+                  },
+                  {
+                    "f": "m.idade",
+                    "op": "<=",
+                    "v": 24
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "f": "m.estudo",
+                    "op": "==",
+                    "v": "eja"
+                  },
+                  {
+                    "f": "m.idade",
+                    "op": ">=",
+                    "v": 19
+                  },
+                  {
+                    "f": "m.idade",
+                    "op": "<=",
+                    "v": 24
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "f": "m.redePublica"
+          }
+        ]
+      },
+      "valor": "R$ 200 na matrícula + até 9 parcelas de R$ 200 por ano + R$ 1.000 por ano concluído (até R$ 9.200 no total)",
+      "ondeIr": [
+        "escola",
+        "cras",
+        "caixa"
+      ],
+      "comoPedir": [
+        "Não precisa se inscrever: entra automático se estiver no CadÚnico e matriculado.",
+        "Tenha pelo menos 80% de presença nas aulas.",
+        "O dinheiro cai numa conta da Caixa no nome do estudante (veja no Caixa Tem)."
+      ],
+      "documentos": [
+        "cpf_todos",
+        "escola",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "MEC - Pé-de-Meia",
+        "url": "https://www.gov.br/mec/pt-br/pe-de-meia"
+      },
+      "baseLegal": "Lei 14.818/2024",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "farmacia_popular",
+      "titulo": "Farmácia Popular (remédios de graça)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "porMembro": true,
+      "resumo": "Remédios de graça para pressão alta, diabetes, asma, rinite, colesterol, osteoporose, Parkinson, glaucoma e anticoncepcional. Vale para qualquer pessoa com receita, sem limite de renda.",
+      "condicao": {
+        "f": "m.temRemedio"
+      },
+      "valor": "Remédio de graça todo mês",
+      "ondeIr": [
+        "ubs",
+        "farmacia"
+      ],
+      "comoPedir": [
+        "Consiga a receita no posto de saúde (ou de médico particular).",
+        "Leve receita, documento com foto e CPF numa farmácia com a placa \"Aqui tem Farmácia Popular\"."
+      ],
+      "documentos": [
+        "receita",
+        "foto",
+        "cpf_todos"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
+      },
+      "baseLegal": "Programa Farmácia Popular do Brasil",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "fralda",
+      "titulo": "Fralda geriátrica de graça (Farmácia Popular)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "porMembro": true,
+      "resumo": "Fraldas de graça para pessoas com 60 anos ou mais ou com deficiência que têm incontinência (perdem urina ou fezes).",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.incontinencia"
+          },
+          {
+            "any": [
+              {
+                "f": "m.idade",
+                "op": ">=",
+                "v": 60
+              },
+              {
+                "f": "m.pcd"
+              }
+            ]
+          }
+        ]
+      },
+      "valor": "Fraldas de graça todo mês",
+      "ondeIr": [
+        "ubs",
+        "farmacia"
+      ],
+      "comoPedir": [
+        "Peça ao médico do posto uma receita ou laudo dizendo que a pessoa precisa de fralda.",
+        "Leve receita, documento com foto e CPF numa farmácia credenciada."
+      ],
+      "documentos": [
+        "receita",
+        "laudo",
+        "foto",
+        "cpf_todos"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
+      },
+      "baseLegal": "Programa Farmácia Popular do Brasil",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "absorvente",
+      "titulo": "Absorvente de graça (Dignidade Menstrual)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "porMembro": true,
+      "resumo": "Absorventes de graça na Farmácia Popular para meninas e mulheres de 10 a 49 anos de famílias de baixa renda no CadÚnico, estudantes de baixa renda da rede pública ou em situação de rua.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.sexo",
+            "op": "==",
+            "v": "F"
+          },
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 10
+          },
+          {
+            "f": "m.idade",
+            "op": "<=",
+            "v": 49
+          },
+          {
+            "any": [
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "linhaPobrezaBF"
+              },
+              {
+                "f": "situacaoRua"
+              }
+            ]
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "m.sexo",
+            "op": "==",
+            "v": "F"
+          },
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 10
+          },
+          {
+            "f": "m.idade",
+            "op": "<=",
+            "v": 49
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "f": "m.redePublica"
+          }
+        ]
+      },
+      "notaTalvez": "Estudantes de baixa renda da rede pública também podem ter direito. Confirme na UBS.",
+      "valor": "Absorventes de graça (autorização vale 180 dias)",
+      "ondeIr": [
+        "ubs",
+        "farmacia"
+      ],
+      "comoPedir": [
+        "Gere a autorização no aplicativo Meu SUS Digital ou peça ajuda na UBS.",
+        "Leve a autorização, documento com foto e CPF na farmácia credenciada."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular"
+      },
+      "baseLegal": "Lei 14.214/2021",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "sus_basico",
+      "titulo": "Atendimento no SUS: consultas, exames e vacinas",
+      "esfera": "federal",
+      "categoria": "saude",
+      "resumo": "Todo mundo tem direito ao SUS, de graça, sem limite de renda. O posto de saúde (UBS) marca consulta, pede exames e encaminha para especialista.",
+      "condicao": {
+        "f": "precisaSaude"
+      },
+      "condicaoTalvez": {
+        "f": "n",
+        "op": ">=",
+        "v": 1
+      },
+      "notaTalvez": "Mesmo sem nenhuma necessidade agora, é bom ter o Cartão SUS e ser cadastrado na UBS do bairro.",
+      "valor": "Consultas, exames, vacinas e tratamento de graça",
+      "ondeIr": [
+        "ubs"
+      ],
+      "comoPedir": [
+        "Vá à UBS do bairro e peça para cadastrar a família (Saúde da Família).",
+        "Marque consulta. O médico pede os exames e, se precisar, encaminha para especialista.",
+        "Para ver resultados, vacinas e filas, use o aplicativo Meu SUS Digital."
+      ],
+      "documentos": [
+        "sus",
+        "endereco",
+        "foto"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude"
+      },
+      "baseLegal": "Constituição Federal, art. 196; Lei 8.080/1990",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "sus_especialista",
+      "titulo": "Especialista e tratamento fora da cidade (SUS)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "resumo": "Se precisa de médico especialista, cirurgia ou exame que não tem na cidade, o SUS encaminha e pode pagar transporte e estadia (Tratamento Fora de Domicílio).",
+      "condicao": {
+        "f": "precisaEspecialista"
+      },
+      "valor": "Consulta, exame e transporte pelo SUS",
+      "ondeIr": [
+        "ubs",
+        "prefeitura"
+      ],
+      "comoPedir": [
+        "Peça ao médico da UBS o encaminhamento.",
+        "Se o tratamento for em outra cidade, peça na Secretaria de Saúde o TFD (Tratamento Fora de Domicílio).",
+        "Acompanhe a fila pelo Meu SUS Digital."
+      ],
+      "documentos": [
+        "sus",
+        "laudo",
+        "foto",
+        "endereco"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude"
+      },
+      "baseLegal": "Portaria SAS/MS 55/1999 (TFD)",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "sus_dentista",
+      "titulo": "Dentista de graça (Brasil Sorridente)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "resumo": "Tratamento de dente, extração e prótese (dentadura) pelo SUS.",
+      "condicao": {
+        "f": "precisaDentista"
+      },
+      "valor": "Dentista e prótese de graça",
+      "ondeIr": [
+        "ubs"
+      ],
+      "comoPedir": [
+        "Peça na UBS para marcar com a equipe de saúde bucal."
+      ],
+      "documentos": [
+        "sus",
+        "foto"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude"
+      },
+      "baseLegal": "Política Nacional de Saúde Bucal (Lei 14.572/2023)",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "sus_mental",
+      "titulo": "Saúde mental (CAPS)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "resumo": "Atendimento de graça para depressão, ansiedade, crises, uso de álcool ou drogas.",
+      "condicao": {
+        "f": "precisaSaudeMental"
+      },
+      "valor": "Atendimento de graça",
+      "ondeIr": [
+        "ubs"
+      ],
+      "comoPedir": [
+        "Vá à UBS ou direto ao CAPS da cidade.",
+        "Em crise ou risco de vida, ligue 192 (SAMU) ou 188 (CVV, ligação grátis)."
+      ],
+      "documentos": [
+        "sus",
+        "foto"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude"
+      },
+      "baseLegal": "Lei 10.216/2001",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "prenatal",
+      "titulo": "Pré-natal e parto pelo SUS",
+      "esfera": "federal",
+      "categoria": "saude",
+      "porMembro": true,
+      "resumo": "Consultas, exames e ultrassom na gravidez, parto e acompanhamento do bebê de graça.",
+      "condicao": {
+        "f": "m.gestante"
+      },
+      "valor": "Pré-natal e parto de graça",
+      "ondeIr": [
+        "ubs"
+      ],
+      "comoPedir": [
+        "Vá à UBS o quanto antes para começar o pré-natal.",
+        "Pegue o Cartão da Gestante e leve em todas as consultas."
+      ],
+      "documentos": [
+        "sus",
+        "foto"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Ministério da Saúde",
+        "url": "https://www.gov.br/saude"
+      },
+      "baseLegal": "Rede Alyne (Portaria GM/MS 5.350/2024)",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "salario_maternidade",
+      "titulo": "Salário-maternidade",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Pago por 120 dias para quem trabalha com carteira, é MEI, contribui para o INSS ou perdeu o emprego há pouco tempo.",
+      "condicao": {
+        "all": [
+          {
+            "any": [
+              {
+                "f": "m.gestante"
+              },
+              {
+                "f": "m.nutriz"
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "f": "m.trabalhoFormal"
+              },
+              {
+                "f": "m.demitido"
+              }
+            ]
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "any": [
+          {
+            "f": "m.gestante"
+          },
+          {
+            "f": "m.nutriz"
+          }
+        ]
+      },
+      "notaTalvez": "Depende de ter contribuído para o INSS. Quem trabalha na roça (segurada especial) também pode ter direito.",
+      "valor": "Cerca de 4 meses de salário",
+      "ondeIr": [
+        "inss"
+      ],
+      "comoPedir": [
+        "Quem tem carteira assinada pede na empresa.",
+        "Os outros casos pedem pelo Meu INSS ou ligando 135."
+      ],
+      "documentos": [
+        "foto",
+        "ctps",
+        "certidoes"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "INSS",
+        "url": "https://meu.inss.gov.br"
+      },
+      "baseLegal": "Lei 8.213/1991, art. 71",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "seguro_desemprego",
+      "titulo": "Seguro-desemprego",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Para quem foi demitido sem justa causa de trabalho com carteira assinada. Tem prazo: peça em até 120 dias depois da demissão.",
+      "condicao": {
+        "f": "m.demitido"
+      },
+      "valor": "De 3 a 5 parcelas",
+      "ondeIr": [
+        "sine"
+      ],
+      "comoPedir": [
+        "Peça pelo aplicativo Carteira de Trabalho Digital ou no Sine.",
+        "Tenha em mãos o termo de rescisão."
+      ],
+      "documentos": [
+        "foto",
+        "ctps",
+        "rescisao"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Ministério do Trabalho e Emprego",
+        "url": "https://www.gov.br/trabalho-e-emprego"
+      },
+      "baseLegal": "Lei 7.998/1990",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "pessoa_idosa_viagem",
+      "titulo": "Carteira da Pessoa Idosa (viagem de ônibus grátis entre estados)",
+      "esfera": "federal",
+      "categoria": "direitos",
+      "porMembro": true,
+      "resumo": "Pessoas com 60 anos ou mais e renda individual de até 2 salários mínimos viajam de graça ou com desconto em ônibus entre estados.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 60
+          },
+          {
+            "f": "m.renda",
+            "op": "<=",
+            "v": "doisSM"
+          }
+        ]
+      },
+      "valor": "2 vagas grátis por ônibus e 50% de desconto nas outras",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico.",
+        "Peça a carteira no CRAS ou pelo site da Carteira da Pessoa Idosa."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "nis"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 5,
+      "fonte": {
+        "nome": "MDS",
+        "url": "https://www.gov.br/mds"
+      },
+      "baseLegal": "Estatuto da Pessoa Idosa (Lei 10.741/2003), art. 40",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "id_jovem",
+      "titulo": "ID Jovem (meia-entrada e viagens)",
+      "esfera": "federal",
+      "categoria": "direitos",
+      "porMembro": true,
+      "resumo": "Jovens de 15 a 29 anos de famílias de baixa renda pagam meia-entrada em cinema, shows e eventos e têm vagas grátis em ônibus entre estados.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 15
+          },
+          {
+            "f": "m.idade",
+            "op": "<=",
+            "v": 29
+          },
+          {
+            "f": "rendaTotal",
+            "op": "<=",
+            "v": "doisSM"
+          }
+        ]
+      },
+      "valor": "Meia-entrada e viagens grátis",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico.",
+        "Gere a carteirinha pelo aplicativo ID Jovem."
+      ],
+      "documentos": [
+        "nis",
+        "cpf_todos"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 5,
+      "fonte": {
+        "nome": "Secretaria Nacional da Juventude",
+        "url": "https://www.gov.br/secretariageral"
+      },
+      "baseLegal": "Estatuto da Juventude (Lei 12.852/2013)",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "passe_livre_pcd",
+      "titulo": "Passe Livre (pessoa com deficiência, viagem entre estados)",
+      "esfera": "federal",
+      "categoria": "direitos",
+      "porMembro": true,
+      "resumo": "Viagem de graça em ônibus, trem e barco entre estados para pessoa com deficiência de baixa renda.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.pcd"
+          },
+          {
+            "any": [
+              {
+                "f": "m.recebeBPC"
+              },
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "umSM"
+              }
+            ]
+          }
+        ]
+      },
+      "valor": "Passagem de graça (com acompanhante, se tiver laudo)",
+      "ondeIr": [
+        "antt"
+      ],
+      "comoPedir": [
+        "Peça pelo site da ANTT. A carteirinha é digital (QR Code).",
+        "Para levar acompanhante de graça, precisa de laudo dizendo que precisa."
+      ],
+      "documentos": [
+        "foto",
+        "laudo",
+        "nis"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 5,
+      "fonte": {
+        "nome": "ANTT",
+        "url": "https://www.gov.br/antt"
+      },
+      "baseLegal": "Lei 8.899/1994; Portarias Interministeriais 2 e 3/2026",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "mcmv",
+      "titulo": "Minha Casa, Minha Vida (Faixa 1)",
+      "esfera": "federal",
+      "categoria": "moradia",
+      "resumo": "Casa própria com quase tudo pago pelo governo para famílias com renda de até R$ {mcmvFaixa1} por mês. Famílias do Bolsa Família ou BPC podem receber a casa de graça.",
+      "condicao": {
+        "all": [
+          {
+            "f": "rendaTotal",
+            "op": "<=",
+            "v": "mcmvFaixa1"
+          },
+          {
+            "f": "semCasaPropria"
+          }
+        ]
+      },
+      "valor": "Casa própria com parcela pequena ou de graça",
+      "ondeIr": [
+        "prefeitura",
+        "cras"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico.",
+        "Faça a inscrição na Secretaria de Habitação da Prefeitura (as inscrições abrem em datas certas).",
+        "Mulher chefe de família, pessoa idosa, pessoa com deficiência e quem mora em área de risco têm prioridade."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "certidoes",
+        "renda",
+        "endereco",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "Ministério das Cidades",
+        "url": "https://www.gov.br/cidades"
+      },
+      "baseLegal": "Lei 14.620/2023",
+      "aviso": "O limite de renda da Faixa 1 em 2026 deve ser confirmado na Prefeitura ou na Caixa.",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "isencao_taxas",
+      "titulo": "Isenção de taxa do ENEM e de concursos",
+      "esfera": "federal",
+      "categoria": "educacao",
+      "porMembro": true,
+      "resumo": "Quem está no CadÚnico com renda de até meio salário mínimo por pessoa não paga a inscrição de concursos federais e pode pedir isenção no ENEM.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 15
+          },
+          {
+            "f": "m.idade",
+            "op": "<=",
+            "v": 59
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          }
+        ]
+      },
+      "valor": "Inscrição de graça",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Na inscrição do ENEM ou do concurso, marque a opção de isenção e informe o NIS."
+      ],
+      "documentos": [
+        "nis"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 6,
+      "fonte": {
+        "nome": "INEP / Lei 13.656/2018",
+        "url": "https://www.gov.br/inep"
+      },
+      "baseLegal": "Lei 13.656/2018",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "garantia_safra",
+      "titulo": "Garantia-Safra e Pronaf (agricultor familiar)",
+      "esfera": "federal",
+      "categoria": "renda",
+      "resumo": "Ajuda para agricultor familiar que perde a plantação por seca ou chuva (no Norte de Minas e Vale do Jequitinhonha) e crédito barato para produzir (Pronaf).",
+      "condicao": {
+        "f": "agricultor"
+      },
+      "valor": "Parcelas em caso de perda da safra + crédito",
+      "ondeIr": [
+        "emater",
+        "prefeitura"
+      ],
+      "comoPedir": [
+        "Tire o CAF (Cadastro Nacional da Agricultura Familiar) no Sindicato Rural ou na Emater.",
+        "Pergunte na Secretaria de Agricultura se sua cidade participa do Garantia-Safra."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "terra",
+        "endereco"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "Ministério do Desenvolvimento Agrário",
+        "url": "https://www.gov.br/mda"
+      },
+      "baseLegal": "Lei 10.420/2002",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "seguro_defeso",
+      "titulo": "Seguro-defeso (pescador artesanal)",
+      "esfera": "federal",
+      "categoria": "renda",
+      "resumo": "Um salário mínimo por mês durante o período em que a pesca é proibida (piracema).",
+      "condicao": {
+        "f": "pescador"
+      },
+      "valor": "R$ {salarioMinimo} por mês no período de defeso",
+      "ondeIr": [
+        "inss"
+      ],
+      "comoPedir": [
+        "Tenha o Registro Geral da Pesca (RGP) em dia.",
+        "Peça pelo Meu INSS ou ligando 135."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "nis"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "INSS",
+        "url": "https://meu.inss.gov.br"
+      },
+      "baseLegal": "Lei 10.779/2003",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "documentos_gratis",
+      "titulo": "Documentos de graça (certidão e identidade)",
+      "esfera": "federal",
+      "categoria": "direitos",
+      "porMembro": true,
+      "resumo": "A primeira via da Carteira de Identidade (CIN) é de graça. A segunda via da certidão de nascimento é de graça para quem declara que não pode pagar.",
+      "condicao": {
+        "f": "m.semDocumento"
+      },
+      "valor": "Documento de graça",
+      "ondeIr": [
+        "cartorio",
+        "cras"
+      ],
+      "comoPedir": [
+        "Certidão: peça no cartório onde foi registrado (ou em qualquer cartório) e diga que não pode pagar.",
+        "Identidade (CIN): agende no site MG App, na UAI ou na Polícia Civil."
+      ],
+      "documentos": [
+        "certidoes"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Lei 9.534/1997 e Decreto 10.977/2022",
+        "url": "https://www.gov.br/governodigital/pt-br/identidade"
+      },
+      "baseLegal": "Lei 9.534/1997; Decreto 10.977/2022",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "copasa_social",
+      "titulo": "Tarifa Social da Copasa (água mais barata)",
+      "esfera": "estadual",
+      "categoria": "contas",
+      "resumo": "Desconto de 55% na conta de água para renda de até meio salário mínimo por pessoa, e de 65% para renda de até R$ {linhaPobrezaBF} por pessoa. Quem recebe BPC também tem direito.",
+      "condicao": {
+        "all": [
+          {
+            "f": "aguaCopasa"
+          },
+          {
+            "any": [
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "meioSM"
+              },
+              {
+                "f": "algumBPC"
+              }
+            ]
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "aguaNaoSei"
+          },
+          {
+            "any": [
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "meioSM"
+              },
+              {
+                "f": "algumBPC"
+              }
+            ]
+          }
+        ]
+      },
+      "notaTalvez": "Vale se a água da sua casa for da Copasa. Se for do SAAE da Prefeitura, pergunte se existe tarifa social.",
+      "calculo": "copasa",
+      "ondeIr": [
+        "copasa",
+        "cras"
+      ],
+      "comoPedir": [
+        "Esteja no CadÚnico.",
+        "Peça pelo WhatsApp da Copasa (31) 99770-7000, pelo site ou numa agência.",
+        "O desconto começa depois que a Copasa confere os dados."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "conta_agua",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Copasa / Diário do Comércio",
+        "url": "https://diariodocomercio.com.br/economia/nova-tarifa-social-copasa-oferece-65-desconto-beneficiarios/"
+      },
+      "baseLegal": "Resolução ARSAE-MG; vigente desde 22/01/2026",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "trilhas_futuro",
+      "titulo": "Trilhas de Futuro (curso técnico grátis em Minas)",
+      "esfera": "estadual",
+      "categoria": "educacao",
+      "porMembro": true,
+      "resumo": "Curso técnico de graça pago pelo Governo de Minas para quem está no ensino médio ou já terminou. Pode incluir ajuda de transporte e alimentação.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": ">=",
+            "v": 15
+          },
+          {
+            "any": [
+              {
+                "f": "m.estudo",
+                "op": "==",
+                "v": "medio"
+              },
+              {
+                "f": "m.estudo",
+                "op": "==",
+                "v": "eja"
+              },
+              {
+                "f": "m.medioCompleto"
+              }
+            ]
+          }
+        ]
+      },
+      "valor": "Curso técnico de graça",
+      "ondeIr": [
+        "escola"
+      ],
+      "comoPedir": [
+        "Fique de olho nos editais no site da Secretaria de Educação de Minas (as inscrições abrem em datas certas).",
+        "Faça a inscrição pela internet; a escola pode ajudar."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "escola"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 6,
+      "fonte": {
+        "nome": "Secretaria de Estado de Educação de MG",
+        "url": "https://www.educacao.mg.gov.br"
+      },
+      "baseLegal": "Programa estadual Trilhas de Futuro",
+      "aviso": "As regras mudam a cada edital. Confira o edital aberto.",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "beneficio_eventual",
+      "titulo": "Benefícios eventuais da Prefeitura (cesta básica, auxílio-natalidade, auxílio-funeral)",
+      "esfera": "municipal",
+      "categoria": "assistencia",
+      "resumo": "A Prefeitura deve ajudar em momentos difíceis: nascimento de bebê, morte na família, falta de comida, despejo ou desastre (enchente, deslizamento).",
+      "condicao": {
+        "any": [
+          {
+            "all": [
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "quartoSM"
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "f": "algumaGestante"
+              },
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "meioSM"
+              }
+            ]
+          },
+          {
+            "f": "emergencia"
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "f": "rpc",
+        "op": "<=",
+        "v": "meioSM"
+      },
+      "notaTalvez": "Cada cidade define o limite de renda. Pergunte no CRAS.",
+      "valor": "Varia conforme a cidade",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao CRAS e conte o que está acontecendo.",
+        "Peça a avaliação para benefício eventual."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "endereco",
+        "cad_folha"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "LOAS, art. 22",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/l8742.htm"
+      },
+      "baseLegal": "Lei 8.742/1993, art. 22",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "creche",
+      "titulo": "Vaga em creche e pré-escola pública",
+      "esfera": "municipal",
+      "categoria": "educacao",
+      "porMembro": true,
+      "resumo": "Toda criança de 0 a 5 anos tem direito a vaga em creche ou pré-escola pública perto de casa. A partir dos 4 anos a matrícula é obrigatória.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.idade",
+            "op": "<=",
+            "v": 5
+          },
+          {
+            "f": "m.estudo",
+            "op": "==",
+            "v": "nao"
+          }
+        ]
+      },
+      "valor": "Vaga de graça",
+      "ondeIr": [
+        "prefeitura"
+      ],
+      "comoPedir": [
+        "Faça a inscrição na Secretaria de Educação da Prefeitura ou numa escola municipal.",
+        "Se não houver vaga, procure a Defensoria Pública ou o Conselho Tutelar."
+      ],
+      "documentos": [
+        "certidoes",
+        "vacina",
+        "endereco",
+        "cpf_todos"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Constituição Federal, art. 208",
+        "url": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm"
+      },
+      "baseLegal": "CF art. 208, IV; ECA art. 54",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "violencia",
+      "titulo": "Proteção para quem sofre violência",
+      "esfera": "municipal",
+      "categoria": "direitos",
+      "resumo": "Atendimento, abrigo e medida protetiva para mulher, criança, pessoa idosa ou pessoa com deficiência que sofre violência.",
+      "condicao": {
+        "f": "violencia"
+      },
+      "valor": "Atendimento e proteção de graça",
+      "ondeIr": [
+        "creas",
+        "defensoria"
+      ],
+      "comoPedir": [
+        "Em perigo agora: ligue 190.",
+        "Mulher: ligue 180 (grátis, 24 horas) ou vá à Delegacia da Mulher.",
+        "Criança, idoso ou pessoa com deficiência: ligue 100 ou procure o Conselho Tutelar / CREAS."
+      ],
+      "documentos": [],
+      "requerCadUnico": false,
+      "prioridade": 0,
+      "fonte": {
+        "nome": "Lei Maria da Penha (11.340/2006)",
+        "url": "https://www.gov.br/mulheres"
+      },
+      "baseLegal": "Lei 11.340/2006; ECA; Estatuto da Pessoa Idosa",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "situacao_rua",
+      "titulo": "Apoio para pessoa em situação de rua",
+      "esfera": "municipal",
+      "categoria": "assistencia",
+      "resumo": "Abrigo, alimentação, banho, documentos e encaminhamento para trabalho e moradia.",
+      "condicao": {
+        "f": "situacaoRua"
+      },
+      "valor": "Atendimento de graça",
+      "ondeIr": [
+        "centropop",
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao Centro POP ou ao CRAS.",
+        "Pessoas em situação de rua podem entrar no CadÚnico mesmo sem endereço."
+      ],
+      "documentos": [],
+      "requerCadUnico": false,
+      "prioridade": 0,
+      "fonte": {
+        "nome": "Política Nacional para a População em Situação de Rua",
+        "url": "https://www.gov.br/mdh"
+      },
+      "baseLegal": "Decreto 7.053/2009",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "defensoria",
+      "titulo": "Advogado de graça (Defensoria Pública)",
+      "esfera": "estadual",
+      "categoria": "direitos",
+      "resumo": "Ajuda na Justiça de graça: pensão alimentícia, guarda, despejo, benefício negado pelo INSS, vaga em creche, remédio que o SUS não deu.",
+      "condicao": {
+        "all": [
+          {
+            "f": "precisaJustica"
+          },
+          {
+            "f": "rendaTotal",
+            "op": "<=",
+            "v": "tresSM"
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "f": "precisaJustica"
+      },
+      "notaTalvez": "A Defensoria avalia a renda e os gastos de cada família. Vale procurar.",
+      "valor": "Advogado de graça",
+      "ondeIr": [
+        "defensoria"
+      ],
+      "comoPedir": [
+        "Procure a Defensoria Pública da sua cidade.",
+        "Leve todos os papéis do problema (cartas, contas, decisões)."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "endereco",
+        "renda"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Defensoria Pública de MG",
+        "url": "https://defensoria.mg.def.br"
+      },
+      "baseLegal": "Constituição Federal, art. 134",
+      "aviso": "O limite de renda é uma referência; a Defensoria analisa cada caso.",
+      "verificadoEm": "2026-10-21"
+    }
+  ],
+  "municipios": {
+    "3106200": {
+      "extras": [
+        {
+          "titulo": "Prefeitura de Belo Horizonte: telefone 156",
+          "texto": "Para saber o endereço do CRAS, da UBS e do Restaurante Popular mais perto, ligue 156 ou acesse prefeitura.pbh.gov.br."
+        }
+      ],
+      "aviso": "Endereços e telefones mudam. Ligue antes de ir."
+    },
+    "3132404": {
+      "verificadoEm": "2026-10-21",
+      "fonte": {
+        "nome": "Prefeitura de Itajubá",
+        "url": "https://www.itajuba.mg.gov.br/detalhe-da-agenda/info/cras-volante/107"
+      },
+      "cras": [
+        {
+          "nome": "CRAS Antônio Carlos Parreira Tiengo",
+          "endereco": "Rua Zequinha Braga, 212, bairro São Vicente",
+          "telefone": ""
+        },
+        {
+          "nome": "CRAS Luzia Silva Riera",
+          "endereco": "Rua Miguel Braga, 382, bairro Boa Vista (ao lado da Igreja Assembleia de Deus)",
+          "telefone": ""
+        }
+      ],
+      "extras": [
+        {
+          "titulo": "Itajubá: zona rural tem CRAS Volante",
+          "texto": "Quem mora na roça pode ser atendido pelo CRAS Volante, que vai até os bairros rurais. Pergunte a agenda num dos CRAS da cidade. A água da cidade é da Copasa."
+        }
+      ],
+      "aviso": "Endereços e telefones mudam. Ligue antes de ir."
+    },
+    "3152501": {
+      "verificadoEm": "2026-10-21",
+      "fonte": {
+        "nome": "Lista de CRAS de Pouso Alegre (atualizada em 08/04/2026)",
+        "url": "https://cliquesp.com.br/cidades/cras-pouso-alegre-mg-agendamento-enderecos-telefones-servicos-e-como-ser-atendido-gratuitamente/"
+      },
+      "cras": [
+        {
+          "nome": "CRAS Central (CEUs)",
+          "endereco": "Av. Pinto Cobra (Perimetral), 2015, Centro",
+          "telefone": "(35) 3112-3819"
+        },
+        {
+          "nome": "CRAS Volante (zona rural)",
+          "endereco": "Av. Pinto Cobra (Perimetral), 2015, Centro",
+          "telefone": "(35) 3112-3851"
+        },
+        {
+          "nome": "CRAS Cidade Jardim",
+          "endereco": "Av. Camilo de Barros Laraia, 480, Cidade Jardim",
+          "telefone": "(35) 3112-3813"
+        },
+        {
+          "nome": "CRAS Nordeste (Faisqueira)",
+          "endereco": "Rua Geraldo dos Reis, 85, Faisqueira",
+          "telefone": "(35) 3112-3745"
+        },
+        {
+          "nome": "CRAS Sudeste (São Geraldo)",
+          "endereco": "Av. Vereador Antônio da Costa Rios, 861, São Geraldo",
+          "telefone": "(35) 3112-3824"
+        },
+        {
+          "nome": "CRAS Sudoeste (São João)",
+          "endereco": "Rua Ouro Fino, 62, Jardim Amazonas",
+          "telefone": "(35) 3112-3771"
+        },
+        {
+          "nome": "CRAS Sul (São Cristóvão)",
+          "endereco": "Rua Hélio Jacy Gouvêa Schiefler, 670, Jardim Aeroporto",
+          "telefone": "(35) 3112-3836"
+        }
+      ],
+      "extras": [
+        {
+          "titulo": "Pouso Alegre: qual CRAS atende seu bairro",
+          "texto": "Cada bairro tem um CRAS de referência. Na dúvida, ligue para a Secretaria Municipal de Políticas Sociais: (35) 3112-3877. A água da cidade é da Copasa."
+        }
+      ],
+      "aviso": "Endereços e telefones mudam. Ligue antes de ir."
+    },
+    "3147303": {
+      "verificadoEm": "2026-10-21",
+      "fonte": {
+        "nome": "Prefeitura de Paraisópolis",
+        "url": "https://www.paraisopolis.mg.gov.br/locais/cras-centro-de-referencia-da-assistencia-social/"
+      },
+      "cras": [
+        {
+          "nome": "CRAS de Paraisópolis",
+          "endereco": "Av. Rio Branco, 603, Centro (das 8h às 12h e das 13h às 17h)",
+          "telefone": "(35) 3651-1595 · (35) 3651-4380 · (35) 98429-1243"
+        }
+      ],
+      "extras": [],
+      "aviso": "Endereços e telefones mudam. Ligue antes de ir."
+    },
+    "3159605": {
+      "verificadoEm": "2026-10-21",
+      "fonte": {
+        "nome": "Prefeitura de Santa Rita do Sapucaí",
+        "url": "https://pmsrs.mg.gov.br/departamentos/secretaria-municipal-de-desenvolvimento-social/"
+      },
+      "cras": [
+        {
+          "nome": "CRAS Santa Rita",
+          "endereco": "Rua Cel. Francisco Moreira da Costa, 183, Centro (das 7h30 às 11h30 e das 13h às 16h30)",
+          "telefone": "(35) 3471-1249"
+        }
+      ],
+      "extras": [
+        {
+          "titulo": "Santa Rita do Sapucaí: programas da Prefeitura",
+          "texto": "A Secretaria de Desenvolvimento Social (Rua Juca Castelo, 91, Centro, telefone (35) 3471-4309) tem o Cartão Alimentação e a Lavanderia Comunitária. Pergunte no CRAS se sua família pode participar."
+        }
+      ],
+      "aviso": "Endereços e telefones mudam. Ligue antes de ir."
+    }
+  }
+}
