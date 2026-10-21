@@ -1,5 +1,5 @@
 {
-  "versao": "2026.10.6",
+  "versao": "2026.10.7",
   "atualizadoEm": "2026-10-21",
   "observacao": "Regras usadas para estimar direitos. A decisão final é sempre do órgão responsável. Para atualizar, edite este arquivo, mude 'versao' e 'atualizadoEm' e publique junto com o aplicativo.",
   "parametros": {
@@ -119,6 +119,24 @@
       "como": "Peça pelo aplicativo FGTS ou numa agência da Caixa, com o laudo médico.",
       "telefone": "0800 726 0101",
       "site": "https://www.caixa.gov.br"
+    },
+    "saude_municipal": {
+      "nome": "Secretaria Municipal de Saúde (setor de TFD ou de transporte de pacientes)",
+      "como": "Primeiro o médico do SUS preenche o pedido de TFD. Depois leve o pedido à Secretaria de Saúde da sua cidade. Peça com antecedência, antes da data da consulta ou do exame.",
+      "telefone": "136 (Disque Saúde)",
+      "site": "https://bvsms.saude.gov.br/bvs/saudelegis/sas/1999/prt0055_24_02_1999.html"
+    },
+    "transporte_municipal": {
+      "nome": "Ônibus da cidade (empresa de ônibus ou Prefeitura)",
+      "como": "Na maioria das cidades basta mostrar um documento com foto ao motorista ou cobrador. Algumas cidades pedem um cartão: pergunte na empresa de ônibus ou na Prefeitura.",
+      "telefone": "",
+      "site": "https://www.planalto.gov.br/ccivil_03/leis/2003/l10.741.htm"
+    },
+    "restaurante_popular": {
+      "nome": "Restaurante Popular de Belo Horizonte",
+      "como": "Vá direto, não precisa de cadastro. Restaurante I: Av. do Contorno, 11.484, Centro (café 7h–8h, almoço 11h–14h, jantar 17h–21h). Restaurante III: Rua Padre Pedro Pinto, 2.277, Venda Nova (almoço). Restaurante IV: Rua Afonso Vaz de Melo, 1.001, Barreiro (almoço). Refeitório Popular: Av. dos Andradas, 3.100, Santa Efigênia (almoço).",
+      "telefone": "156",
+      "site": "https://prefeitura.pbh.gov.br/seguranca-alimentar-nutricional/equipamentos/restaurantes-populares"
     }
   },
   "documentos": {
@@ -1760,7 +1778,11 @@
       "baseLegal": "Lei 8.742/1993, art. 22",
       "verificadoEm": "2026-10-21",
       "porque": "A renda é {rpc$} por pessoa (até 1/4 do salário mínimo, {quartoSM$}), ou há gestante, ou a família passa por emergência.",
-      "porqueTalvez": "A renda é {rpc$} por pessoa, até meio salário mínimo; cada cidade define o limite."
+      "porqueTalvez": "A renda é {rpc$} por pessoa, até meio salário mínimo; cada cidade define o limite.",
+      "excetoMunicipios": [
+        "3152501",
+        "3159605"
+      ]
     },
     {
       "id": "creche",
@@ -2027,19 +2049,487 @@
       "aviso": "Nem todo remédio está na lista. O médico ou a farmácia confirmam se o seu está.",
       "verificadoEm": "2026-10-21",
       "porque": "{nome} tem uma doença que costuma usar remédio de alto custo do SUS."
+    },
+    {
+      "id": "tfd",
+      "titulo": "Tratamento Fora de Domicílio (TFD): transporte para tratar em outra cidade",
+      "esfera": "municipal",
+      "categoria": "saude",
+      "resumo": "Quando o tratamento pelo SUS não existe na sua cidade, a Prefeitura deve levar o paciente (e um acompanhante, se precisar) até a cidade onde ele vai ser atendido. Em viagens longas pode haver ajuda de custo para comida e pousada.",
+      "condicao": {
+        "any": [
+          {
+            "f": "precisaEspecialista"
+          }
+        ]
+      },
+      "valor": "Transporte de graça e, em alguns casos, ajuda de custo",
+      "ondeIr": [
+        "ubs",
+        "saude_municipal"
+      ],
+      "comoPedir": [
+        "Peça ao médico do SUS que preencha o pedido de TFD, dizendo por que o tratamento precisa ser em outra cidade.",
+        "Leve o pedido à Secretaria Municipal de Saúde e pergunte o dia e o horário do transporte.",
+        "Se a pessoa não pode ir sozinha, peça que o médico escreva que precisa de acompanhante."
+      ],
+      "documentos": [
+        "foto_beneficiario",
+        "cpf_beneficiario",
+        "sus",
+        "laudo",
+        "endereco"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Ministério da Saúde, Portaria SAS 55/1999",
+        "url": "https://bvsms.saude.gov.br/bvs/saudelegis/sas/1999/prt0055_24_02_1999.html"
+      },
+      "baseLegal": "Portaria SAS/MS 55/1999",
+      "verificadoEm": "2026-10-21",
+      "porque": "Alguém da família precisa de especialista ou tratamento que muitas vezes não existe na própria cidade. Se for o caso, o SUS deve pagar o transporte."
+    },
+    {
+      "id": "onibus_idoso",
+      "titulo": "Ônibus da cidade de graça para pessoa com 65 anos ou mais",
+      "esfera": "municipal",
+      "categoria": "direitos",
+      "porMembro": true,
+      "resumo": "Pessoas com 65 anos ou mais não pagam ônibus urbano. Algumas cidades dão o mesmo direito a partir dos 60 anos.",
+      "condicao": {
+        "f": "m.idade",
+        "op": ">=",
+        "v": 65
+      },
+      "condicaoTalvez": {
+        "f": "m.idade",
+        "op": ">=",
+        "v": 60
+      },
+      "notaTalvez": "De 60 a 64 anos depende da lei da sua cidade. Pergunte na empresa de ônibus.",
+      "valor": "Passagem de ônibus urbano de graça",
+      "ondeIr": [
+        "transporte_municipal"
+      ],
+      "comoPedir": [
+        "Mostre um documento com foto ao motorista ou cobrador.",
+        "Se a cidade usar cartão, peça o cartão da pessoa idosa na empresa de ônibus ou na Prefeitura."
+      ],
+      "documentos": [
+        "foto_beneficiario"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 5,
+      "fonte": {
+        "nome": "Estatuto da Pessoa Idosa, art. 39",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/2003/l10.741.htm"
+      },
+      "baseLegal": "Lei 10.741/2003, art. 39",
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem {idade} anos (65 ou mais).",
+      "porqueTalvez": "{nome} tem {idade} anos. De 60 a 64 anos, o ônibus de graça depende da lei da cidade."
+    },
+    {
+      "id": "transporte_escolar",
+      "titulo": "Transporte escolar de graça (zona rural)",
+      "esfera": "municipal",
+      "categoria": "educacao",
+      "porMembro": true,
+      "resumo": "Estudante da escola pública que mora na roça tem direito a transporte escolar de graça, pago pela Prefeitura ou pelo Estado.",
+      "condicao": {
+        "all": [
+          {
+            "f": "zonaRural"
+          },
+          {
+            "f": "m.redePublica"
+          }
+        ]
+      },
+      "valor": "Transporte de ida e volta para a escola",
+      "ondeIr": [
+        "escola",
+        "prefeitura"
+      ],
+      "comoPedir": [
+        "Peça na secretaria da escola a inclusão do estudante na rota do transporte escolar.",
+        "Se não tiver rota perto de casa, peça na Secretaria Municipal de Educação."
+      ],
+      "documentos": [
+        "escola",
+        "endereco"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "Lei de Diretrizes e Bases da Educação, arts. 10 e 11",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/l9394.htm"
+      },
+      "baseLegal": "Lei 9.394/1996, arts. 10, VII e 11, VI",
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} estuda em escola pública e a família mora na zona rural."
+    },
+    {
+      "id": "pa_natalidade",
+      "titulo": "Pouso Alegre: Auxílio-Natalidade da Prefeitura",
+      "esfera": "municipal",
+      "categoria": "assistencia",
+      "municipios": [
+        "3152501"
+      ],
+      "resumo": "Ajuda em dinheiro de 35% do salário mínimo para a família de baixa renda que vai ter ou acabou de ter bebê. Pode pedir de 60 dias antes do parto até 30 dias depois.",
+      "condicao": {
+        "all": [
+          {
+            "any": [
+              {
+                "f": "algumaGestante"
+              },
+              {
+                "f": "nutrizes",
+                "op": ">=",
+                "v": 1
+              }
+            ]
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "quartoSM"
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "any": [
+              {
+                "f": "algumaGestante"
+              },
+              {
+                "f": "nutrizes",
+                "op": ">=",
+                "v": 1
+              }
+            ]
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          }
+        ]
+      },
+      "notaTalvez": "Acima de 1/4 do salário mínimo por pessoa, só com avaliação da assistente social.",
+      "valor": "35% do salário mínimo, uma vez",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao CRAS do seu bairro entre 60 dias antes do parto e 30 dias depois.",
+        "A família precisa estar no CadÚnico."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "endereco",
+        "renda",
+        "prenatal",
+        "certidao_bebe",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Pouso Alegre, Resolução CMAS 09/2019",
+        "url": "https://www.diariomunicipal.com.br/amm-mg/materia/06C3AC14"
+      },
+      "baseLegal": "Resolução CMAS de Pouso Alegre 09/2019, arts. 8 a 10",
+      "verificadoEm": "2026-10-21",
+      "porque": "Tem gestante ou bebê na família e a renda é {rpc$} por pessoa, até 1/4 do salário mínimo ({quartoSM$}).",
+      "porqueTalvez": "Tem gestante ou bebê na família e a renda é {rpc$} por pessoa, acima de 1/4 do salário mínimo mas até meio ({meioSM$}). A assistente social pode aprovar."
+    },
+    {
+      "id": "pa_eventuais",
+      "titulo": "Pouso Alegre: cesta básica, auxílio-funeral, mudança e documentos",
+      "esfera": "municipal",
+      "categoria": "assistencia",
+      "municipios": [
+        "3152501"
+      ],
+      "resumo": "A Prefeitura de Pouso Alegre dá cesta básica, paga o funeral, ajuda na mudança e paga 2ª via de documentos e foto 3x4 para famílias de baixa renda acompanhadas pelo CRAS.",
+      "condicao": {
+        "f": "rpc",
+        "op": "<=",
+        "v": "quartoSM"
+      },
+      "condicaoTalvez": {
+        "f": "rpc",
+        "op": "<=",
+        "v": "meioSM"
+      },
+      "notaTalvez": "Acima de 1/4 do salário mínimo por pessoa, só com avaliação da assistente social.",
+      "valor": "Cesta básica, funeral, mudança ou documentos, conforme a necessidade",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao CRAS do seu bairro e conte a necessidade.",
+        "A família precisa estar no CadÚnico e ser acompanhada pelo CRAS.",
+        "Dúvidas: Secretaria de Políticas Sociais, (35) 3112-3877."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "certidoes",
+        "endereco",
+        "renda",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Pouso Alegre, Resolução CMAS 09/2019",
+        "url": "https://www.diariomunicipal.com.br/amm-mg/materia/06C3AC14"
+      },
+      "baseLegal": "Resolução CMAS de Pouso Alegre 09/2019, art. 5",
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda é {rpc$} por pessoa, até 1/4 do salário mínimo ({quartoSM$}), que é o limite em Pouso Alegre.",
+      "porqueTalvez": "A renda é {rpc$} por pessoa, entre 1/4 ({quartoSM$}) e meio salário mínimo ({meioSM$}). Em casos especiais a assistente social pode aprovar."
+    },
+    {
+      "id": "pa_moradia",
+      "titulo": "Pouso Alegre: Auxílio-Moradia (ajuda temporária com o aluguel)",
+      "esfera": "municipal",
+      "categoria": "moradia",
+      "municipios": [
+        "3152501"
+      ],
+      "resumo": "Ajuda de até R$ 550 por mês, por até 6 meses (podendo renovar uma vez), para família de baixa renda que mora em Pouso Alegre há pelo menos 2 anos e ficou sem condições de morar onde estava.",
+      "condicao": {
+        "all": [
+          {
+            "f": "emergencia"
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "quartoSM"
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "emergencia"
+          },
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          }
+        ]
+      },
+      "notaTalvez": "Depende da avaliação da assistente social.",
+      "valor": "Até R$ 550 por mês, por até 6 meses",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao CRAS e explique a situação da moradia.",
+        "Leve papéis que mostrem o problema (laudo da Defesa Civil, ordem de despejo, boletim de ocorrência)."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "endereco",
+        "renda",
+        "cad_folha",
+        "docs_caso"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Pouso Alegre, Resolução CMAS 09/2019",
+        "url": "https://www.diariomunicipal.com.br/amm-mg/materia/06C3AC14"
+      },
+      "baseLegal": "Resolução CMAS de Pouso Alegre 09/2019, arts. 14 a 21",
+      "verificadoEm": "2026-10-21",
+      "porque": "A família passa por uma emergência e a renda é {rpc$} por pessoa, até 1/4 do salário mínimo ({quartoSM$}).",
+      "porqueTalvez": "A família passa por uma emergência e a renda é {rpc$} por pessoa, até meio salário mínimo ({meioSM$})."
+    },
+    {
+      "id": "srs_eventuais",
+      "titulo": "Santa Rita do Sapucaí: cesta básica, Pão e Leite, natalidade, funeral e passagem",
+      "esfera": "municipal",
+      "categoria": "assistencia",
+      "municipios": [
+        "3159605"
+      ],
+      "resumo": "A Prefeitura de Santa Rita do Sapucaí dá cesta básica, o Auxílio Pão e Leite, auxílio-natalidade, auxílio-funeral e passagem de ônibus para outra cidade a famílias de baixa renda, depois da avaliação de uma assistente social.",
+      "condicao": {
+        "f": "rpc",
+        "op": "<",
+        "v": "quartoSM"
+      },
+      "condicaoTalvez": {
+        "f": "rpc",
+        "op": "<=",
+        "v": "meioSM"
+      },
+      "notaTalvez": "O limite da cidade é menos de 1/4 do salário mínimo por pessoa. Acima disso, pergunte no CRAS.",
+      "valor": "Conforme a necessidade da família",
+      "ondeIr": [
+        "cras"
+      ],
+      "comoPedir": [
+        "Vá ao CRAS (Rua Cel. Francisco Moreira da Costa, 183) ou à Secretaria de Desenvolvimento Social (Rua Juca Castelo, 91).",
+        "Conte a necessidade. Uma assistente social vai avaliar a família."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "endereco",
+        "renda",
+        "cad_folha"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Santa Rita do Sapucaí, Plano Municipal de Assistência Social 2022–2025 e Decreto 15.318/2023",
+        "url": "https://www.pmsrs.mg.gov.br/instrumentos/decreto-n-15-318/"
+      },
+      "baseLegal": "Decreto municipal 15.318/2023",
+      "verificadoEm": "2026-10-21",
+      "porque": "A renda é {rpc$} por pessoa, menos de 1/4 do salário mínimo ({quartoSM$}), que é o limite em Santa Rita do Sapucaí.",
+      "porqueTalvez": "A renda é {rpc$} por pessoa, acima do limite da cidade ({quartoSM$}) mas até meio salário mínimo. Em casos especiais, a assistente social pode aprovar."
+    },
+    {
+      "id": "bh_restaurante",
+      "titulo": "Belo Horizonte: Restaurante Popular (almoço por R$ 3,00)",
+      "esfera": "municipal",
+      "categoria": "assistencia",
+      "municipios": [
+        "3106200"
+      ],
+      "resumo": "Refeição barata para qualquer pessoa: café R$ 0,75, almoço R$ 3,00 e jantar R$ 1,50. Quem tem Bolsa Família paga metade. Pessoa em situação de rua no CadÚnico come de graça.",
+      "condicao": {
+        "any": [
+          {
+            "f": "rpc",
+            "op": "<=",
+            "v": "meioSM"
+          },
+          {
+            "f": "recebeBF"
+          },
+          {
+            "f": "situacaoRua"
+          }
+        ]
+      },
+      "valor": "Almoço R$ 3,00 (R$ 1,50 com Bolsa Família)",
+      "ondeIr": [
+        "restaurante_popular"
+      ],
+      "comoPedir": [
+        "Vá direto ao restaurante, não precisa de cadastro.",
+        "Para pagar metade, mostre o cartão do Bolsa Família e um documento com foto."
+      ],
+      "documentos": [],
+      "requerCadUnico": false,
+      "prioridade": 4,
+      "fonte": {
+        "nome": "Prefeitura de Belo Horizonte",
+        "url": "https://prefeitura.pbh.gov.br/seguranca-alimentar-nutricional/equipamentos/restaurantes-populares"
+      },
+      "baseLegal": "Programa municipal de segurança alimentar",
+      "verificadoEm": "2026-10-21",
+      "porque": "A família mora em Belo Horizonte e tem renda de {rpc$} por pessoa, recebe Bolsa Família ou está em situação de rua."
+    },
+    {
+      "id": "bh_bolsa_moradia",
+      "titulo": "Belo Horizonte: Bolsa Moradia (R$ 800 por mês para o aluguel)",
+      "esfera": "municipal",
+      "categoria": "moradia",
+      "municipios": [
+        "3106200"
+      ],
+      "resumo": "Ajuda de R$ 800 por mês para pagar aluguel, para pessoas em situação de rua, em área de risco ou que precisam sair de casa por obra pública. Não tem inscrição direta: a pessoa é indicada pelos serviços da Prefeitura.",
+      "condicao": {
+        "all": [
+          {
+            "f": "situacaoRua"
+          },
+          {
+            "f": "emergencia"
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "any": [
+          {
+            "f": "situacaoRua"
+          },
+          {
+            "all": [
+              {
+                "f": "emergencia"
+              },
+              {
+                "f": "rpc",
+                "op": "<=",
+                "v": "meioSM"
+              }
+            ]
+          }
+        ]
+      },
+      "notaTalvez": "A pessoa precisa ser indicada pelo Centro POP, CRAS, saúde ou Defesa Civil. Peça a indicação.",
+      "valor": "R$ 800 por mês",
+      "ondeIr": [
+        "centropop",
+        "cras"
+      ],
+      "comoPedir": [
+        "Peça ao Centro POP, ao CRAS ou à equipe de saúde a indicação para o Bolsa Moradia.",
+        "Será preciso ter contrato de aluguel e mostrar o recibo todo mês."
+      ],
+      "documentos": [
+        "foto",
+        "cpf_todos",
+        "cad_folha"
+      ],
+      "requerCadUnico": true,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Prefeitura de Belo Horizonte",
+        "url": "https://prefeitura.pbh.gov.br/noticias/prefeitura-de-bh-reajusta-em-60-o-valor-do-bolsa-moradia"
+      },
+      "baseLegal": "Política Municipal de Habitação de Belo Horizonte",
+      "verificadoEm": "2026-10-21",
+      "porque": "A família está em situação de rua e passa por uma emergência de moradia.",
+      "porqueTalvez": "A família está sem moradia ou passa por emergência, com renda de {rpc$} por pessoa. O Bolsa Moradia depende de indicação."
     }
   ],
   "municipios": {
     "3106200": {
+      "nome": "Belo Horizonte",
       "extras": [
         {
           "titulo": "Prefeitura de Belo Horizonte: telefone 156",
           "texto": "Para saber o endereço do CRAS, da UBS e do Restaurante Popular mais perto, ligue 156 ou acesse prefeitura.pbh.gov.br."
+        },
+        {
+          "titulo": "Belo Horizonte: Restaurante Popular",
+          "texto": "Café da manhã R$ 0,75, almoço R$ 3,00 e jantar R$ 1,50. Quem tem Bolsa Família paga metade (leve o cartão e a identidade). Pessoa em situação de rua no CadÚnico come de graça. Restaurante Popular I: Av. do Contorno, 11.484, Centro."
         }
       ],
       "aviso": "Endereços e telefones mudam. Ligue antes de ir."
     },
     "3132404": {
+      "nome": "Itajubá",
       "verificadoEm": "2026-10-21",
       "fonte": {
         "nome": "Prefeitura de Itajubá",
@@ -2066,6 +2556,7 @@
       "aviso": "Endereços e telefones mudam. Ligue antes de ir."
     },
     "3152501": {
+      "nome": "Pouso Alegre",
       "verificadoEm": "2026-10-21",
       "fonte": {
         "nome": "Lista de CRAS de Pouso Alegre (atualizada em 08/04/2026)",
@@ -2112,11 +2603,16 @@
         {
           "titulo": "Pouso Alegre: qual CRAS atende seu bairro",
           "texto": "Cada bairro tem um CRAS de referência. Na dúvida, ligue para a Secretaria Municipal de Políticas Sociais: (35) 3112-3877. A água da cidade é da Copasa."
+        },
+        {
+          "titulo": "Pouso Alegre: casas do Minha Casa Minha Vida da Prefeitura",
+          "texto": "A Prefeitura abre inscrições por edital para casas da Faixa 1 (renda da família de até R$ 2.850 por mês e 5 anos ou mais morando na cidade). Fique de olho nos editais da Secretaria de Políticas Sociais: (35) 3112-3877."
         }
       ],
       "aviso": "Endereços e telefones mudam. Ligue antes de ir."
     },
     "3147303": {
+      "nome": "Paraisópolis",
       "verificadoEm": "2026-10-21",
       "fonte": {
         "nome": "Prefeitura de Paraisópolis",
@@ -2129,10 +2625,16 @@
           "telefone": "(35) 3651-1595 · (35) 3651-4380 · (35) 98429-1243"
         }
       ],
-      "extras": [],
+      "extras": [
+        {
+          "titulo": "Paraisópolis: Serviço Social e CREAS",
+          "texto": "O Serviço Social da Prefeitura fica no mesmo endereço do CRAS (Av. Rio Branco, 603). Em caso de violência ou direitos violados, procure o CREAS: (35) 3651-4380 ou (35) 99971-7283. Atendimento de segunda a sexta, das 8h às 12h e das 13h às 17h."
+        }
+      ],
       "aviso": "Endereços e telefones mudam. Ligue antes de ir."
     },
     "3159605": {
+      "nome": "Santa Rita do Sapucaí",
       "verificadoEm": "2026-10-21",
       "fonte": {
         "nome": "Prefeitura de Santa Rita do Sapucaí",
@@ -2147,8 +2649,8 @@
       ],
       "extras": [
         {
-          "titulo": "Santa Rita do Sapucaí: programas da Prefeitura",
-          "texto": "A Secretaria de Desenvolvimento Social (Rua Juca Castelo, 91, Centro, telefone (35) 3471-4309) tem o Cartão Alimentação e a Lavanderia Comunitária. Pergunte no CRAS se sua família pode participar."
+          "titulo": "Santa Rita do Sapucaí: benefícios da Prefeitura",
+          "texto": "Os benefícios eventuais (cesta básica, Auxílio Pão e Leite, auxílio-natalidade, auxílio-funeral e passagem de ônibus) são pedidos no CRAS ou na Secretaria de Desenvolvimento Social (Rua Juca Castelo, 91, Centro, telefone (35) 3471-4309). Uma assistente social avalia a família."
         }
       ],
       "aviso": "Endereços e telefones mudam. Ligue antes de ir."

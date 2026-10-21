@@ -117,6 +117,9 @@
     // No BPC, o benefício de até 1 salário mínimo de outro idoso (65+) ou pessoa com deficiência não entra na conta (LOAS art. 20, §14).
     const rendaBPC = membros.reduce((s, m) => s + (((m.fonte === 'bpc' || m.fonte === 'aposentadoria') && m.renda <= p.salarioMinimo && ((m.idade ?? 0) >= 65 || m.pcd)) ? 0 : m.renda), 0);
     const s = f.saude || {}; const t = f.sit || {};
+    // Código IBGE da cidade, para os programas que só existem em algumas Prefeituras.
+    const cid = norm(f.cidade);
+    const municipio = (cid && Object.entries(regras.municipios || {}).find(([, m]) => m && norm(m.nome) === cid) || [''])[0];
     const entre = (m, a, b) => m.idade !== null && m.idade >= a && m.idade <= b;
     return Object.assign({}, p, {
       n, membros, rendaTotal, rpc: rendaTotal / n, rpcBPC: rendaBPC / n,
@@ -130,7 +133,7 @@
       precisaJustica: !!t.justica, violencia: !!t.violencia, situacaoRua: !!t.rua || f.moradia === 'rua', agricultor: !!t.agricultor,
       pescador: !!t.pescador, indigena: !!t.indigena, emergencia: !!t.emergencia,
       semCasaPropria: f.moradia !== 'propria', aguaCopasa: f.agua === 'copasa', aguaNaoSei: f.agua === 'naosei' || !f.agua,
-      contaLuzOutroNome: f.luz === 'outro', recebeBF: f.bf === 'sim', cadunico: f.cad, cadOk: f.cad === 'sim'
+      contaLuzOutroNome: f.luz === 'outro', zonaRural: f.zona === 'rural', municipio, recebeBF: f.bf === 'sim', cadunico: f.cad, cadOk: f.cad === 'sim'
     });
   }
 
@@ -177,6 +180,8 @@
   function calcular(f, regras, hoje) {
     const fx = fatos(f, regras, hoje); const res = [];
     for (const pr of regras.programas) {
+      if (Array.isArray(pr.municipios) && !pr.municipios.includes(fx.municipio)) continue;
+      if (Array.isArray(pr.excetoMunicipios) && pr.excetoMunicipios.includes(fx.municipio)) continue;
       let status = null, quem = [];
       if (pr.porMembro) {
         const sims = fx.membros.filter(m => avaliar(pr.condicao, fx, { m }));
@@ -278,7 +283,7 @@
 
   // ---------- Validação do arquivo de regras ----------
   // Usada antes de aceitar uma atualização baixada da internet. Devolve lista de problemas (vazia = ok).
-  const FATOS_FAMILIA = ['n', 'rendaTotal', 'rpc', 'rpcBPC', 'algumBPC', 'algumaGestante', 'criancas0a6', 'jovens7a17', 'gestantes', 'nutrizes', 'precisaSaude', 'precisaEspecialista', 'precisaDentista', 'precisaSaudeMental', 'precisaJustica', 'violencia', 'situacaoRua', 'agricultor', 'pescador', 'indigena', 'emergencia', 'semCasaPropria', 'aguaCopasa', 'aguaNaoSei', 'contaLuzOutroNome', 'recebeBF', 'cadunico', 'cadOk'];
+  const FATOS_FAMILIA = ['n', 'rendaTotal', 'rpc', 'rpcBPC', 'algumBPC', 'algumaGestante', 'criancas0a6', 'jovens7a17', 'gestantes', 'nutrizes', 'precisaSaude', 'precisaEspecialista', 'precisaDentista', 'precisaSaudeMental', 'precisaJustica', 'violencia', 'situacaoRua', 'agricultor', 'pescador', 'indigena', 'emergencia', 'semCasaPropria', 'aguaCopasa', 'aguaNaoSei', 'contaLuzOutroNome', 'zonaRural', 'municipio', 'recebeBF', 'cadunico', 'cadOk'];
   const FATOS_MEMBRO = ['idade', 'sexo', 'pcd', 'gestante', 'nutriz', 'estudo', 'redePublica', 'medioCompleto', 'renda', 'fonte', 'recebeBPC', 'trabalhoFormal', 'demitido', 'incontinencia', 'doencas', 'temRemedio', 'semDocumento', 'cancer', 'hiv', 'doencaGrave', 'altoCusto', 'aposentado'];
   const LIMITES = ['quartoSM', 'meioSM', 'umSM', 'doisSM', 'tresSM'];
   const OPS = ['<=', '<', '>=', '>', '==', '!=', 'in'];
@@ -334,6 +339,8 @@
       if (pr.calculo && !CALCULOS[pr.calculo]) erros.push(onde + ': cálculo desconhecido ' + pr.calculo);
       if (!pr.valor && !pr.calculo) erros.push(onde + ': falta valor');
       if (typeof pr.porque !== 'string' || !pr.porque.trim()) erros.push(onde + ': falta porque');
+      for (const k of ['municipios', 'excetoMunicipios']) if (pr[k] !== undefined && (!Array.isArray(pr[k]) || pr[k].some(c => !r.municipios || !r.municipios[c]))) erros.push(onde + ': ' + k + ' com cidade desconhecida');
+      if (pr.municipios && pr.esfera !== 'municipal') erros.push(onde + ': programa de cidade precisa ser municipal');
       if (!pr.porMembro && /\{(nome|idade)\}/.test((pr.porque || '') + (pr.porqueTalvez || ''))) erros.push(onde + ': porque usa {nome} sem ser porMembro');
     });
     if (!ids.has('cadunico')) erros.push('falta o programa cadunico');
@@ -341,6 +348,7 @@
       for (const [cod, m] of Object.entries(r.municipios)) {
         if (!/^31\d{5}$/.test(cod)) erros.push('municipio ' + cod + ': código IBGE de MG inválido');
         if (!m || !Array.isArray(m.extras)) { erros.push('municipio ' + cod + ': falta extras'); continue; }
+        if (typeof m.nome !== 'string' || !m.nome.trim()) erros.push('municipio ' + cod + ': falta nome');
         if (m.cras !== undefined && (!Array.isArray(m.cras) || m.cras.some(c => !c || typeof c.nome !== 'string' || typeof c.endereco !== 'string'))) erros.push('municipio ' + cod + ': lista de CRAS inválida');
         if (m.fonte !== undefined && !(m.fonte && /^https:\/\//.test(m.fonte.url || ''))) erros.push('municipio ' + cod + ': fonte sem link https');
       }

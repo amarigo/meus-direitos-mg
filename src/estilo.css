@@ -110,6 +110,7 @@ details.more summary{cursor:pointer;font-weight:700;color:var(--green);padding-b
 .pessoa-direitos ul{margin:0;padding-left:20px}
 .pessoa-direitos li{margin-bottom:8px;overflow-wrap:anywhere}
 .local h3{margin:0}
+.local p,.local li,.card p{overflow-wrap:anywhere}
 .local ul{margin:6px 0 0;padding-left:20px}
 .checklist{display:flex;flex-direction:column;gap:10px}
 .doc-item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}

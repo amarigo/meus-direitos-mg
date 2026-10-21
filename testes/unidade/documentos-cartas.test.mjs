@@ -85,3 +85,44 @@ test('a sigla BPC nunca aparece sozinha: sempre com o nome completo no mesmo tex
   andar(REGRAS);
   for (const t of textos) if (/\bBPC\b/.test(t)) assert.match(t, /Benefício de Prestação Continuada/, 'sigla sem explicação: ' + t);
 });
+
+// ---------- Benefícios das Prefeituras ----------
+const pobre = cidade => familia([{ nome: 'Rosa', idade: 30, renda: 0, sexo: 'F', gestante: true }], { cidade, sit: { emergencia: true } });
+test('programa de uma Prefeitura só aparece para quem mora naquela cidade', () => {
+  const ids = c => calc(pobre(c)).res.map(r => r.pr.id);
+  assert.ok(ids('Pouso Alegre').includes('pa_natalidade'));
+  assert.ok(ids('pouso alegre').includes('pa_eventuais'), 'cidade escrita sem maiúscula também vale');
+  assert.ok(!ids('Itajubá').includes('pa_natalidade'));
+  assert.ok(!ids('').includes('pa_natalidade'));
+  assert.ok(ids('Santa Rita do Sapucai').includes('srs_eventuais'), 'cidade sem acento também vale');
+  assert.ok(ids('Belo Horizonte').includes('bh_restaurante'));
+  assert.ok(!ids('Pouso Alegre').includes('bh_restaurante'));
+});
+test('benefício eventual genérico some onde a Prefeitura tem o seu próprio, e fica nas outras cidades', () => {
+  const ids = c => calc(pobre(c)).res.map(r => r.pr.id);
+  assert.ok(!ids('Pouso Alegre').includes('beneficio_eventual'));
+  assert.ok(!ids('Santa Rita do Sapucaí').includes('beneficio_eventual'));
+  assert.ok(ids('Itajubá').includes('beneficio_eventual'));
+  assert.ok(ids('Paraisópolis').includes('beneficio_eventual'));
+});
+test('limites de renda das Prefeituras: Santa Rita usa "menos de 1/4", Pouso Alegre "até 1/4"', () => {
+  const q = REGRAS.parametros.salarioMinimo / 4;
+  const st = (cidade, id) => (calc(familia([{ idade: 40, renda: q }], { cidade })).res.find(r => r.pr.id === id) || {}).status;
+  assert.equal(st('Pouso Alegre', 'pa_eventuais'), 'sim');
+  assert.equal(st('Santa Rita do Sapucaí', 'srs_eventuais'), 'talvez');
+});
+test('transporte escolar só para estudante de escola pública na roça; ônibus grátis a partir de 65', () => {
+  const rural = familia([{ nome: 'Mãe', idade: 40, renda: 500 }, { nome: 'Lia', idade: 9, estudo: 'fundamental', rede: 'publica' }], { zona: 'rural' });
+  assert.deepEqual(calc(rural).res.find(r => r.pr.id === 'transporte_escolar').quem, ['Lia']);
+  rural.zona = 'urbana';
+  assert.ok(!calc(rural).res.some(r => r.pr.id === 'transporte_escolar'));
+  const idosos = calc(familia([{ nome: 'Zé', idade: 66, renda: 3000 }, { nome: 'Lu', idade: 62 }])).res.find(r => r.pr.id === 'onibus_idoso');
+  assert.equal(idosos.status, 'sim'); assert.deepEqual(idosos.quem, ['Zé']);
+});
+test('regras recusam programa de cidade com código que não existe', () => {
+  const r = JSON.parse(JSON.stringify(REGRAS));
+  r.programas.find(p => p.id === 'pa_natalidade').municipios = ['3199999'];
+  assert.ok(Motor.validarRegras(r).some(e => /cidade desconhecida/.test(e)));
+  delete r.municipios['3152501'].nome;
+  assert.ok(Motor.validarRegras(r).some(e => /falta nome/.test(e)));
+});

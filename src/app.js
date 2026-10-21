@@ -27,7 +27,7 @@
   let bloqueado = false;
   let pacoteCifrado = null;
   let passo = store.get('md_passo', 0);
-  if (!(passo === 'relatorio' || passo === 'documentos' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
+  if (!(passo === 'relatorio' || passo === 'documentos' || passo === 'questionario' || (Number.isInteger(passo) && passo >= 0 && passo <= 5))) passo = 0;
   let tela = null;         // telas especiais: 'criar-senha', 'trocar-dados'
 
   (function iniciarDados() {
@@ -104,6 +104,7 @@
       '<ol class="plan"><li><span>Conte onde vocês moram.</span></li><li><span>Diga quem mora na casa e quanto cada um ganha.</span></li><li><span>Marque o que a família precisa (saúde, escola, moradia).</span></li><li><span>Veja os direitos e imprima o relatório.</span></li></ol></div>' +
       '<div class="btns"><button type="button" class="go" id="comecar">' + (temDados ? 'Continuar de onde parei' : 'Começar') + '</button>' +
       '<button type="button" id="ver-exemplo">Ver um exemplo pronto</button></div>' +
+      '<div class="card stack tight"><h3>Está ajudando outra família?</h3><p>Mande um questionário pelo WhatsApp com todas as perguntas. Depois preencha o aplicativo com as respostas.</p><div class="btns"><button type="button" class="small" id="abrir-questionario">Questionário para WhatsApp</button></div></div>' +
       (!EM_MOLDURA && !instalado && eventoInstalar ? '<div class="btns"><button type="button" class="sun" id="instalar">Instalar no celular ou computador</button></div>' : '') +
       (!EM_MOLDURA && !instalado && !eventoInstalar && ehIOS ? '<p class="hint">Para instalar no iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início".</p>' : '') +
       '<section class="card stack tight" id="seguranca"><h3>Seus dados estão seguros</h3>' +
@@ -114,6 +115,58 @@
       '<button type="button" class="small danger" id="limpar">Apagar todos os dados</button></div>' +
       '<div id="confirma-limpar" hidden class="stack tight"><p><b>Apagar todos os dados da família deste aparelho?</b> Isso não pode ser desfeito.</p><div class="btns"><button type="button" class="go" id="limpar-sim">Sim, apagar</button><button type="button" id="limpar-nao">Não</button></div></div>' +
       '</section></div>';
+  }
+  // Questionário para mandar por WhatsApp quando alguém ajuda a família a preencher.
+  function textoQuestionario() {
+    const L = [], op = l => l.map((x, i) => '   ' + String.fromCharCode(97 + i) + ') ' + (Array.isArray(x) ? x[1] : x)).join('\n');
+    let n = 0; const q = (t, opcoes) => { n++; L.push('*' + n + '.* ' + t + (opcoes ? '\n' + op(opcoes) : '')); };
+    L.push('*Questionário: benefícios e direitos da família*',
+      'Olá! Estou ajudando a ver quais benefícios do governo e da Prefeitura a sua família pode ter. Responda aqui mesmo, pode ser por áudio. Se não souber alguma coisa, escreva "não sei".',
+      'As respostas servem só para preencher o aplicativo Meus Direitos MG, que guarda os dados apenas no aparelho de quem está ajudando.', '');
+    L.push('*PARTE 1: ONDE VOCÊS MORAM*');
+    q('CEP (se souber)'); q('Cidade'); q('Bairro'); q('Rua, avenida ou estrada'); q('Número da casa (se não tiver, escreva S/N)');
+    q('Complemento (casa, apartamento, bloco, fundos...)'); q('Ponto de referência (algo perto que ajude a achar a casa)'); q('Seu telefone');
+    q('Outro telefone para recado: nome, quem é (mãe, marido, filho, vizinho...) e número');
+    q('A casa fica:', ['Na cidade', 'Na roça (zona rural)']);
+    q('A casa é:', ['Própria (já paga)', 'Própria, ainda pagando', 'Alugada', 'Emprestada (cedida)', 'Ocupação', 'Não tenho casa / moro na rua']);
+    q('De quem é a água? (olhe na conta de água)', ['Copasa', 'SAAE ou outra empresa', 'Não sei / não tenho conta de água']);
+    q('A conta de luz está no nome de quem?', ['De alguém que mora na casa', 'De outra pessoa (dono da casa, parente)', 'Não tenho conta de luz']);
+    L.push('', '*PARTE 2: QUEM MORA NA CASA*', 'Responda as perguntas abaixo para *cada pessoa* que mora na casa e divide as despesas, inclusive bebês. Comece por você.');
+    q('Nome completo'); q('Data de nascimento'); q('Sexo:', SEXOS.slice(1));
+    q('O que é seu (filho, esposa, mãe, neto...)? Para você mesmo, escreva "eu".');
+    q('De onde vem o dinheiro desta pessoa?', FONTES);
+    q('Quanto ganha por mês *antes dos descontos* (valor bruto do contracheque)? Se o valor muda, diga a média. Não conte o Bolsa Família.');
+    q('Estuda?', ESTUDOS); q('Se estuda, a escola é pública ou particular?');
+    q('Tem alguma deficiência ou doença que impede de trabalhar ou estudar por muito tempo? (sim ou não)');
+    q('Está grávida ou amamentando bebê de até 6 meses?');
+    q('Foi mandado embora de trabalho com carteira nos últimos 4 meses? (sim ou não)');
+    q('Usa remédio todo mês para alguma destas? (pode marcar várias)', DOENCAS);
+    q('Tem alguma destas doenças? (pode marcar várias)', GRAVES);
+    q('Precisa usar fralda (perde urina ou fezes)? (sim ou não)');
+    q('Está sem algum documento (certidão, identidade ou CPF)? Qual?');
+    q('Já terminou o ensino médio? (sim ou não)');
+    q('CPF e NIS (número do CadÚnico). *Opcional*: só mande se confiar em quem está ajudando. Também pode mostrar pessoalmente.');
+    L.push('', '*PARTE 3: SAÚDE*');
+    q('Alguém da casa precisa agora de: (pode marcar várias)', ['Consulta médica ou exame', 'Médico especialista, cirurgia ou tratamento que não tem na cidade', 'Dentista ou dentadura', 'Ajuda para tristeza, ansiedade, crises, álcool ou drogas']);
+    L.push('', '*PARTE 4: SITUAÇÃO DA FAMÍLIA*');
+    q('A família está no Cadastro Único (CadÚnico, o cadastro feito no CRAS)?', ['Sim, atualizado nos últimos 2 anos', 'Sim, mas faz mais de 2 anos', 'Não', 'Não sei']);
+    q('A família recebe Bolsa Família hoje? (sim ou não)');
+    q('Alguma destas coisas acontece com a família? (pode marcar várias)', ['Trabalha na roça como agricultor familiar', 'É pescador artesanal', 'É indígena ou quilombola', 'Passa por emergência: falta comida, despejo, morte na família ou desastre (enchente, deslizamento)', 'Precisa de ajuda na Justiça (pensão, guarda, despejo, benefício negado)']);
+    L.push('', '_Se alguém da casa sofre violência, não responda por aqui. Fale pessoalmente com quem está ajudando, ou ligue 180 (mulher) ou 100 (direitos humanos). Em perigo agora, ligue 190._', '',
+      '*DOCUMENTOS PARA IR SEPARANDO*', 'Identidade ou CNH, CPF de todos, certidão de nascimento ou casamento, comprovante de endereço, comprovante de renda, Cartão SUS e, se tiver, a folha do CadÚnico. A lista exata de cada lugar sai no relatório.', '',
+      'Obrigado! Com as respostas eu preencho o aplicativo e te mando a lista do que você pode pedir, onde ir e quais documentos levar.');
+    return L.join('\n');
+  }
+  function telaQuestionario() {
+    const t = textoQuestionario();
+    return '<div class="stack"><div class="btns noprint"><button type="button" data-ir="0">Voltar</button></div>' +
+      '<h2>Questionário para WhatsApp</h2>' +
+      '<p class="lead">Está ajudando outra família? Mande este questionário. Com as respostas, você preenche o aplicativo por ela.</p>' +
+      '<div class="btns noprint"><button type="button" class="go" id="copiar-questionario">Copiar o questionário</button>' +
+      '<a class="botao-link" id="whatsapp-questionario" href="' + esc('https://wa.me/?text=' + encodeURIComponent(t)) + '" target="_blank" rel="noopener noreferrer">Abrir no WhatsApp</a>' +
+      (EM_MOLDURA ? '' : '<button type="button" id="imprimir">Imprimir</button>') + '</div>' +
+      '<p class="sub noprint">O WhatsApp abre com o texto pronto: escolha a pessoa e envie. Se o texto não aparecer inteiro, use "Copiar" e cole na conversa. O aplicativo não envia nada sozinho.</p>' +
+      '<pre class="carta" id="texto-questionario">' + esc(t) + '</pre></div>';
   }
   function telaCriarSenha() {
     return '<div class="stack lock"><h2>Proteger com senha</h2>' +
@@ -441,7 +494,7 @@
     else if (tela === 'criar-senha') html = telaCriarSenha();
     else {
       const t = typeof passo === 'string' ? passo : PASSOS[passo];
-      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio, documentos: telaDocumentos }[t]();
+      html = { inicio: telaInicio, casa: telaCasa, pessoas: telaPessoas, saude: telaSaude, situacao: telaSituacao, resultado: telaResultado, relatorio: telaRelatorio, documentos: telaDocumentos, questionario: telaQuestionario }[t]();
     }
     view.innerHTML = html;
     renderFoot();
@@ -510,15 +563,18 @@
     try { window.print(); } catch (err) {}
     setTimeout(limpar, 60000);
   }
-  async function copiarCarta(canal) {
-    const pre = document.querySelector('pre[data-carta="' + (window.CSS && CSS.escape ? CSS.escape(canal) : canal) + '"]'); if (!pre) return;
+  function copiarCarta(canal) {
+    copiarTexto(document.querySelector('pre[data-carta="' + (window.CSS && CSS.escape ? CSS.escape(canal) : canal) + '"]'), 'Carta copiada. Cole no e-mail ou no WhatsApp.');
+  }
+  async function copiarTexto(pre, msgOk) {
+    if (!pre) return;
     const texto = pre.textContent;
-    try { await navigator.clipboard.writeText(texto); toast('Carta copiada. Cole no e-mail ou no WhatsApp.'); return; } catch (e) {}
+    try { await navigator.clipboard.writeText(texto); toast(msgOk); return; } catch (e) {}
     try {
       const r = document.createRange(); r.selectNodeContents(pre);
       const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-      toast(document.execCommand('copy') ? 'Carta copiada.' : 'A carta está selecionada. Use "Copiar" do seu aparelho.');
-    } catch (e) { toast('Selecione a carta e copie com o dedo ou o mouse.'); }
+      toast(document.execCommand('copy') ? msgOk : 'O texto está selecionado. Use "Copiar" do seu aparelho.');
+    } catch (e) { toast('Selecione o texto e copie com o dedo ou o mouse.'); }
   }
   function rerender(focoId) { const y = window.scrollY; render(); window.scrollTo(0, y); const f = focoId && document.getElementById(focoId); if (f) f.focus(); }
   function erroSenha(msg) { const el = document.getElementById('erro-senha'); if (el) { el.textContent = msg; el.hidden = false; } }
@@ -582,6 +638,8 @@
       case 'limpar-sim': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'terminar': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'add-pessoa': if (F.pessoas.length < 20) { F.pessoas.push(M.novaPessoa(false)); salvar(); rerender('p' + (F.pessoas.length - 1) + '_nome'); } break;
+      case 'abrir-questionario': passo = 'questionario'; salvar(); render(); window.scrollTo(0, 0); break;
+      case 'copiar-questionario': copiarTexto(document.getElementById('texto-questionario'), 'Questionário copiado. Cole na conversa do WhatsApp.'); break;
       case 'abrir-documentos': passo = 'documentos'; salvar(); render(); window.scrollTo(0, 0); break;
       case 'abrir-relatorio': passo = 'relatorio'; salvar(); render(); window.scrollTo(0, 0); break;
       case 'imprimir': try { window.print(); } catch (err) {} break;

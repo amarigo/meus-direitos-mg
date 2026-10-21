@@ -55,7 +55,11 @@ test('Todo programa do arquivo aparece para alguma família (nenhuma regra morta
     familia([{ idade: 30, renda: 1200, pcd: true, fonte: 'bpc' }].map(p => ({ ...p, fonte: 'formal' })).concat([{ idade: 20, pcd: true, renda: SM, fonte: 'bpc' }])),
     familia([{ idade: 75, renda: 0, incontinencia: true, doencas: ['diabetes', 'cancer', 'esclerose'], semDocumento: true }], { saude: { especialista: true, dentista: true, mental: true }, sit: { justica: true, emergencia: true } }),
     familia([{ idade: 30, renda: SM * 1.5 }, { idade: 30 }]),
-    familia([{ idade: 40, renda: 0 }, { idade: 19, estudo: 'eja', rede: 'publica' }])
+    familia([{ idade: 40, renda: 0 }, { idade: 19, estudo: 'eja', rede: 'publica' }]),
+    // Programas das Prefeituras: cada um só aparece na sua cidade.
+    familia([{ idade: 25, renda: 0, sexo: 'F', gestante: true }, { idade: 10, estudo: 'fundamental', rede: 'publica' }], { cidade: 'Pouso Alegre', zona: 'rural', sit: { emergencia: true } }),
+    familia([{ idade: 40, renda: 100 }], { cidade: 'Santa Rita do Sapucaí' }),
+    familia([{ idade: 40, renda: 0 }], { cidade: 'Belo Horizonte', moradia: 'rua', sit: { emergencia: true } })
   ];
   const pcdTrabalha = familia([{ idade: 30, renda: 1800, fonte: 'formal', pcd: true }]);
   pcdTrabalha.pessoas[0].fonte = 'formal';

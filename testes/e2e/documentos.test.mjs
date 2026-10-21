@@ -141,3 +141,43 @@ test('Relatório impresso traz quem tem direito e a carta de cada local', async 
   assert.deepEqual(erros, []);
   await ctx.close();
 });
+
+test('Questionário para WhatsApp: todas as perguntas, copiar e link do WhatsApp', async () => {
+  const ctx = await nav.newContext({ viewport: { width: 360, height: 740 } });
+  await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: srv.url.replace(/\/$/, '') });
+  const pg = await ctx.newPage(); const erros = [];
+  pg.on('pageerror', e => erros.push(e.message));
+  await pg.goto(srv.url);
+  await pg.click('#abrir-questionario');
+  const t = await pg.textContent('#texto-questionario');
+  for (const trecho of ['CEP', 'Ponto de referência', 'Outro telefone para recado', 'antes dos descontos', 'Benefício de Prestação Continuada', 'Câncer', 'Prefiro não responder', 'CadÚnico', 'Bolsa Família', 'emergência', 'não responda por aqui', 'DOCUMENTOS']) assert.ok(t.includes(trecho), 'questionário sem: ' + trecho);
+  const href = await pg.getAttribute('#whatsapp-questionario', 'href');
+  assert.ok(href.startsWith('https://wa.me/?text='));
+  assert.equal(decodeURIComponent(href.split('text=')[1]), t);
+  await pg.click('#copiar-questionario');
+  await pg.waitForSelector('#toast:not([hidden])');
+  assert.equal(await pg.evaluate(() => navigator.clipboard.readText()), t);
+  assert.ok(await semRolagemLateral(pg));
+  await pg.click('[data-ir="0"]');
+  await pg.waitForSelector('#comecar');
+  assert.deepEqual(erros, []);
+  await ctx.close();
+});
+
+test('Pouso Alegre: benefícios da Prefeitura aparecem no resultado e na carta do CRAS', async () => {
+  const ctx = await nav.newContext({ viewport: { width: 390, height: 844 } });
+  const pg = await ctx.newPage(); const erros = [];
+  pg.on('pageerror', e => erros.push(e.message));
+  await pg.goto(srv.url);
+  await pg.click('#ver-exemplo');
+  await pg.click('[data-ir="1"]');
+  await pg.fill('#cidade', 'Pouso Alegre');
+  for (let i = 0; i < 4; i++) await pg.click('#avancar');
+  const progs = await pg.$$eval('[data-programa]', els => els.map(e => e.dataset.programa));
+  assert.ok(progs.includes('pa_eventuais'), progs.join(','));
+  assert.ok(!progs.includes('beneficio_eventual'));
+  await pg.click('#abrir-documentos');
+  assert.match(await pg.textContent('#local-cras pre.carta'), /Pouso Alegre: cesta básica/);
+  assert.deepEqual(erros, []);
+  await ctx.close();
+});
