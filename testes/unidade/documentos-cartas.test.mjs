@@ -78,3 +78,10 @@ test('dados salvos de documentos e e-mails são limpos ao abrir (nada estranho e
   assert.deepEqual(f.docsOk, { 'cras|cpf|0': true });
   assert.deepEqual(Object.keys(f.emails), ['cras']);
 });
+
+test('a sigla BPC nunca aparece sozinha: sempre com o nome completo no mesmo texto', () => {
+  const textos = [];
+  const andar = (x, k) => { if (Array.isArray(x)) x.forEach(v => andar(v, k)); else if (x && typeof x === 'object') Object.entries(x).forEach(([kk, v]) => andar(v, kk)); else if (typeof x === 'string' && !['f', 'v', 'id', 'op'].includes(k)) textos.push(x); };
+  andar(REGRAS);
+  for (const t of textos) if (/\bBPC\b/.test(t)) assert.match(t, /Benefício de Prestação Continuada/, 'sigla sem explicação: ' + t);
+});

@@ -38,7 +38,7 @@ for (const [nome, vp] of [['celular pequeno', { width: 360, height: 740 }], ['ce
     assert.ok(await semRolagemLateral(pg), 'rolagem lateral no resultado');
     await pg.click('#abrir-relatorio');
     const rel = (await pg.textContent('#relatorio')).replace(/\s/g, ' ');
-    for (const t of ['Joana da Silva', '123.456.789-09', 'Vó Rita', 'Itajubá', 'R$ 1.500,00', 'BPC/LOAS para pessoa idosa']) assert.ok(rel.includes(t), 'relatório sem ' + t);
+    for (const t of ['Joana da Silva', '123.456.789-09', 'Vó Rita', 'Itajubá', 'R$ 1.500,00', 'Benefício de Prestação Continuada (BPC/LOAS) para pessoa idosa']) assert.ok(rel.includes(t), 'relatório sem ' + t);
     assert.ok(await pg.isVisible('#imprimir'), 'botão imprimir');
     assert.ok(await semRolagemLateral(pg), 'rolagem lateral no relatório');
     assert.deepEqual(await pg.evaluate(() => window.__csp || []), [], 'violação da política de segurança');

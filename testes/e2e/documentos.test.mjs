@@ -24,7 +24,7 @@ test('Resultado mostra quem da família tem direito a quê e por quê', async ()
   const { ctx, pg, erros } = await abrirExemplo();
   const q = (await pg.textContent('#quem-tem-direito')).replace(/\s/g, ' ');
   assert.match(q, /José \(exemplo\) \(\d+ anos\)/);
-  assert.match(q, /BPC\/LOAS para pessoa idosa.*José \(exemplo\) tem \d+ anos/);
+  assert.match(q, /Benefício de Prestação Continuada \(BPC\/LOAS\) para pessoa idosa.*José \(exemplo\) tem \d+ anos/);
   assert.match(q, /Família toda/);
   assert.ok((await pg.$$('.porque')).length > 0, 'cartões sem "Por quê"');
   assert.deepEqual(erros, []);

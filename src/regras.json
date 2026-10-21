@@ -1,5 +1,5 @@
 {
-  "versao": "2026.10.5",
+  "versao": "2026.10.6",
   "atualizadoEm": "2026-10-21",
   "observacao": "Regras usadas para estimar direitos. A decisão final é sempre do órgão responsável. Para atualizar, edite este arquivo, mude 'versao' e 'atualizadoEm' e publique junto com o aplicativo.",
   "parametros": {
@@ -223,7 +223,7 @@
     "biometria": {
       "texto": "Documento com biometria (Identidade nova/CIN, CNH ou título de eleitor com digital cadastrada)",
       "quem": "beneficiario",
-      "obs": "O INSS exige biometria para pedir e manter o BPC."
+      "obs": "O INSS exige biometria para pedir e manter o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda)."
     },
     "rgp": {
       "texto": "Registro Geral da Pesca (RGP) em dia",
@@ -339,7 +339,7 @@
     },
     {
       "id": "bpc_idoso",
-      "titulo": "BPC/LOAS para pessoa idosa",
+      "titulo": "Benefício de Prestação Continuada (BPC/LOAS) para pessoa idosa",
       "esfera": "federal",
       "categoria": "renda",
       "porMembro": true,
@@ -404,7 +404,7 @@
       ],
       "comoPedir": [
         "Esteja no CadÚnico com os dados atualizados.",
-        "Peça o BPC pelo Meu INSS ou ligando 135.",
+        "Peça o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) pelo Meu INSS ou ligando 135.",
         "Pode ser pedido biometria (foto) em documento como CIN, CNH ou título de eleitor."
       ],
       "documentos": [
@@ -423,12 +423,12 @@
       },
       "baseLegal": "Lei 8.742/1993 (LOAS), art. 20",
       "verificadoEm": "2026-10-21",
-      "porque": "{nome} tem {idade} anos (65 ou mais) e a renda por pessoa considerada para o BPC é {rpcBPC$}, dentro do limite de 1/4 do salário mínimo ({quartoSM$}).",
-      "porqueTalvez": "{nome} tem {idade} anos, mas a renda por pessoa para o BPC é {rpcBPC$}, acima de 1/4 do salário mínimo ({quartoSM$}) e abaixo de meio ({meioSM$}). O INSS ou a Justiça podem aceitar se houver gastos com saúde ou cuidador."
+      "porque": "{nome} tem {idade} anos (65 ou mais) e a renda por pessoa considerada para o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) é {rpcBPC$}, dentro do limite de 1/4 do salário mínimo ({quartoSM$}).",
+      "porqueTalvez": "{nome} tem {idade} anos, mas a renda por pessoa para o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) é {rpcBPC$}, acima de 1/4 do salário mínimo ({quartoSM$}) e abaixo de meio ({meioSM$}). O INSS ou a Justiça podem aceitar se houver gastos com saúde ou cuidador."
     },
     {
       "id": "bpc_pcd",
-      "titulo": "BPC/LOAS para pessoa com deficiência",
+      "titulo": "Benefício de Prestação Continuada (BPC/LOAS) para pessoa com deficiência",
       "esfera": "federal",
       "categoria": "renda",
       "porMembro": true,
@@ -489,7 +489,7 @@
       ],
       "comoPedir": [
         "Esteja no CadÚnico com os dados atualizados.",
-        "Peça o BPC pelo Meu INSS ou ligando 135.",
+        "Peça o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) pelo Meu INSS ou ligando 135.",
         "O INSS vai marcar perícia médica e avaliação social. Leve todos os laudos."
       ],
       "documentos": [
@@ -509,8 +509,8 @@
       },
       "baseLegal": "Lei 8.742/1993 (LOAS), art. 20",
       "verificadoEm": "2026-10-21",
-      "porque": "{nome} tem deficiência ou doença de longo prazo e a renda por pessoa considerada para o BPC é {rpcBPC$}, dentro do limite de {quartoSM$}.",
-      "porqueTalvez": "{nome} tem deficiência ou doença de longo prazo, mas a renda por pessoa para o BPC é {rpcBPC$}, entre {quartoSM$} e {meioSM$}. Pode ser aceito conforme os gastos da família."
+      "porque": "{nome} tem deficiência ou doença de longo prazo e a renda por pessoa considerada para o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) é {rpcBPC$}, dentro do limite de {quartoSM$}.",
+      "porqueTalvez": "{nome} tem deficiência ou doença de longo prazo, mas a renda por pessoa para o BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) é {rpcBPC$}, entre {quartoSM$} e {meioSM$}. Pode ser aceito conforme os gastos da família."
     },
     {
       "id": "auxilio_inclusao",
@@ -518,7 +518,7 @@
       "esfera": "federal",
       "categoria": "renda",
       "porMembro": true,
-      "resumo": "Para a pessoa com deficiência que recebe BPC e começa a trabalhar com carteira assinada ganhando até 2 salários mínimos. O BPC para e entra o Auxílio-Inclusão, de meio salário mínimo.",
+      "resumo": "Para a pessoa com deficiência que recebe BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) e começa a trabalhar com carteira assinada ganhando até 2 salários mínimos. O BPC para e entra o Auxílio-Inclusão, de meio salário mínimo.",
       "condicao": {
         "all": [
           {
@@ -552,7 +552,7 @@
       },
       "baseLegal": "Lei 14.176/2021",
       "verificadoEm": "2026-10-21",
-      "porque": "{nome} tem deficiência, recebe BPC e trabalha com carteira assinada."
+      "porque": "{nome} tem deficiência, recebe BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) e trabalha com carteira assinada."
     },
     {
       "id": "tarifa_social_luz",
@@ -599,7 +599,7 @@
       },
       "baseLegal": "Lei 12.212/2010, alterada pela Lei 15.235/2025",
       "verificadoEm": "2026-10-21",
-      "porque": "A renda da família é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), ou alguém da casa recebe BPC."
+      "porque": "A renda da família é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), ou alguém da casa recebe BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda)."
     },
     {
       "id": "desconto_social_luz",
@@ -1373,14 +1373,14 @@
       },
       "baseLegal": "Lei 8.899/1994; Portarias Interministeriais 2 e 3/2026",
       "verificadoEm": "2026-10-21",
-      "porque": "{nome} tem deficiência e recebe BPC ou a renda por pessoa é {rpc$}, até 1 salário mínimo ({umSM$})."
+      "porque": "{nome} tem deficiência e recebe BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) ou a renda por pessoa é {rpc$}, até 1 salário mínimo ({umSM$})."
     },
     {
       "id": "mcmv",
       "titulo": "Minha Casa, Minha Vida (Faixa 1)",
       "esfera": "federal",
       "categoria": "moradia",
-      "resumo": "Casa própria com quase tudo pago pelo governo para famílias com renda de até R$ {mcmvFaixa1} por mês. Famílias do Bolsa Família ou BPC podem receber a casa de graça.",
+      "resumo": "Casa própria com quase tudo pago pelo governo para famílias com renda de até R$ {mcmvFaixa1} por mês. Famílias do Bolsa Família ou BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) podem receber a casa de graça.",
       "condicao": {
         "all": [
           {
@@ -1573,7 +1573,7 @@
       "titulo": "Tarifa Social da Copasa (água mais barata)",
       "esfera": "estadual",
       "categoria": "contas",
-      "resumo": "Desconto de 55% na conta de água para renda de até meio salário mínimo por pessoa, e de 65% para renda de até R$ {linhaPobrezaBF} por pessoa. Quem recebe BPC também tem direito.",
+      "resumo": "Desconto de 55% na conta de água para renda de até meio salário mínimo por pessoa, e de 65% para renda de até R$ {linhaPobrezaBF} por pessoa. Quem recebe BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda) também tem direito.",
       "condicao": {
         "all": [
           {
@@ -1637,7 +1637,7 @@
       },
       "baseLegal": "Resolução ARSAE-MG; vigente desde 22/01/2026",
       "verificadoEm": "2026-10-21",
-      "porque": "A água é da Copasa e a renda é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), ou alguém recebe BPC.",
+      "porque": "A água é da Copasa e a renda é {rpc$} por pessoa, até meio salário mínimo ({meioSM$}), ou alguém recebe BPC (Benefício de Prestação Continuada, o salário mínimo do INSS para idoso ou pessoa com deficiência de baixa renda).",
       "porqueTalvez": "A renda é {rpc$} por pessoa, mas não sabemos se a água é da Copasa."
     },
     {
