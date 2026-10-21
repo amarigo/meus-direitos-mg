@@ -87,8 +87,22 @@
     return ddd + r.slice(0, corte) + '-' + r.slice(corte);
   }
   function telefoneCompleto(txt) { const d = String(txt || '').replace(/\D/g, ''); return d.length === 10 || d.length === 11; }
+  // CPF e NIS: máscara e conferência dos dígitos verificadores.
+  const so = t => String(t || '').replace(/\D/g, '');
+  function mascaraCpf(t) { const d = so(t).slice(0, 11); return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2'); }
+  function cpfValido(t) {
+    const d = so(t); if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    const dv = n => { let s = 0; for (let i = 0; i < n; i++) s += +d[i] * (n + 1 - i); const r = (s * 10) % 11; return r === 10 ? 0 : r; };
+    return dv(9) === +d[9] && dv(10) === +d[10];
+  }
+  function mascaraNis(t) { const d = so(t).slice(0, 11); return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{5})(\d)/, '$1.$2.$3').replace(/^(\d{3})\.(\d{5})\.(\d{2})(\d)/, '$1.$2.$3-$4'); }
+  function nisValido(t) {
+    const d = so(t); if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    const pesos = [3, 2, 9, 8, 7, 6, 5, 4, 3, 2]; let s = 0; for (let i = 0; i < 10; i++) s += +d[i] * pesos[i];
+    let dv = 11 - (s % 11); if (dv >= 10) dv = 0; return dv === +d[10];
+  }
   function novaPessoa(resp) {
-    return { nome: '', nasc: '', nascTxt: '', parentesco: resp ? 'Responsável pela família' : '', sexo: '', cpf: '', nis: '', renda: '', fonte: 'sem', estudo: 'nao', rede: 'publica', medioCompleto: false, pcd: false, gestante: false, nutriz: false, demitido: false, incontinencia: false, semDocumento: false, doencas: [] };
+    return { nome: '', nasc: '', nascTxt: '', parentesco: resp ? 'Responsável pela família' : '', sexo: '', cpf: '', nis: '', renda: '', fonte: 'sem', estudo: 'nao', rede: 'publica', medioCompleto: false, pcd: false, gestante: false, nutriz: false, demitido: false, incontinencia: false, semDocumento: false, semCpf: false, semNis: false, doencas: [] };
   }
   // Doenças graves com direitos especiais (Lei 7.713/1988 art. 6º XIV; Lei 8.036/1990 art. 20; Portaria Interministerial MTP/MS 22/2022)
   // Doenças com remédio grátis na Farmácia Popular
@@ -138,7 +152,7 @@
         gestante: !!x.gestante && x.sexo !== 'M', nutriz: !!x.nutriz && x.sexo !== 'M',
         estudo: x.estudo || 'nao', redePublica: x.rede === 'publica' && estuda, medioCompleto: !!x.medioCompleto, renda, fonte: x.fonte,
         recebeBPC: x.fonte === 'bpc', trabalhoFormal: x.fonte === 'formal', demitido: !!x.demitido, incontinencia: !!x.incontinencia,
-        doencas: x.doencas || [], temRemedio: (x.doencas || []).some(d => FARMACIA_POPULAR.includes(d)), semDocumento: !!x.semDocumento,
+        doencas: x.doencas || [], temRemedio: (x.doencas || []).some(d => FARMACIA_POPULAR.includes(d)), semDocumento: !!x.semDocumento || !!x.semCpf,
         cancer: (x.doencas || []).includes('cancer'), hiv: (x.doencas || []).includes('hiv'),
         doencaGrave: (x.doencas || []).some(d => DOENCAS_GRAVES.includes(d)), altoCusto: (x.doencas || []).some(d => DOENCAS_ALTO_CUSTO.includes(d)),
         aposentado: x.fonte === 'aposentadoria'
@@ -387,5 +401,5 @@
     return erros;
   }
 
-  return { dataDigitada, mascaraData, dataParaTexto, mascaraTelefone, telefoneCompleto, planoPorLocal, direitosPorPessoa, DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
+  return { mascaraCpf, cpfValido, mascaraNis, nisValido, dataDigitada, mascaraData, dataParaTexto, mascaraTelefone, telefoneCompleto, planoPorLocal, direitosPorPessoa, DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
 });

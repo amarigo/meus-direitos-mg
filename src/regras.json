@@ -1,5 +1,5 @@
 {
-  "versao": "2026.10.7",
+  "versao": "2026.10.8",
   "atualizadoEm": "2026-10-21",
   "observacao": "Regras usadas para estimar direitos. A decisão final é sempre do órgão responsável. Para atualizar, edite este arquivo, mude 'versao' e 'atualizadoEm' e publique junto com o aplicativo.",
   "parametros": {
@@ -478,7 +478,14 @@
       "condicaoTalvez": {
         "all": [
           {
-            "f": "m.pcd"
+            "any": [
+              {
+                "f": "m.pcd"
+              },
+              {
+                "f": "m.doencaGrave"
+              }
+            ]
           },
           {
             "f": "rpcBPC",
@@ -499,7 +506,7 @@
           }
         ]
       },
-      "notaTalvez": "A renda por pessoa passa de 1/4 do salário mínimo, mas pode ser aceita até meio salário mínimo conforme a deficiência e os gastos da família. Vale pedir.",
+      "notaTalvez": "Pode ser aceito se a renda por pessoa for até meio salário mínimo, ou se uma doença grave (como câncer) impede a pessoa de trabalhar ou de viver normalmente por 2 anos ou mais. O INSS decide na perícia. Vale pedir.",
       "valor": "R$ {salarioMinimo} por mês para cada pessoa",
       "ondeIr": [
         "cras",
@@ -1977,38 +1984,36 @@
     },
     {
       "id": "doenca_grave_direitos",
-      "titulo": "Direitos de quem tem doença grave",
+      "titulo": "Outros direitos de quem tem doença grave",
       "esfera": "federal",
       "categoria": "renda",
       "porMembro": true,
-      "resumo": "Câncer, HIV, doença grave do rim, do coração ou do fígado, tuberculose, hanseníase, doença mental grave, esclerose múltipla, Parkinson, cegueira e paralisia dão direitos especiais: auxílio do INSS sem precisar ter contribuído 12 meses, aposentadoria ou pensão sem desconto de Imposto de Renda, e (no câncer e no HIV) saque do FGTS e do PIS.",
+      "resumo": "Quem tem câncer, HIV ou outra doença grave tem prioridade nos processos na Justiça e no INSS. Se a doença deixar a pessoa sem poder trabalhar para sempre, a aposentadoria por incapacidade não exige tempo mínimo de contribuição, e o seguro do financiamento da casa própria pode pagar o que falta da dívida.",
       "condicao": {
         "f": "m.doencaGrave"
       },
-      "valor": "Varia conforme a situação de cada pessoa",
+      "valor": "Prioridade e proteção conforme a situação",
       "ondeIr": [
         "inss",
-        "caixa_fgts"
+        "defensoria"
       ],
       "comoPedir": [
-        "Peça ao médico um laudo com o nome da doença e o CID.",
-        "Se a doença impede de trabalhar e a pessoa contribui ou contribuiu para o INSS: peça o auxílio por incapacidade no Meu INSS ou pelo 135.",
-        "Quem é aposentado ou pensionista: peça a isenção do Imposto de Renda no Meu INSS.",
-        "Câncer ou HIV: peça o saque do FGTS e do PIS no aplicativo FGTS ou na Caixa."
+        "Peça ao médico um laudo com o nome da doença e o CID, e guarde cópias.",
+        "Em qualquer processo na Justiça ou no INSS, peça prioridade mostrando o laudo.",
+        "Se a casa é financiada e a pessoa ficou inválida, avise o banco e peça o uso do seguro (MIP)."
       ],
       "documentos": [
         "laudo_doenca",
         "foto_beneficiario",
-        "cpf_beneficiario",
-        "ctps"
+        "cpf_beneficiario"
       ],
       "requerCadUnico": false,
-      "prioridade": 2,
+      "prioridade": 4,
       "fonte": {
-        "nome": "INSS",
-        "url": "https://meu.inss.gov.br"
+        "nome": "Lei 8.213/1991",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/l8213cons.htm"
       },
-      "baseLegal": "Lei 8.213/1991 art. 26 e 151; Lei 7.713/1988 art. 6º XIV; Lei 8.036/1990 art. 20",
+      "baseLegal": "Código de Processo Civil, art. 1.048, I; Lei 8.213/1991, arts. 26 e 151",
       "verificadoEm": "2026-10-21",
       "porque": "{nome} tem uma doença grave que dá direitos especiais por lei."
     },
@@ -2511,6 +2516,178 @@
       "verificadoEm": "2026-10-21",
       "porque": "A família está em situação de rua e passa por uma emergência de moradia.",
       "porqueTalvez": "A família está sem moradia ou passa por emergência, com renda de {rpc$} por pessoa. O Bolsa Moradia depende de indicação."
+    },
+    {
+      "id": "incapacidade_inss",
+      "titulo": "Auxílio por incapacidade do INSS (antigo auxílio-doença)",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Quem trabalha com carteira assinada ou paga o INSS (autônomo, MEI) e não pode trabalhar por causa da doença recebe um valor todo mês do INSS enquanto durar o tratamento. Com câncer, HIV e outras doenças graves não precisa ter pago 12 meses: basta estar contribuindo.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.doencaGrave"
+          },
+          {
+            "f": "m.trabalhoFormal"
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "all": [
+          {
+            "f": "m.doencaGrave"
+          },
+          {
+            "any": [
+              {
+                "f": "m.fonte",
+                "op": "==",
+                "v": "informal"
+              },
+              {
+                "f": "m.demitido"
+              }
+            ]
+          }
+        ]
+      },
+      "notaTalvez": "Tem direito se pagava o INSS como autônomo ou MEI, ou se saiu do emprego com carteira há menos de 12 meses (às vezes até 24 ou 36 meses). Confira no Meu INSS.",
+      "valor": "91% da média dos salários de contribuição, todo mês, enquanto não puder trabalhar",
+      "ondeIr": [
+        "inss"
+      ],
+      "comoPedir": [
+        "Peça ao médico um atestado ou laudo dizendo que a pessoa não pode trabalhar e por quanto tempo, com o CID.",
+        "Peça o benefício no aplicativo Meu INSS (opção \"Benefício por incapacidade\") ou ligando 135.",
+        "Quem trabalha com carteira: os primeiros 15 dias quem paga é o patrão; depois, o INSS."
+      ],
+      "documentos": [
+        "laudo_doenca",
+        "foto_beneficiario",
+        "cpf_beneficiario",
+        "ctps"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Lei 8.213/1991, arts. 26, 59 a 63 e 151",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/l8213cons.htm"
+      },
+      "baseLegal": "Lei 8.213/1991, arts. 26, II, 59 a 63 e 151",
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem uma doença grave e trabalha com carteira assinada. Se a doença impede de trabalhar, o INSS paga sem exigir 12 meses de contribuição.",
+      "porqueTalvez": "{nome} tem uma doença grave. Se pagava o INSS (autônomo, MEI) ou saiu do emprego com carteira há pouco tempo, pode receber do INSS enquanto não puder trabalhar."
+    },
+    {
+      "id": "saque_fgts_doenca",
+      "titulo": "Saque do FGTS e do PIS por câncer ou HIV",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Quem tem câncer ou HIV pode sacar todo o FGTS e o PIS/PASEP. O saque também vale quando é o filho, o marido, a esposa ou outro dependente que tem a doença: quem saca é o trabalhador que tem o FGTS.",
+      "condicao": {
+        "all": [
+          {
+            "any": [
+              {
+                "f": "m.cancer"
+              },
+              {
+                "f": "m.hiv"
+              }
+            ]
+          },
+          {
+            "any": [
+              {
+                "f": "m.trabalhoFormal"
+              },
+              {
+                "f": "m.demitido"
+              }
+            ]
+          }
+        ]
+      },
+      "condicaoTalvez": {
+        "any": [
+          {
+            "f": "m.cancer"
+          },
+          {
+            "f": "m.hiv"
+          }
+        ]
+      },
+      "notaTalvez": "Vale se a pessoa doente, ou alguém da família de quem ela é dependente, já trabalhou com carteira assinada e tem FGTS ou PIS.",
+      "valor": "Todo o saldo do FGTS e do PIS/PASEP",
+      "ondeIr": [
+        "caixa_fgts"
+      ],
+      "comoPedir": [
+        "Peça ao médico um laudo com o nome da doença, o CID e a fase (estágio) da doença.",
+        "Peça o saque no aplicativo FGTS (opção \"Doença grave\") ou numa agência da Caixa.",
+        "Se o doente é dependente, leve também um documento que mostre o parentesco (certidão)."
+      ],
+      "documentos": [
+        "laudo_doenca",
+        "foto_beneficiario",
+        "cpf_beneficiario",
+        "ctps",
+        "certidoes"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Lei 8.036/1990, art. 20, XI e XIII",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/l8036consol.htm"
+      },
+      "baseLegal": "Lei 8.036/1990, art. 20, XI e XIII",
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} tem câncer ou HIV e trabalha ou trabalhou com carteira assinada.",
+      "porqueTalvez": "{nome} tem câncer ou HIV. Se a pessoa, ou alguém de quem ela é dependente, tem FGTS ou PIS, pode sacar tudo."
+    },
+    {
+      "id": "isencao_ir_doenca",
+      "titulo": "Aposentadoria ou pensão sem desconto de Imposto de Renda (doença grave)",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Aposentado ou pensionista com câncer, HIV, cegueira, doença grave do coração ou do rim e outras doenças graves não paga Imposto de Renda sobre a aposentadoria ou pensão, mesmo se a doença começou depois de aposentar.",
+      "condicao": {
+        "all": [
+          {
+            "f": "m.doencaGrave"
+          },
+          {
+            "f": "m.aposentado"
+          }
+        ]
+      },
+      "valor": "Fim do desconto do Imposto de Renda e devolução do que foi descontado indevidamente",
+      "ondeIr": [
+        "inss"
+      ],
+      "comoPedir": [
+        "Peça ao médico do SUS ou do INSS um laudo com o nome da doença, o CID e a data de início.",
+        "Peça a isenção no aplicativo Meu INSS (opção \"Isenção de Imposto de Renda\") ou ligando 135."
+      ],
+      "documentos": [
+        "laudo_doenca",
+        "foto_beneficiario",
+        "cpf_beneficiario"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 3,
+      "fonte": {
+        "nome": "Lei 7.713/1988, art. 6º, XIV",
+        "url": "https://www.planalto.gov.br/ccivil_03/leis/l7713.htm"
+      },
+      "baseLegal": "Lei 7.713/1988, art. 6º, XIV",
+      "verificadoEm": "2026-10-21",
+      "porque": "{nome} é aposentado(a) ou pensionista e tem uma doença grave."
     }
   ],
   "municipios": {

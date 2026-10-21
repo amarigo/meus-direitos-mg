@@ -197,6 +197,7 @@ test('Data dd/mm/aaaa e telefone formatado com tipo (WhatsApp, celular, fixo)', 
   await pg.selectOption('#contato2Tipo', 'fixo');
   await pg.click('#avancar');
   await pg.fill('#p0_nome', 'Ana Souza');
+  await pg.fill('#p0_cpf', '123.456.789-09'); await pg.fill('#p0_nis', '120.00000.00-4');
   await pg.locator('#p0_nasc').pressSequentially('25031980');
   assert.equal(await pg.inputValue('#p0_nasc'), '25/03/1980');
   assert.match(await pg.textContent('#p0_idade'), /46 anos/);

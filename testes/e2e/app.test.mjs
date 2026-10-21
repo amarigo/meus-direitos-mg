@@ -66,6 +66,16 @@ test('Validação: avisa nome faltando, renda faltando e data impossível', asyn
   await pg.click('#avancar');
   assert.match(await pg.textContent('#erro-pessoas'), /Falta o nome/);
   await pg.fill('#p0_nome', 'Ana'); await pg.selectOption('#p0_fonte', 'formal'); await pg.click('#avancar');
+  assert.match(await pg.textContent('#erro-pessoas'), /Falta o CPF de Ana/);
+  await pg.fill('#p0_cpf', '123.456.789-00'); await pg.click('#avancar');
+  assert.match(await pg.textContent('#erro-pessoas'), /CPF de Ana não está certo/);
+  await pg.fill('#p0_cpf', '12345678909');
+  assert.equal(await pg.inputValue('#p0_cpf'), '123.456.789-09');
+  await pg.click('#avancar');
+  assert.match(await pg.textContent('#erro-pessoas'), /Falta o NIS de Ana/);
+  await pg.check('#p0_semNis');
+  assert.ok(await pg.isDisabled('#p0_nis'));
+  await pg.click('#avancar');
   assert.match(await pg.textContent('#erro-pessoas'), /Falta quanto Ana ganha/);
   await ctx.close();
 });

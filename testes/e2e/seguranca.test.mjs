@@ -20,7 +20,7 @@ const ATAQUES = ['<img src=x onerror="window.__xss=1">', '"><script>window.__xss
 
 test('Texto de ataque digitado em todos os campos não executa código e aparece como texto', async () => {
   const { ctx, pg, erros } = await abrir();
-  await preencherFamilia(pg, { cidade: ATAQUES[0], pessoas: ATAQUES.map((a, i) => ({ nome: a, nasc: '1950-01-0' + (i + 1), fonte: 'informal', renda: '100', cpf: ATAQUES[(i + 1) % ATAQUES.length] })) });
+  await preencherFamilia(pg, { cidade: ATAQUES[0], pessoas: ATAQUES.map((a, i) => ({ nome: a, nasc: '1950-01-0' + (i + 1), fonte: 'informal', renda: '100', cpf: '123.456.789-09' })) });
   await pg.click('[data-ir="1"]');
   await pg.fill('#bairro', ATAQUES[1]); await pg.fill('#rua', ATAQUES[2]); await pg.fill('#referencia', ATAQUES[4]); await pg.fill('#contato2Nome', ATAQUES[5]); await pg.fill('#telefone', ATAQUES[3]);
   for (let i = 0; i < 4; i++) await pg.click('#avancar');

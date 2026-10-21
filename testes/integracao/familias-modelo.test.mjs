@@ -59,7 +59,8 @@ test('Todo programa do arquivo aparece para alguma família (nenhuma regra morta
     // Programas das Prefeituras: cada um só aparece na sua cidade.
     familia([{ idade: 25, renda: 0, sexo: 'F', gestante: true }, { idade: 10, estudo: 'fundamental', rede: 'publica' }], { cidade: 'Pouso Alegre', zona: 'rural', sit: { emergencia: true } }),
     familia([{ idade: 40, renda: 100 }], { cidade: 'Santa Rita do Sapucaí' }),
-    familia([{ idade: 40, renda: 0 }], { cidade: 'Belo Horizonte', moradia: 'rua', sit: { emergencia: true } })
+    familia([{ idade: 40, renda: 0 }], { cidade: 'Belo Horizonte', moradia: 'rua', sit: { emergencia: true } }),
+    familia([{ idade: 70, renda: 3000, fonte: 'aposentadoria', doencas: ['cancer'] }])
   ];
   const pcdTrabalha = familia([{ idade: 30, renda: 1800, fonte: 'formal', pcd: true }]);
   pcdTrabalha.pessoas[0].fonte = 'formal';

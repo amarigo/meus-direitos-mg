@@ -126,3 +126,24 @@ test('regras recusam programa de cidade com código que não existe', () => {
   delete r.municipios['3152501'].nome;
   assert.ok(Motor.validarRegras(r).some(e => /falta nome/.test(e)));
 });
+
+test('CPF e NIS: dígitos verificadores e máscara', () => {
+  assert.ok(Motor.cpfValido('123.456.789-09'));
+  assert.ok(!Motor.cpfValido('123.456.789-00'));
+  assert.ok(!Motor.cpfValido('111.111.111-11'), 'todos iguais não vale');
+  assert.equal(Motor.mascaraCpf('12345678909'), '123.456.789-09');
+  assert.ok(Motor.nisValido('120.00000.00-4'));
+  assert.ok(!Motor.nisValido('120.00000.00-5'));
+  assert.equal(Motor.mascaraNis('12000000004'), '120.00000.00-4');
+});
+test('câncer: tratamento em 60 dias, auxílio do INSS, saque do FGTS e, se aposentado, sem Imposto de Renda', () => {
+  const st = (f, id) => (calc(f).res.find(r => r.pr.id === id) || {}).status;
+  const clt = familia([{ nome: 'Ana', idade: 50, renda: 2500, fonte: 'formal', doencas: ['cancer'] }]);
+  for (const id of ['tratamento_cancer', 'incapacidade_inss', 'saque_fgts_doenca', 'tfd', 'doenca_grave_direitos']) assert.equal(st(clt, id), 'sim', id);
+  const bico = familia([{ nome: 'Ana', idade: 50, renda: 300, fonte: 'informal', doencas: ['cancer'] }]);
+  assert.equal(st(bico, 'incapacidade_inss'), 'talvez');
+  assert.equal(st(bico, 'bpc_pcd'), 'talvez', 'câncer com renda baixa: vale pedir o BPC');
+  const apos = familia([{ nome: 'Zé', idade: 70, renda: 3000, fonte: 'aposentadoria', doencas: ['cancer'] }]);
+  assert.equal(st(apos, 'isencao_ir_doenca'), 'sim');
+  assert.equal(st(clt, 'isencao_ir_doenca'), undefined);
+});

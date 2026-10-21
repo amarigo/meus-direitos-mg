@@ -68,10 +68,10 @@
     return M.normalizarFamilia({
       cidade: 'Itajubá', bairro: 'Centro', rua: 'Rua das Flores', numero: '120', complemento: 'Casa 2', referencia: 'Perto da escola estadual', cep: '37500-000', contato2Nome: 'Rosa', contato2Parentesco: 'Mãe', contato2Tel: '(35) 98888-0000', telefone: '(35) 99999-0000', telefoneTipo: 'whatsapp', contato2Tipo: 'celular', zona: 'urbana', moradia: 'alugada', agua: 'copasa', luz: 'familia',
       pessoas: [
-        Object.assign(np(true), { nome: 'Maria Aparecida (exemplo)', nasc: (y - 38) + '-03-10', sexo: 'F', renda: '800', fonte: 'informal', doencas: ['pressao'] }),
-        Object.assign(np(false), { nome: 'Pedro (exemplo)', nasc: (y - 16) + '-07-22', parentesco: 'Filho(a)', sexo: 'M', estudo: 'medio', rede: 'publica' }),
-        Object.assign(np(false), { nome: 'Ana Clara (exemplo)', nasc: (y - 4) + '-01-05', parentesco: 'Filho(a)', sexo: 'F', estudo: 'nao' }),
-        Object.assign(np(false), { nome: 'José (exemplo)', nasc: (y - 71) + '-01-30', parentesco: 'Pai / mãe', sexo: 'M', incontinencia: true, doencas: ['diabetes'] })
+        Object.assign(np(true), { nome: 'Maria Aparecida (exemplo)', cpf: '123.456.789-09', nis: '120.00000.00-4', nasc: (y - 38) + '-03-10', sexo: 'F', renda: '800', fonte: 'informal', doencas: ['pressao'] }),
+        Object.assign(np(false), { nome: 'Pedro (exemplo)', cpf: '222.333.444-05', nis: '120.01234.56-4', nasc: (y - 16) + '-07-22', parentesco: 'Filho(a)', sexo: 'M', estudo: 'medio', rede: 'publica' }),
+        Object.assign(np(false), { nome: 'Ana Clara (exemplo)', cpf: '987.654.321-00', semNis: true, nasc: (y - 4) + '-01-05', parentesco: 'Filho(a)', sexo: 'F', estudo: 'nao' }),
+        Object.assign(np(false), { nome: 'José (exemplo)', cpf: '321.654.987-91', nis: '120.02469.13-1', nasc: (y - 71) + '-01-30', parentesco: 'Pai / mãe', sexo: 'M', incontinencia: true, doencas: ['diabetes'] })
       ],
       saude: { consulta: true, especialista: false, dentista: true, mental: false }, cad: 'velho', bf: 'nao'
     });
@@ -122,7 +122,7 @@
     let n = 0; const q = (t, opcoes) => { n++; L.push('*' + n + '.* ' + t + (opcoes ? '\n' + op(opcoes) : '')); };
     L.push('*Questionário: benefícios e direitos da família*',
       'Olá! Estou ajudando a ver quais benefícios do governo e da Prefeitura a sua família pode ter. Responda aqui mesmo, pode ser por áudio. Se não souber alguma coisa, escreva "não sei".',
-      'As respostas servem só para preencher o aplicativo Meus Direitos MG, que guarda os dados apenas no aparelho de quem está ajudando.', '');
+      'As respostas servem só para preencher o aplicativo Meus Direitos MG, que guarda os dados apenas no aparelho de quem está ajudando. CPF e NIS são obrigatórios porque vão nos pedidos para os órgãos: mande só para quem você confia.', '');
     L.push('*PARTE 1: ONDE VOCÊS MORAM*');
     q('CEP (se souber)'); q('Cidade'); q('Bairro'); q('Rua, avenida ou estrada'); q('Número da casa (se não tiver, escreva S/N)');
     q('Complemento (casa, apartamento, bloco, fundos...)'); q('Ponto de referência (algo perto que ajude a achar a casa)'); q('Seu telefone, com DDD. Ex.: (35) 99999-9999', TIPOS_FONE.slice(1));
@@ -145,7 +145,8 @@
     q('Precisa usar fralda (perde urina ou fezes)? (sim ou não)');
     q('Está sem algum documento (certidão, identidade ou CPF)? Qual?');
     q('Já terminou o ensino médio? (sim ou não)');
-    q('CPF e NIS (número do CadÚnico). *Opcional*: só mande se confiar em quem está ajudando. Também pode mostrar pessoalmente.');
+    q('CPF (obrigatório). Se ainda não tem, escreva "não tem".');
+    q('NIS (obrigatório): número do CadÚnico. Está na folha do CadÚnico, no cartão do Bolsa Família ou é o PIS da carteira de trabalho. Se não tem ou não sabe, escreva "não sei".');
     L.push('', '*PARTE 3: SAÚDE*');
     q('Alguém da casa precisa agora de: (pode marcar várias)', ['Consulta médica ou exame', 'Médico especialista, cirurgia ou tratamento que não tem na cidade', 'Dentista ou dentadura', 'Ajuda para tristeza, ansiedade, crises, álcool ou drogas']);
     L.push('', '*PARTE 4: SITUAÇÃO DA FAMÍLIA*');
@@ -190,7 +191,8 @@
       perg('d', 'Marque o que for verdade para esta pessoa:') + ops(['Tem deficiência ou doença que impede de trabalhar ou estudar por muito tempo', 'Está grávida', 'Está amamentando bebê de até 6 meses', 'Foi mandada embora de trabalho com carteira nos últimos 4 meses', 'Precisa usar fralda (perde urina ou fezes)', 'Está sem algum documento (certidão, identidade ou CPF)', 'Já terminou o ensino médio'], 'fp-1 fp-duas') +
       perg('e', 'Usa remédio todo mês para:') + ops(DOENCAS, 'fp-3') +
       perg('f', 'Tem alguma destas doenças?', 'Algumas dão direito a remédio caro de graça e outros benefícios.') + ops(GRAVES, 'fp-2') +
-      '<div class="fp-2">' + linha('CPF', 'se quiser') + linha('NIS', 'número do CadÚnico, se souber') + '</div>' +
+      '<div class="fp-2"><div>' + quad('CPF (obrigatório)', casas(3) + '.' + casas(3) + '.' + casas(3) + '-' + casas(2)) + '<div class="fp-inline">' + cx('Ainda não tem CPF') + '</div></div>' +
+      '<div>' + quad('NIS (obrigatório)', casas(3) + '.' + casas(5) + '.' + casas(2) + '-' + casas(1), 'número do CadÚnico ou PIS') + '<div class="fp-inline">' + cx('Não tem ou não sabe') + '</div></div></div>' +
       '</section>';
     let n = 0; const q = () => ++n;
     const form =
@@ -203,7 +205,7 @@
       '<li><b>Aposentadoria ou pensão do INSS:</b> de quem pagou o INSS ou pensão deixada por alguém que morreu.</li>' +
       '<li><b>Benefício de Prestação Continuada (BPC/LOAS):</b> um salário mínimo pago pelo INSS para pessoa com 65 anos ou mais, ou com deficiência, de família de baixa renda, mesmo sem nunca ter pago o INSS.</li>' +
       '<li><b>Bico ou por conta própria:</b> faxina, venda, obra, roça, aplicativo, qualquer trabalho sem carteira assinada.</li>' +
-      '<li>O <b>CPF</b> e o <b>NIS</b> são opcionais. Só escreva se confiar em quem vai receber a folha.</li></ul></div>' +
+      '<li>O <b>CPF</b> e o <b>NIS</b> de cada pessoa são <b>obrigatórios</b>, porque vão nos pedidos para os órgãos. O NIS está na folha do CadÚnico, no cartão do Bolsa Família ou é o PIS da carteira de trabalho. Entregue esta folha só para quem você confia.</li></ul></div>' +
       '<h2>Parte 1: Onde vocês moram</h2>' +
       '<div class="fp-2">' + quad('CEP', casas(5) + '-' + casas(3), 'se souber') + linha('Cidade', '') + '</div>' +
       linha('Bairro', '') + linha('Rua, avenida ou estrada', '') +
@@ -290,6 +292,8 @@
       '<label class="q">Nome completo<input type="text" id="' + pre + 'nome" data-p="' + i + '" data-k="nome" maxlength="100" autocomplete="off" value="' + esc(p.nome) + '"></label>' +
       '<div class="grid2"><label class="q">Data de nascimento<small id="' + pre + 'idade">' + (id != null ? id + ' anos' : 'dia/mês/ano, ex.: 25/03/1980') + '</small><input type="text" inputmode="numeric" autocomplete="off" id="' + pre + 'nasc" data-p="' + i + '" data-k="nascTxt" maxlength="10" placeholder="dd/mm/aaaa" value="' + esc(p.nascTxt || M.dataParaTexto(p.nasc)) + '"></label>' +
       '<label class="q">Sexo' + sel('sexo', SEXOS, p.sexo) + '</label></div>' +
+      '<div class="grid2"><div class="stack tight"><label class="q">CPF <span class="obrig">(obrigatório)</span><small>Vai no relatório e nas cartas para os órgãos.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'cpf" data-p="' + i + '" data-k="cpf" placeholder="000.000.000-00" value="' + esc(p.cpf) + '"' + (p.semCpf ? ' disabled' : '') + '></label>' + chk('semCpf', 'Ainda não tem CPF') + '</div>' +
+      '<div class="stack tight"><label class="q">NIS <span class="obrig">(obrigatório)</span><small>Número do CadÚnico. Está na folha do CadÚnico, no cartão do Bolsa Família ou é o PIS da carteira de trabalho.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'nis" data-p="' + i + '" data-k="nis" placeholder="000.00000.00-0" value="' + esc(p.nis) + '"' + (p.semNis ? ' disabled' : '') + '></label>' + chk('semNis', 'Não tem NIS ou não sabe o número') + '</div></div>' +
       (i > 0 ? '<label class="q">O que é do responsável' + sel('parentesco', [['', 'Escolha']].concat(PARENTESCOS.slice(1).map(x => [x, x])), p.parentesco) + '</label>' : '') +
       '<label class="q">De onde vem o dinheiro desta pessoa' + sel('fonte', FONTES, p.fonte) + '</label>' +
       '<details class="ajuda"><summary>O que é cada uma?</summary><ul class="sub">' +
@@ -302,12 +306,11 @@
       '<div class="choices">' + chk('pcd', 'Tem alguma deficiência ou doença que impede de trabalhar ou estudar por muito tempo') +
       (p.sexo !== 'M' ? chk('gestante', 'Está grávida') + chk('nutriz', 'Está amamentando bebê de até 6 meses') : '') +
       chk('demitido', 'Foi mandado embora de trabalho com carteira nos últimos 4 meses') + '</div>' +
-      '<details class="more"' + (p.doencas.length || p.incontinencia || p.semDocumento || p.cpf || p.medioCompleto ? ' open' : '') + '><summary>Saúde, doenças e documentos</summary><div class="stack mid mt">' +
+      '<details class="more"' + (p.doencas.length || p.incontinencia || p.semDocumento || p.medioCompleto ? ' open' : '') + '><summary>Saúde, doenças e documentos</summary><div class="stack mid mt">' +
       '<p><b>Usa remédio todo mês para:</b></p><div class="choices dz">' + DOENCAS.map(([k, l]) => '<label class="choice"><input type="checkbox" id="' + pre + 'd_' + k + '" data-p="' + i + '" data-doenca="' + k + '"' + (p.doencas.includes(k) ? ' checked' : '') + '><span>' + l + '</span></label>').join('') + '</div>' +
       '<p><b>Tem alguma destas doenças?</b><br><small class="sub">Algumas dão direito a remédios caros de graça, prazo para tratamento e outros benefícios.</small></p><div class="choices dz">' + GRAVES.map(([k, l]) => '<label class="choice"><input type="checkbox" id="' + pre + 'd_' + k + '" data-p="' + i + '" data-doenca="' + k + '"' + (p.doencas.includes(k) ? ' checked' : '') + '><span>' + l + '</span></label>').join('') + '</div>' +
       '<div class="choices">' + chk('incontinencia', 'Precisa usar fralda (perde urina ou fezes)') + chk('semDocumento', 'Está sem algum documento (certidão, identidade ou CPF)') + chk('medioCompleto', 'Já terminou o ensino médio') + '</div>' +
-      '<div class="grid2"><label class="q">CPF<small>Opcional. Vai no relatório.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'cpf" data-p="' + i + '" data-k="cpf" value="' + esc(p.cpf) + '"></label>' +
-      '<label class="q">NIS<small>Opcional. Número do CadÚnico.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'nis" data-p="' + i + '" data-k="nis" value="' + esc(p.nis) + '"></label></div>' +
+
       '</div></details></section>';
   }
   function telaPessoas() {
@@ -410,6 +413,7 @@
     const id = idade(x.nasc);
     const partes = [x.nome + (id !== null ? ', ' + id + ' anos' : '') + (i === 0 ? ' (responsável)' : x.parentesco ? ' (' + x.parentesco.toLowerCase() + ')' : '')];
     const fonte = x.fonte && x.fonte !== 'sem' ? ROTULO_FONTE(x.fonte) + ', ' + brl(numero(x.renda)) + ' por mês' : 'sem renda';
+    partes.push('CPF ' + (x.cpf || (x.semCpf ? 'ainda não tem' : 'não informado')) + ', NIS ' + (x.nis || (x.semNis ? 'não tem ou não sabe' : 'não informado')));
     partes.push(fonte);
     if (x.estudo && x.estudo !== 'nao') partes.push('estuda: ' + ((ESTUDOS.find(e => e[0] === x.estudo) || [])[1] || '').toLowerCase() + (x.rede === 'publica' ? ' em escola pública' : ''));
     if (x.pcd) partes.push('tem deficiência ou doença de longo prazo');
@@ -498,7 +502,7 @@
     const linhas = F.pessoas.map((x, i) => {
       const id = idade(x.nasc); const est = (ESTUDOS.find(e => e[0] === x.estudo) || [])[1] || ''; const fonte = (FONTES.find(e => e[0] === x.fonte) || [])[1] || '';
       const sit = [x.pcd ? 'Pessoa com deficiência' : '', x.gestante ? 'Gestante' : '', x.nutriz ? 'Amamentando' : '', x.demitido ? 'Demitido(a) recentemente' : '', x.doencas.length ? 'Saúde: ' + x.doencas.map(d => (DOENCAS.concat(GRAVES).find(z => z[0] === d) || [, d])[1]).join(', ') : '', x.incontinencia ? 'Usa fralda' : ''].filter(Boolean).join('; ');
-      return '<tr><td>' + esc(x.nome) + '</td><td>' + (i === 0 ? 'Responsável' : esc(x.parentesco)) + '</td><td>' + (x.nasc ? esc(dataBR(x.nasc)) + (id != null ? ' (' + id + ')' : '') : '') + '</td><td>' + esc(x.cpf) + '</td><td>' + esc(x.nis) + '</td><td>' + esc(fonte.split(' (')[0]) + (x.fonte !== 'sem' ? '<br>' + brl(numero(x.renda)) : '') + '</td><td>' + esc(est) + (x.estudo !== 'nao' ? ' (' + (x.rede === 'publica' ? 'pública' : 'particular') + ')' : '') + '</td><td>' + esc(sit) + '</td></tr>';
+      return '<tr><td>' + esc(x.nome) + '</td><td>' + (i === 0 ? 'Responsável' : esc(x.parentesco)) + '</td><td>' + (x.nasc ? esc(dataBR(x.nasc)) + (id != null ? ' (' + id + ')' : '') : '') + '</td><td>' + esc(x.cpf || (x.semCpf ? 'Ainda não tem' : '')) + '</td><td>' + esc(x.nis || (x.semNis ? 'Não tem / não sabe' : '')) + '</td><td>' + esc(fonte.split(' (')[0]) + (x.fonte !== 'sem' ? '<br>' + brl(numero(x.renda)) : '') + '</td><td>' + esc(est) + (x.estudo !== 'nao' ? ' (' + (x.rede === 'publica' ? 'pública' : 'particular') + ')' : '') + '</td><td>' + esc(sit) + '</td></tr>';
     }).join('');
     return '<div class="stack">' +
       '<div class="btns noprint">' + (EM_MOLDURA ? '' : '<button type="button" class="go" id="imprimir">Imprimir relatório</button>') + '<button type="button" data-ir="5">Voltar ao resultado</button></div>' +
@@ -586,6 +590,11 @@
         if (sm) sm.textContent = id != null ? id + ' anos' : (v.length === 10 ? 'Data não parece certa' : 'dia/mês/ano, ex.: 25/03/1980');
         salvar(); return;
       }
+      if (el.dataset.k === 'cpf' || el.dataset.k === 'nis') {
+        const v = el.dataset.k === 'cpf' ? M.mascaraCpf(el.value) : M.mascaraNis(el.value); if (el.value !== v) el.value = v;
+        p[el.dataset.k] = v; salvar(); return;
+      }
+      if (el.dataset.k === 'semCpf' || el.dataset.k === 'semNis') { p[el.dataset.k] = el.checked; if (el.checked) p[el.dataset.k === 'semCpf' ? 'cpf' : 'nis'] = ''; salvar(); rerender(el.id); return; }
       if (el.dataset.doenca) { const s = new Set(p.doencas); el.checked ? s.add(el.dataset.doenca) : s.delete(el.dataset.doenca); p.doencas = [...s]; }
       else if (el.type === 'checkbox') p[el.dataset.k] = el.checked;
       else p[el.dataset.k] = String(el.value).slice(0, 120);
@@ -729,6 +738,11 @@
           const erro = document.getElementById('erro-pessoas');
           const semNome = F.pessoas.findIndex(p => !p.nome.trim());
           if (semNome >= 0) { erro.textContent = 'Falta o nome da pessoa ' + (semNome + 1) + '. Escreva o nome ou toque em "Tirar esta pessoa".'; erro.hidden = false; return; }
+          const nome1 = k => F.pessoas[k].nome.split(' ')[0];
+          const semCpf = F.pessoas.findIndex(p => !p.semCpf && !M.cpfValido(p.cpf));
+          if (semCpf >= 0) { erro.textContent = (F.pessoas[semCpf].cpf ? 'O CPF de ' + nome1(semCpf) + ' não está certo. Confira os 11 números.' : 'Falta o CPF de ' + nome1(semCpf) + '. Ele é obrigatório para os órgãos. Se a pessoa ainda não tem, marque "Ainda não tem CPF".'); erro.hidden = false; return; }
+          const semNis = F.pessoas.findIndex(p => !p.semNis && !M.nisValido(p.nis));
+          if (semNis >= 0) { erro.textContent = (F.pessoas[semNis].nis ? 'O NIS de ' + nome1(semNis) + ' não está certo. Confira os 11 números.' : 'Falta o NIS de ' + nome1(semNis) + '. Se não tem ou não sabe, marque "Não tem NIS ou não sabe o número".'); erro.hidden = false; return; }
           const semRenda = F.pessoas.findIndex(p => p.fonte !== 'sem' && !numero(p.renda));
           if (semRenda >= 0) { erro.textContent = 'Falta quanto ' + F.pessoas[semRenda].nome.split(' ')[0] + ' ganha por mês. Se não tem renda, escolha "Não tem renda".'; erro.hidden = false; return; }
           const nascRuim = F.pessoas.findIndex(p => (p.nascTxt && !p.nasc) || (p.nasc && idade(p.nasc) === null));
