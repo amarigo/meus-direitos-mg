@@ -22,7 +22,7 @@ export async function preencherFamilia(pg, { cidade = 'Itajubá', pessoas, cad =
     if (p.fonte) await pg.selectOption(`#p${i}_fonte`, p.fonte);
     if (p.renda) await pg.fill(`#p${i}_renda`, p.renda);
     if (p.estudo) await pg.selectOption(`#p${i}_estudo`, p.estudo);
-    if (p.cpf) { await pg.click(`#p${i}_nome >> xpath=ancestor::section//summary`); await pg.fill(`#p${i}_cpf`, p.cpf); }
+    if (p.cpf) { await pg.click(`#p${i}_nome >> xpath=ancestor::section//details[contains(@class,"more")]/summary`); await pg.fill(`#p${i}_cpf`, p.cpf); }
   }
   await pg.click('#avancar');
   await pg.click('#avancar');

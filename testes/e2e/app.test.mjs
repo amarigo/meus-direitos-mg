@@ -112,3 +112,61 @@ test('Sul de Minas: Itajubá mostra os CRAS da cidade no resultado e no relatór
   assert.match(await pg.textContent('#relatorio'), /Miguel Braga, 382/);
   await ctx.close();
 });
+
+async function irParaEndereco(pg) { await pg.click('#comecar'); await pg.waitForSelector('#cep'); }
+test('CEP: preenche rua, bairro e cidade (com internet)', async () => {
+  const { ctx, pg } = await abrir();
+  await pg.route('https://viacep.com.br/**', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ cep: '37550-000', logradouro: 'Rua Comendador José Garcia', bairro: 'Centro', localidade: 'Pouso Alegre', uf: 'MG' }) }));
+  await irParaEndereco(pg);
+  await pg.fill('#cep', '37550000');
+  await pg.waitForFunction(() => document.getElementById('rua')?.value === 'Rua Comendador José Garcia');
+  assert.equal(await pg.inputValue('#cidade'), 'Pouso Alegre');
+  assert.equal(await pg.inputValue('#bairro'), 'Centro');
+  assert.equal(await pg.inputValue('#cep'), '37550-000');
+  assert.equal(await pg.evaluate(() => document.activeElement.id), 'numero');
+  await ctx.close();
+});
+test('CEP: de outro estado, inexistente, resposta de ataque e sem internet', async () => {
+  const { ctx, pg } = await abrir();
+  let resposta = { uf: 'SP', localidade: 'São Paulo' };
+  await pg.route('https://viacep.com.br/**', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(resposta) }));
+  await irParaEndereco(pg);
+  await pg.fill('#cep', '01001000');
+  await pg.waitForFunction(() => /outro estado/.test(document.getElementById('cep-status').textContent));
+  resposta = { erro: true };
+  await pg.fill('#cep', '37000000');
+  await pg.waitForFunction(() => /não encontrado/.test(document.getElementById('cep-status').textContent));
+  resposta = { uf: 'MG', localidade: 'Itajubá', bairro: '<img src=x onerror="window.__xss=1">', logradouro: '"><script>window.__xss=2</script>' };
+  await pg.fill('#cep', '37500000');
+  await pg.waitForFunction(() => /encontrado/.test(document.getElementById('cep-status').textContent));
+  assert.equal(await pg.evaluate(() => window.__xss), undefined);
+  assert.equal(await pg.inputValue('#bairro'), '<img src=x onerror="window.__xss=1">');
+  await ctx.setOffline(true);
+  await pg.fill('#cep', '37500001');
+  await pg.waitForFunction(() => /Sem internet/.test(document.getElementById('cep-status').textContent));
+  await ctx.close();
+});
+test('Novos campos: sexo com 5 opções, renda bruta explicada, recado e referência no relatório', async () => {
+  const { ctx, pg } = await abrir();
+  await pg.click('#ver-exemplo');
+  await pg.click('[data-ir="1"]'); await pg.click('#avancar');
+  assert.equal(await pg.$$eval('#p0_sexo option', o => o.length), 5);
+  assert.match(await pg.textContent('main'), /antes dos descontos/);
+  await pg.click('#p0_nome >> xpath=ancestor::section//details[contains(@class,"ajuda")]/summary');
+  assert.match(await pg.textContent('main'), /mesmo sem nunca ter pago o INSS/);
+  for (let i = 0; i < 3; i++) await pg.click('#avancar');
+  await pg.click('#abrir-relatorio');
+  const rel = (await pg.textContent('#relatorio')).replace(/\s/g, ' ');
+  for (const t of ['Perto da escola estadual', '(35) 98888-0000', 'Rosa', 'Rua das Flores, 120, Casa 2']) assert.ok(rel.includes(t), 'falta ' + t);
+  await ctx.close();
+});
+test('Doença grave marcada mostra os direitos no resultado', async () => {
+  const { ctx, pg } = await abrir();
+  await pg.click('#ver-exemplo');
+  await pg.click('[data-ir="1"]'); await pg.click('#avancar');
+  await pg.check('#p0_d_cancer');
+  for (let i = 0; i < 3; i++) await pg.click('#avancar');
+  const progs = await pg.$$eval('[data-programa]', e => e.map(x => x.dataset.programa));
+  assert.ok(progs.includes('tratamento_cancer') && progs.includes('doenca_grave_direitos'));
+  await ctx.close();
+});

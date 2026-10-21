@@ -117,3 +117,25 @@ test('preencher troca {campos} e mantém os desconhecidos', () => {
   assert.equal(Motor.preencher('R$ {salarioMinimo} e {x}', { salarioMinimo: 1621 }), 'R$ 1.621 e {x}');
   assert.equal(Motor.preencher('{meioSM}', { meioSM: 810.5 }), '810,50');
 });
+
+test('Câncer: tratamento em 60 dias, direitos de doença grave e especialista', () => {
+  const f = familia([{ idade: 50, renda: 3000, nome: 'Ana', doencas: ['cancer'] }]);
+  const l = ids(f);
+  for (const id of ['tratamento_cancer', 'doenca_grave_direitos', 'sus_especialista']) assert.ok(l.includes(id), id);
+  assert.ok(!l.includes('farmacia_popular'), 'câncer não é da lista da Farmácia Popular');
+});
+test('Remédio de alto custo só para doenças da lista', () => {
+  assert.ok(ids(familia([{ idade: 40, renda: 0, doencas: ['esclerose'] }])).includes('farmacia_minas'));
+  assert.ok(!ids(familia([{ idade: 40, renda: 0, doencas: ['pressao'] }])).includes('farmacia_minas'));
+  assert.ok(ids(familia([{ idade: 40, renda: 0, doencas: ['mental_grave'] }])).includes('sus_mental'));
+});
+test('Absorvente: vale para "Outro" e "Prefiro não responder", não para masculino', () => {
+  const f = sexo => familia([{ idade: 20, renda: 0, sexo }]);
+  assert.ok(ids(f('O')).includes('absorvente'));
+  assert.ok(ids(f('N')).includes('absorvente'));
+  assert.ok(!ids(f('M')).includes('absorvente'));
+});
+test('Endereço de versões antigas vira rua', () => {
+  const f = Motor.normalizarFamilia({ endereco: 'Rua A, 10', pessoas: [{ nome: 'x' }] });
+  assert.equal(f.rua, 'Rua A, 10');
+});

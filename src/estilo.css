@@ -131,3 +131,5 @@ details.more summary{cursor:pointer;font-weight:700;color:var(--green);padding-b
 .doc{overflow-wrap:anywhere;min-width:0}
 .doc .tw{max-width:100%}
 .stack>*{min-width:0}
+details.ajuda summary{cursor:pointer;color:var(--green);font-weight:700;font-size:.95rem}
+details.ajuda ul{margin:6px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}

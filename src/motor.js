@@ -56,15 +56,22 @@
   function novaPessoa(resp) {
     return { nome: '', nasc: '', parentesco: resp ? 'Responsável pela família' : '', sexo: '', cpf: '', nis: '', renda: '', fonte: 'sem', estudo: 'nao', rede: 'publica', medioCompleto: false, pcd: false, gestante: false, nutriz: false, demitido: false, incontinencia: false, semDocumento: false, doencas: [] };
   }
+  // Doenças graves com direitos especiais (Lei 7.713/1988 art. 6º XIV; Lei 8.036/1990 art. 20; Portaria Interministerial MTP/MS 22/2022)
+  // Doenças com remédio grátis na Farmácia Popular
+  const FARMACIA_POPULAR = ['pressao', 'diabetes', 'asma', 'rinite', 'colesterol', 'osteoporose', 'parkinson', 'glaucoma', 'anticoncepcional'];
+  const DOENCAS_GRAVES = ['cancer', 'hiv', 'renal', 'coracao', 'tuberculose', 'hanseniase', 'mental_grave', 'esclerose', 'hepatite', 'parkinson', 'cegueira', 'paralisia'];
+  // Doenças que costumam usar remédios de alto custo do SUS (Farmácia de Minas / Componente Especializado)
+  const DOENCAS_ALTO_CUSTO = ['renal', 'esclerose', 'hepatite', 'alzheimer', 'epilepsia', 'mental_grave', 'rara', 'parkinson'];
   function familiaVazia() {
-    return { cidade: '', bairro: '', endereco: '', cep: '', telefone: '', zona: 'urbana', moradia: '', agua: '', luz: '', pessoas: [novaPessoa(true)], saude: { consulta: false, especialista: false, dentista: false, mental: false }, cad: '', bf: '', sit: { agricultor: false, pescador: false, indigena: false, violencia: false, rua: false, emergencia: false, justica: false } };
+    return { cidade: '', bairro: '', rua: '', numero: '', complemento: '', referencia: '', endereco: '', cep: '', telefone: '', contato2Nome: '', contato2Parentesco: '', contato2Tel: '', zona: 'urbana', moradia: '', agua: '', luz: '', pessoas: [novaPessoa(true)], saude: { consulta: false, especialista: false, dentista: false, mental: false }, cad: '', bf: '', sit: { agricultor: false, pescador: false, indigena: false, violencia: false, rua: false, emergencia: false, justica: false } };
   }
   // Conserta dados salvos estragados ou de versões antigas, sem perder o que estiver certo.
   function normalizarFamilia(f) {
     const base = familiaVazia();
     if (!f || typeof f !== 'object' || Array.isArray(f)) return base;
     const out = Object.assign({}, base);
-    for (const k of ['cidade', 'bairro', 'endereco', 'cep', 'telefone', 'zona', 'moradia', 'agua', 'luz', 'cad', 'bf']) if (typeof f[k] === 'string') out[k] = f[k];
+    for (const k of ['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'endereco', 'cep', 'telefone', 'contato2Nome', 'contato2Parentesco', 'contato2Tel', 'zona', 'moradia', 'agua', 'luz', 'cad', 'bf']) if (typeof f[k] === 'string') out[k] = f[k];
+    if (!out.rua && out.endereco) out.rua = out.endereco; // dados de versões antigas
     out.saude = Object.assign({}, base.saude, f.saude && typeof f.saude === 'object' ? f.saude : {});
     out.sit = Object.assign({}, base.sit, f.sit && typeof f.sit === 'object' ? f.sit : {});
     const ps = Array.isArray(f.pessoas) ? f.pessoas.filter(p => p && typeof p === 'object') : [];
@@ -94,7 +101,10 @@
         gestante: !!x.gestante && x.sexo !== 'M', nutriz: !!x.nutriz && x.sexo !== 'M',
         estudo: x.estudo || 'nao', redePublica: x.rede === 'publica' && estuda, medioCompleto: !!x.medioCompleto, renda, fonte: x.fonte,
         recebeBPC: x.fonte === 'bpc', trabalhoFormal: x.fonte === 'formal', demitido: !!x.demitido, incontinencia: !!x.incontinencia,
-        doencas: x.doencas || [], temRemedio: (x.doencas || []).length > 0, semDocumento: !!x.semDocumento
+        doencas: x.doencas || [], temRemedio: (x.doencas || []).some(d => FARMACIA_POPULAR.includes(d)), semDocumento: !!x.semDocumento,
+        cancer: (x.doencas || []).includes('cancer'), hiv: (x.doencas || []).includes('hiv'),
+        doencaGrave: (x.doencas || []).some(d => DOENCAS_GRAVES.includes(d)), altoCusto: (x.doencas || []).some(d => DOENCAS_ALTO_CUSTO.includes(d)),
+        aposentado: x.fonte === 'aposentadoria'
       };
     });
     const rendaTotal = membros.reduce((s, m) => s + m.renda, 0);
@@ -109,7 +119,8 @@
       jovens7a17: membros.filter(m => entre(m, 7, 17)).length,
       gestantes: membros.filter(m => m.gestante).length, nutrizes: membros.filter(m => m.nutriz).length,
       precisaSaude: !!(s.consulta || s.especialista || s.dentista || s.mental) || membros.some(m => m.gestante || m.temRemedio || m.pcd),
-      precisaEspecialista: !!s.especialista, precisaDentista: !!s.dentista, precisaSaudeMental: !!s.mental,
+      precisaEspecialista: !!s.especialista || membros.some(m => m.doencas.some(d => ['cancer', 'renal', 'coracao', 'esclerose', 'rara'].includes(d))),
+      precisaDentista: !!s.dentista, precisaSaudeMental: !!s.mental || membros.some(m => m.doencas.some(d => ['mental_grave', 'alzheimer'].includes(d))),
       precisaJustica: !!t.justica, violencia: !!t.violencia, situacaoRua: !!t.rua || f.moradia === 'rua', agricultor: !!t.agricultor,
       pescador: !!t.pescador, indigena: !!t.indigena, emergencia: !!t.emergencia,
       semCasaPropria: f.moradia !== 'propria', aguaCopasa: f.agua === 'copasa', aguaNaoSei: f.agua === 'naosei' || !f.agua,
@@ -201,7 +212,7 @@
   // ---------- Validação do arquivo de regras ----------
   // Usada antes de aceitar uma atualização baixada da internet. Devolve lista de problemas (vazia = ok).
   const FATOS_FAMILIA = ['n', 'rendaTotal', 'rpc', 'rpcBPC', 'algumBPC', 'algumaGestante', 'criancas0a6', 'jovens7a17', 'gestantes', 'nutrizes', 'precisaSaude', 'precisaEspecialista', 'precisaDentista', 'precisaSaudeMental', 'precisaJustica', 'violencia', 'situacaoRua', 'agricultor', 'pescador', 'indigena', 'emergencia', 'semCasaPropria', 'aguaCopasa', 'aguaNaoSei', 'contaLuzOutroNome', 'recebeBF', 'cadunico', 'cadOk'];
-  const FATOS_MEMBRO = ['idade', 'sexo', 'pcd', 'gestante', 'nutriz', 'estudo', 'redePublica', 'medioCompleto', 'renda', 'fonte', 'recebeBPC', 'trabalhoFormal', 'demitido', 'incontinencia', 'doencas', 'temRemedio', 'semDocumento'];
+  const FATOS_MEMBRO = ['idade', 'sexo', 'pcd', 'gestante', 'nutriz', 'estudo', 'redePublica', 'medioCompleto', 'renda', 'fonte', 'recebeBPC', 'trabalhoFormal', 'demitido', 'incontinencia', 'doencas', 'temRemedio', 'semDocumento', 'cancer', 'hiv', 'doencaGrave', 'altoCusto', 'aposentado'];
   const LIMITES = ['quartoSM', 'meioSM', 'umSM', 'doisSM', 'tresSM'];
   const OPS = ['<=', '<', '>=', '>', '==', '!=', 'in'];
   function validarRegras(r) {
@@ -263,5 +274,5 @@
     return erros;
   }
 
-  return { norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
+  return { DOENCAS_GRAVES, DOENCAS_ALTO_CUSTO, FARMACIA_POPULAR, norm, esc, brl, numero, idade, cmpVersao, params, preencher, novaPessoa, familiaVazia, normalizarFamilia, fatos, avaliar, calcular, validarRegras, CALCULOS };
 });

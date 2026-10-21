@@ -56,14 +56,17 @@
   function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 4000); }
 
   const PARENTESCOS = ['Responsável pela família', 'Esposa / marido / companheiro(a)', 'Filho(a)', 'Enteado(a)', 'Neto(a)', 'Pai / mãe', 'Sogro(a)', 'Irmão / irmã', 'Avô / avó', 'Outro parente', 'Não é parente'];
-  const FONTES = [['sem', 'Não tem renda'], ['formal', 'Trabalho com carteira assinada'], ['informal', 'Trabalho sem carteira / bico / autônomo'], ['aposentadoria', 'Aposentadoria ou pensão'], ['bpc', 'BPC / LOAS'], ['outro', 'Outra renda (aluguel, ajuda de parente, pensão alimentícia)']];
+  const FONTES = [['sem', 'Não tem renda'], ['formal', 'Trabalho com carteira assinada'], ['informal', 'Trabalho sem carteira, bico ou por conta própria'], ['aposentadoria', 'Aposentadoria ou pensão do INSS'], ['bpc', 'BPC/LOAS (salário mínimo do INSS para idoso ou pessoa com deficiência)'], ['outro', 'Outra renda (aluguel, ajuda de parente, pensão alimentícia)']];
   const ESTUDOS = [['nao', 'Não estuda'], ['creche', 'Creche ou pré-escola'], ['fundamental', 'Ensino fundamental (1º ao 9º ano)'], ['medio', 'Ensino médio'], ['eja', 'EJA (supletivo)'], ['superior', 'Faculdade ou curso técnico']];
+  const SEXOS = [['', 'Escolha'], ['F', 'Feminino'], ['M', 'Masculino'], ['O', 'Outro'], ['N', 'Prefiro não responder']];
+  const GRAVES = [['cancer', 'Câncer'], ['hiv', 'HIV / aids'], ['renal', 'Doença nos rins (rim parado, hemodiálise)'], ['coracao', 'Doença grave do coração'], ['hepatite', 'Hepatite ou doença grave do fígado'], ['tuberculose', 'Tuberculose'], ['hanseniase', 'Hanseníase'], ['mental_grave', 'Doença mental grave (esquizofrenia, transtorno bipolar e outras)'], ['alzheimer', 'Alzheimer ou demência'], ['epilepsia', 'Epilepsia (convulsões)'], ['esclerose', 'Esclerose múltipla'], ['cegueira', 'Cegueira'], ['paralisia', 'Paralisia'], ['rara', 'Doença rara ou que precisa de remédio muito caro']];
+  const CONTATOS = ['Mãe', 'Pai', 'Esposa / marido / companheiro(a)', 'Filho(a)', 'Irmão / irmã', 'Avô / avó', 'Tio / tia', 'Vizinho(a)', 'Amigo(a)', 'Outro'];
   const DOENCAS = [['pressao', 'Pressão alta'], ['diabetes', 'Diabetes'], ['asma', 'Asma'], ['rinite', 'Rinite'], ['colesterol', 'Colesterol alto'], ['osteoporose', 'Osteoporose'], ['parkinson', 'Parkinson'], ['glaucoma', 'Glaucoma'], ['anticoncepcional', 'Usa anticoncepcional']];
 
   function exemplo() {
     const y = new Date().getFullYear(); const np = M.novaPessoa;
     return M.normalizarFamilia({
-      cidade: 'Itajubá', bairro: 'Centro', endereco: 'Rua das Flores, 120', cep: '37500-000', telefone: '(35) 99999-0000', zona: 'urbana', moradia: 'alugada', agua: 'copasa', luz: 'familia',
+      cidade: 'Itajubá', bairro: 'Centro', rua: 'Rua das Flores', numero: '120', complemento: 'Casa 2', referencia: 'Perto da escola estadual', cep: '37500-000', contato2Nome: 'Rosa', contato2Parentesco: 'Mãe', contato2Tel: '(35) 98888-0000', telefone: '(35) 99999-0000', zona: 'urbana', moradia: 'alugada', agua: 'copasa', luz: 'familia',
       pessoas: [
         Object.assign(np(true), { nome: 'Maria Aparecida (exemplo)', nasc: (y - 38) + '-03-10', sexo: 'F', renda: '800', fonte: 'informal', doencas: ['pressao'] }),
         Object.assign(np(false), { nome: 'Pedro (exemplo)', nasc: (y - 16) + '-07-22', parentesco: 'Filho(a)', sexo: 'M', estudo: 'medio', rede: 'publica' }),
@@ -132,12 +135,20 @@
   }
   function telaCasa() {
     return '<div class="stack"><h2>1. Onde vocês moram</h2>' +
+      '<label class="q">CEP<small>Se souber. Com internet, a rua, o bairro e a cidade aparecem sozinhos (só o CEP é consultado no site ViaCEP).</small><input type="text" id="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" value="' + esc(F.cep) + '" placeholder="00000-000"></label>' +
+      '<p class="sub" id="cep-status" role="status" hidden></p>' +
       '<label class="q">Cidade<small>Comece a digitar e escolha na lista</small><input type="text" id="cidade" list="lista-cidades" autocomplete="off" maxlength="80" value="' + esc(F.cidade) + '" placeholder="Ex.: Pouso Alegre"></label>' +
       '<datalist id="lista-cidades">' + MUNICIPIOS.map(m => '<option value="' + esc(m[1]) + '">').join('') + '</datalist>' +
-      '<div class="grid2"><label class="q">Bairro<input type="text" id="bairro" maxlength="80" value="' + esc(F.bairro) + '"></label>' +
-      '<label class="q">CEP<small>Se souber</small><input type="text" id="cep" inputmode="numeric" maxlength="9" value="' + esc(F.cep) + '"></label></div>' +
-      '<label class="q">Rua e número<input type="text" id="endereco" maxlength="120" value="' + esc(F.endereco) + '"></label>' +
-      '<label class="q">Telefone para contato<input type="tel" id="telefone" maxlength="20" value="' + esc(F.telefone) + '"></label>' +
+      '<label class="q">Bairro<input type="text" id="bairro" maxlength="80" value="' + esc(F.bairro) + '"></label>' +
+      '<label class="q">Rua, avenida ou estrada<input type="text" id="rua" maxlength="120" autocomplete="address-line1" value="' + esc(F.rua) + '"></label>' +
+      '<div class="grid2"><label class="q">Número<small>Se não tiver, escreva S/N</small><input type="text" id="numero" maxlength="10" value="' + esc(F.numero) + '"></label>' +
+      '<label class="q">Complemento<small>Casa, apartamento, bloco, fundos...</small><input type="text" id="complemento" maxlength="60" value="' + esc(F.complemento) + '"></label></div>' +
+      '<label class="q">Ponto de referência<small>Algo perto que ajude a achar a casa. Ex.: perto da escola, em frente à padaria.</small><input type="text" id="referencia" maxlength="120" value="' + esc(F.referencia) + '"></label>' +
+      '<label class="q">Seu telefone<input type="tel" id="telefone" maxlength="20" autocomplete="tel" value="' + esc(F.telefone) + '"></label>' +
+      '<fieldset class="card stack mid"><legend><b>Outro telefone para recado</b><br><small class="sub">De alguém que sempre consegue falar com você</small></legend>' +
+      '<div class="grid2"><label class="q">Nome<input type="text" id="contato2Nome" maxlength="80" value="' + esc(F.contato2Nome) + '"></label>' +
+      '<label class="q">Quem é<select id="contato2Parentesco"><option value="">Escolha</option>' + CONTATOS.map(c => '<option' + (F.contato2Parentesco === c ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></label></div>' +
+      '<label class="q">Telefone<input type="tel" id="contato2Tel" maxlength="20" value="' + esc(F.contato2Tel) + '"></label></fieldset>' +
       '<fieldset class="card choices"><legend><b>A casa fica</b></legend>' + radio('zona', 'urbana', 'Na cidade', F.zona) + radio('zona', 'rural', 'Na roça (zona rural)', F.zona) + '</fieldset>' +
       '<fieldset class="card choices"><legend><b>A casa é</b></legend>' +
       radio('moradia', 'propria', 'Própria (já paga)', F.moradia) + radio('moradia', 'financiada', 'Própria, ainda pagando', F.moradia) + radio('moradia', 'alugada', 'Alugada', F.moradia) + radio('moradia', 'cedida', 'Emprestada (cedida)', F.moradia) + radio('moradia', 'ocupacao', 'Ocupação', F.moradia) + radio('moradia', 'rua', 'Não tenho casa / moro na rua', F.moradia) + '</fieldset>' +
@@ -154,17 +165,22 @@
       '<div class="person-head"><h3>' + (i === 0 ? 'Responsável pela família' : 'Pessoa ' + (i + 1)) + (p.nome ? ': ' + esc(p.nome.split(' ')[0]) : '') + '</h3>' + (i > 0 ? '<button type="button" class="small" data-remover="' + i + '">Tirar esta pessoa</button>' : '') + '</div>' +
       '<label class="q">Nome completo<input type="text" id="' + pre + 'nome" data-p="' + i + '" data-k="nome" maxlength="100" autocomplete="off" value="' + esc(p.nome) + '"></label>' +
       '<div class="grid2"><label class="q">Data de nascimento' + (id != null ? '<small>' + id + ' anos</small>' : '') + '<input type="date" id="' + pre + 'nasc" data-p="' + i + '" data-k="nasc" min="1900-01-01" max="' + hoje + '" value="' + esc(p.nasc) + '"></label>' +
-      '<label class="q">Sexo' + sel('sexo', [['', 'Escolha'], ['F', 'Feminino'], ['M', 'Masculino']], p.sexo) + '</label></div>' +
+      '<label class="q">Sexo' + sel('sexo', SEXOS, p.sexo) + '</label></div>' +
       (i > 0 ? '<label class="q">O que é do responsável' + sel('parentesco', [['', 'Escolha']].concat(PARENTESCOS.slice(1).map(x => [x, x])), p.parentesco) + '</label>' : '') +
-      '<div class="grid2"><label class="q">De onde vem o dinheiro desta pessoa' + sel('fonte', FONTES, p.fonte) + '</label>' +
-      '<label class="q">Quanto ganha por mês (R$)<small>Some tudo. Não conte o Bolsa Família.</small><input type="text" inputmode="decimal" maxlength="12" id="' + pre + 'renda" data-p="' + i + '" data-k="renda" value="' + esc(p.renda) + '" placeholder="0"' + (p.fonte === 'sem' ? ' disabled' : '') + '></label></div>' +
+      '<label class="q">De onde vem o dinheiro desta pessoa' + sel('fonte', FONTES, p.fonte) + '</label>' +
+      '<details class="ajuda"><summary>O que é cada uma?</summary><ul class="sub">' +
+      '<li><b>Aposentadoria ou pensão do INSS:</b> benefício de quem pagou o INSS (trabalhou com carteira ou contribuiu), ou pensão deixada por alguém que morreu.</li>' +
+      '<li><b>BPC/LOAS:</b> um salário mínimo pago todo mês pelo INSS para pessoa com 65 anos ou mais, ou pessoa com deficiência, de família pobre, mesmo sem nunca ter pago o INSS. Não tem 13º salário.</li>' +
+      '<li><b>Bico ou por conta própria:</b> faxina, venda, obra, roça, aplicativo, qualquer trabalho sem carteira assinada.</li></ul></details>' +
+      '<div class="grid2"><label class="q">Quanto ganha por mês, antes dos descontos (R$)<small>É o valor bruto: o salário antes de tirar INSS, vale-transporte e outros descontos (no contracheque aparece como "total de vencimentos"). Se o valor muda, coloque a média. Não conte o Bolsa Família.</small><input type="text" inputmode="decimal" maxlength="12" id="' + pre + 'renda" data-p="' + i + '" data-k="renda" value="' + esc(p.renda) + '" placeholder="0"' + (p.fonte === 'sem' ? ' disabled' : '') + '></label></div>' +
       '<div class="grid2"><label class="q">Estuda?' + sel('estudo', ESTUDOS, p.estudo) + '</label>' +
       (p.estudo !== 'nao' ? '<label class="q">Escola' + sel('rede', [['publica', 'Pública (do governo)'], ['particular', 'Particular']], p.rede) + '</label>' : '') + '</div>' +
       '<div class="choices">' + chk('pcd', 'Tem alguma deficiência ou doença que impede de trabalhar ou estudar por muito tempo') +
       (p.sexo !== 'M' ? chk('gestante', 'Está grávida') + chk('nutriz', 'Está amamentando bebê de até 6 meses') : '') +
       chk('demitido', 'Foi mandado embora de trabalho com carteira nos últimos 4 meses') + '</div>' +
-      '<details class="more"' + (p.doencas.length || p.incontinencia || p.semDocumento || p.cpf || p.medioCompleto ? ' open' : '') + '><summary>Mais informações (saúde, documentos)</summary><div class="stack mid mt">' +
+      '<details class="more"' + (p.doencas.length || p.incontinencia || p.semDocumento || p.cpf || p.medioCompleto ? ' open' : '') + '><summary>Saúde, doenças e documentos</summary><div class="stack mid mt">' +
       '<p><b>Usa remédio todo mês para:</b></p><div class="choices dz">' + DOENCAS.map(([k, l]) => '<label class="choice"><input type="checkbox" id="' + pre + 'd_' + k + '" data-p="' + i + '" data-doenca="' + k + '"' + (p.doencas.includes(k) ? ' checked' : '') + '><span>' + l + '</span></label>').join('') + '</div>' +
+      '<p><b>Tem alguma destas doenças?</b><br><small class="sub">Algumas dão direito a remédios caros de graça, prazo para tratamento e outros benefícios.</small></p><div class="choices dz">' + GRAVES.map(([k, l]) => '<label class="choice"><input type="checkbox" id="' + pre + 'd_' + k + '" data-p="' + i + '" data-doenca="' + k + '"' + (p.doencas.includes(k) ? ' checked' : '') + '><span>' + l + '</span></label>').join('') + '</div>' +
       '<div class="choices">' + chk('incontinencia', 'Precisa usar fralda (perde urina ou fezes)') + chk('semDocumento', 'Está sem algum documento (certidão, identidade ou CPF)') + chk('medioCompleto', 'Já terminou o ensino médio') + '</div>' +
       '<div class="grid2"><label class="q">CPF<small>Opcional. Vai no relatório.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'cpf" data-p="' + i + '" data-k="cpf" value="' + esc(p.cpf) + '"></label>' +
       '<label class="q">NIS<small>Opcional. Número do CadÚnico.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'nis" data-p="' + i + '" data-k="nis" value="' + esc(p.nis) + '"></label></div>' +
@@ -269,10 +285,14 @@
       '<p class="who">Este resultado é uma estimativa feita com as regras de ' + dataBR(REGRAS.atualizadoEm) + '. Quem decide é o órgão responsável.</p>' +
       '<div class="btns noprint"><button type="button" class="small danger" id="terminar">Terminei: apagar os dados deste aparelho</button></div></div>';
   }
+  function enderecoCompleto() {
+    const ruaNum = [F.rua || F.endereco, F.numero].filter(Boolean).join(', ');
+    return [ruaNum, F.complemento, F.bairro, F.cidade ? F.cidade + ' - MG' : '', F.cep ? 'CEP ' + F.cep : ''].filter(Boolean).join(', ');
+  }
   function textoPedido(g, fx, resp, endereco, hoje) {
     const c = REGRAS.canais[g.canal] || {};
     return 'A(o) ' + (c.nome || g.canal) + (F.cidade ? ' de ' + F.cidade + '/MG' : '') + '\n\n' +
-      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', morador(a) em ' + (endereco || '________________________') + ', telefone ' + (F.telefone || '______________') + ', responsável por uma família de ' + fx.n + ' pessoa(s), com renda total de ' + brl(fx.rendaTotal) + ' por mês (' + brl(fx.rpc) + ' por pessoa), venho solicitar:\n\n' +
+      'Eu, ' + (resp.nome || '________________________') + (resp.cpf ? ', CPF ' + resp.cpf : '') + (resp.nis ? ', NIS ' + resp.nis : '') + ', morador(a) em ' + (endereco || '________________________') + ', telefone ' + (F.telefone || '______________') + (F.contato2Tel ? ' (recado: ' + F.contato2Tel + (F.contato2Nome ? ', ' + F.contato2Nome : '') + ')' : '') + (F.referencia ? ', ponto de referência: ' + F.referencia : '') + ', responsável por uma família de ' + fx.n + ' pessoa(s), com renda total de ' + brl(fx.rendaTotal) + ' por mês (' + brl(fx.rpc) + ' por pessoa), venho solicitar:\n\n' +
       g.progs.map(r => '- ' + r.pr.titulo + (r.quem.length ? ' (para ' + r.quem.join(', ') + ')' : '')).join('\n') +
       '\n\nAs informações da família estão no quadro deste relatório. Trago os documentos listados.\n\n' + (F.cidade || '__________') + ', ' + hoje + '.';
   }
@@ -281,10 +301,10 @@
     const plano = planoPorCanal(res);
     const resp = F.pessoas[0] || {};
     const hoje = new Date().toLocaleDateString('pt-BR');
-    const endereco = [F.endereco, F.bairro, F.cidade ? F.cidade + ' - MG' : '', F.cep].filter(Boolean).join(', ');
+    const endereco = enderecoCompleto();
     const linhas = F.pessoas.map((x, i) => {
       const id = idade(x.nasc); const est = (ESTUDOS.find(e => e[0] === x.estudo) || [])[1] || ''; const fonte = (FONTES.find(e => e[0] === x.fonte) || [])[1] || '';
-      const sit = [x.pcd ? 'Pessoa com deficiência' : '', x.gestante ? 'Gestante' : '', x.nutriz ? 'Amamentando' : '', x.demitido ? 'Demitido(a) recentemente' : '', x.doencas.length ? 'Remédio contínuo: ' + x.doencas.map(d => (DOENCAS.find(z => z[0] === d) || [, d])[1]).join(', ') : '', x.incontinencia ? 'Usa fralda' : ''].filter(Boolean).join('; ');
+      const sit = [x.pcd ? 'Pessoa com deficiência' : '', x.gestante ? 'Gestante' : '', x.nutriz ? 'Amamentando' : '', x.demitido ? 'Demitido(a) recentemente' : '', x.doencas.length ? 'Saúde: ' + x.doencas.map(d => (DOENCAS.concat(GRAVES).find(z => z[0] === d) || [, d])[1]).join(', ') : '', x.incontinencia ? 'Usa fralda' : ''].filter(Boolean).join('; ');
       return '<tr><td>' + esc(x.nome) + '</td><td>' + (i === 0 ? 'Responsável' : esc(x.parentesco)) + '</td><td>' + (x.nasc ? esc(dataBR(x.nasc)) + (id != null ? ' (' + id + ')' : '') : '') + '</td><td>' + esc(x.cpf) + '</td><td>' + esc(x.nis) + '</td><td>' + esc(fonte) + (x.fonte !== 'sem' ? '<br>' + brl(numero(x.renda)) : '') + '</td><td>' + esc(est) + (x.estudo !== 'nao' ? ' (' + (x.rede === 'publica' ? 'pública' : 'particular') + ')' : '') + '</td><td>' + esc(sit) + '</td></tr>';
     }).join('');
     return '<div class="stack">' +
@@ -293,7 +313,10 @@
       '<article class="doc" id="relatorio"><h1>Relatório de direitos da família</h1>' +
       '<p class="meta">Feito em ' + hoje + ' com o aplicativo Meus Direitos MG · Regras versão ' + esc(REGRAS.versao) + ' (' + dataBR(REGRAS.atualizadoEm) + ') · Salário mínimo usado: ' + brl(p.salarioMinimo) + '</p>' +
       '<h2>1. Dados da família</h2>' +
-      '<p><b>Responsável:</b> ' + esc(resp.nome) + ' &nbsp; <b>Telefone:</b> ' + esc(F.telefone) + '<br><b>Endereço:</b> ' + esc(endereco) + ' (' + (F.zona === 'rural' ? 'zona rural' : 'zona urbana') + ')<br>' +
+      '<p><b>Responsável:</b> ' + esc(resp.nome) + ' &nbsp; <b>Telefone:</b> ' + esc(F.telefone) +
+      (F.contato2Tel ? '<br><b>Telefone para recado:</b> ' + esc(F.contato2Tel) + (F.contato2Nome ? ' (' + esc(F.contato2Nome) + (F.contato2Parentesco ? ', ' + esc(F.contato2Parentesco.toLowerCase()) : '') + ')' : '') : '') +
+      '<br><b>Endereço:</b> ' + esc(endereco) + ' (' + (F.zona === 'rural' ? 'zona rural' : 'zona urbana') + ')' +
+      (F.referencia ? '<br><b>Ponto de referência:</b> ' + esc(F.referencia) : '') + '<br>' +
       '<b>Pessoas na casa:</b> ' + fx.n + ' &nbsp; <b>Renda total:</b> <span id="rel-renda">' + brl(fx.rendaTotal) + '</span> &nbsp; <b>Renda por pessoa:</b> <span id="rel-rpc">' + brl(fx.rpc) + '</span><br>' +
       '<b>CadÚnico:</b> ' + ({ sim: 'Sim, atualizado', velho: 'Sim, precisa atualizar', nao: 'Não', naosei: 'Não sabe' }[F.cad] || 'Não informado') + ' &nbsp; <b>Bolsa Família:</b> ' + (F.bf === 'sim' ? 'Recebe' : 'Não recebe') + '</p>' +
       '<div class="tw"><table><thead><tr><th>Nome</th><th>Parentesco</th><th>Nascimento</th><th>CPF</th><th>NIS</th><th>Renda</th><th>Estudo</th><th>Situação</th></tr></thead><tbody>' + linhas + '</tbody></table></div>' +
@@ -311,6 +334,34 @@
       res.map(r => '<div class="box"><h3>' + esc(r.pr.titulo) + ' — ' + (r.status === 'sim' ? 'provável direito' : 'pode ter direito') + '</h3><p>' + esc(preencher(r.pr.resumo, p)) + '</p>' + (r.quem.length ? '<p><b>Para:</b> ' + esc(r.quem.join(', ')) + '</p>' : '') + (r.valor ? '<p><b>Valor:</b> ' + esc(r.valor) + '</p>' : '') + (r.nota ? '<p><i>' + esc(r.nota) + '</i></p>' : '') + r.avisos.map(a => '<p><i>' + esc(a) + '</i></p>').join('') + '<p><b>Como pedir:</b> ' + esc(r.pr.comoPedir.join(' ')) + '</p><p class="meta">Base legal: ' + esc(r.pr.baseLegal || '') + ' · Fonte: ' + esc(r.pr.fonte.nome) + ' (' + esc(r.pr.fonte.url) + ') · Conferido em ' + dataBR(r.pr.verificadoEm) + '</p></div>').join('') +
       '<h2>4. Declaração</h2><p>Declaro que as informações acima são verdadeiras. Sei que este relatório é uma estimativa e que cada órgão confere os dados e decide sobre o benefício. Nenhum atendimento público pode cobrar para fazer o cadastro ou liberar benefício.</p>' +
       '<div class="assin"><div>Assinatura do(a) responsável</div><div>Atendente / órgão (carimbo)</div></div></article></div>';
+  }
+
+  // Busca a rua pelo CEP no ViaCEP (só com internet; só o CEP é enviado).
+  let cepPedido = 0;
+  async function buscarCep(dig) {
+    const st = document.getElementById('cep-status');
+    const msg = t => { if (st) { st.textContent = t; st.hidden = !t; } };
+    if (!navigator.onLine) { msg('Sem internet: preencha a rua, o bairro e a cidade à mão.'); return; }
+    const meu = ++cepPedido;
+    msg('Procurando o CEP...');
+    try {
+      const txt = await baixarTexto('https://viacep.com.br/ws/' + dig + '/json/', 8000, true);
+      if (meu !== cepPedido) return;
+      const r = JSON.parse(txt);
+      if (!r || typeof r !== 'object' || r.erro) { msg('CEP não encontrado. Confira os números ou preencha à mão.'); return; }
+      const txtOk = v => typeof v === 'string' ? v.slice(0, 120) : '';
+      if (txtOk(r.uf) !== 'MG') { msg('Este CEP é de outro estado (' + txtOk(r.uf).slice(0, 2) + '). Confira os números.'); return; }
+      const mun = MUN_POR_NOME.get(norm(txtOk(r.localidade)));
+      if (mun) F.cidade = mun.nome;
+      if (txtOk(r.bairro)) F.bairro = txtOk(r.bairro);
+      if (txtOk(r.logradouro)) F.rua = txtOk(r.logradouro);
+      salvar();
+      if (PASSOS[passo] === 'casa' && !tela && !bloqueado) {
+        render();
+        const s2 = document.getElementById('cep-status'); if (s2) { s2.textContent = 'Endereço encontrado. Confira e coloque o número.'; s2.hidden = false; }
+        const n = document.getElementById(txtOk(r.logradouro) ? 'numero' : 'rua'); if (n) n.focus();
+      }
+    } catch (e) { if (meu === cepPedido) msg('Não foi possível procurar o CEP agora. Preencha à mão.'); }
   }
 
   function render() {
@@ -347,7 +398,14 @@
     if (el.type === 'radio') { F[el.name] = el.value; salvar(); return; }
     if (PASSOS[passo] === 'saude' && el.dataset.k) { F.saude[el.dataset.k] = el.checked; salvar(); return; }
     if (PASSOS[passo] === 'situacao' && el.dataset.k) { F.sit[el.dataset.k] = el.checked; salvar(); return; }
-    if (['cidade', 'bairro', 'endereco', 'cep', 'telefone'].includes(el.id)) { F[el.id] = String(el.value).slice(0, 120); salvar(); }
+    if (['cidade', 'bairro', 'rua', 'numero', 'complemento', 'referencia', 'telefone', 'contato2Nome', 'contato2Parentesco', 'contato2Tel'].includes(el.id)) { F[el.id] = String(el.value).slice(0, 120); salvar(); }
+    if (el.id === 'cep') {
+      const dig = el.value.replace(/\D/g, '').slice(0, 8);
+      const fmt = dig.length > 5 ? dig.slice(0, 5) + '-' + dig.slice(5) : dig;
+      if (el.value !== fmt) el.value = fmt;
+      F.cep = fmt; salvar();
+      if (dig.length === 8) buscarCep(dig);
+    }
   });
   view.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;
@@ -452,13 +510,15 @@
     if (r === 'ok') { if (F || bloqueado) render(); }
     else if (r !== 'versão não é mais nova') store.del('md_regras');
   }
-  async function baixarTexto(url, ms) {
+  async function baixarTexto(url, ms, externo) {
     const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const t = setTimeout(() => ctrl && ctrl.abort(), ms);
     try {
-      const r = await fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined, credentials: 'omit' });
+      const r = await fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined, credentials: 'omit', referrerPolicy: 'no-referrer' });
       if (!r.ok) throw new Error('http ' + r.status);
-      return await r.text();
+      const t = await r.text();
+      if (externo && t.length > 5000) throw new Error('resposta grande demais');
+      return t;
     } finally { clearTimeout(t); }
   }
   let verificando = false;

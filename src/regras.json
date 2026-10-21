@@ -1,5 +1,5 @@
 {
-  "versao": "2026.10.3",
+  "versao": "2026.10.4",
   "atualizadoEm": "2026-10-21",
   "observacao": "Regras usadas para estimar direitos. A decisão final é sempre do órgão responsável. Para atualizar, edite este arquivo, mude 'versao' e 'atualizadoEm' e publique junto com o aplicativo.",
   "parametros": {
@@ -107,6 +107,18 @@
       "como": "Leve os documentos da terra e da família.",
       "telefone": "",
       "site": "https://www.emater.mg.gov.br"
+    },
+    "farmacia_minas": {
+      "nome": "Farmácia de Minas (remédios especiais do SUS)",
+      "como": "Peça ao médico os formulários do remédio (laudo LME e receita). Entregue na Farmácia de Minas da sua cidade ou na Secretaria de Saúde, que manda para a Regional de Saúde.",
+      "telefone": "136 (Disque Saúde)",
+      "site": "https://www.saude.mg.gov.br"
+    },
+    "caixa_fgts": {
+      "nome": "Caixa (saque do FGTS e PIS)",
+      "como": "Peça pelo aplicativo FGTS ou numa agência da Caixa, com o laudo médico.",
+      "telefone": "0800 726 0101",
+      "site": "https://www.caixa.gov.br"
     }
   },
   "documentos": {
@@ -127,7 +139,9 @@
     "conta_agua": "Conta de água da casa",
     "cad_folha": "Folha resumo do CadÚnico (pedir no CRAS)",
     "rescisao": "Termo de rescisão do contrato de trabalho",
-    "terra": "Documento da terra ou contrato (arrendamento, comodato)"
+    "terra": "Documento da terra ou contrato (arrendamento, comodato)",
+    "lme": "Laudo para remédio especial (LME) preenchido pelo médico, com receita e exames",
+    "laudo_doenca": "Laudo médico com o nome da doença e o código (CID), assinado e com data"
   },
   "programas": [
     {
@@ -750,13 +764,17 @@
       "esfera": "federal",
       "categoria": "saude",
       "porMembro": true,
-      "resumo": "Absorventes de graça na Farmácia Popular para meninas e mulheres de 10 a 49 anos de famílias de baixa renda no CadÚnico, estudantes de baixa renda da rede pública ou em situação de rua.",
+      "resumo": "Absorventes de graça na Farmácia Popular para quem menstrua, de 10 a 49 anos de famílias de baixa renda no CadÚnico, estudantes de baixa renda da rede pública ou em situação de rua.",
       "condicao": {
         "all": [
           {
             "f": "m.sexo",
-            "op": "==",
-            "v": "F"
+            "op": "in",
+            "v": [
+              "F",
+              "O",
+              "N"
+            ]
           },
           {
             "f": "m.idade",
@@ -786,8 +804,12 @@
         "all": [
           {
             "f": "m.sexo",
-            "op": "==",
-            "v": "F"
+            "op": "in",
+            "v": [
+              "F",
+              "O",
+              "N"
+            ]
           },
           {
             "f": "m.idade",
@@ -837,7 +859,7 @@
       "titulo": "Atendimento no SUS: consultas, exames e vacinas",
       "esfera": "federal",
       "categoria": "saude",
-      "resumo": "Todo mundo tem direito ao SUS, de graça, sem limite de renda. O posto de saúde (UBS) marca consulta, pede exames e encaminha para especialista.",
+      "resumo": "Todo mundo tem direito ao SUS, de graça, sem limite de renda. O posto de saúde (UBS) marca consulta, pede exames e encaminha para especialista. Isso inclui tratamento de câncer, hemodiálise, transplante, HIV e doenças raras.",
       "condicao": {
         "f": "precisaSaude"
       },
@@ -1748,6 +1770,115 @@
       },
       "baseLegal": "Constituição Federal, art. 134",
       "aviso": "O limite de renda é uma referência; a Defensoria analisa cada caso.",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "tratamento_cancer",
+      "titulo": "Tratamento do câncer pelo SUS (prazo de 60 dias)",
+      "esfera": "federal",
+      "categoria": "saude",
+      "porMembro": true,
+      "resumo": "Quem tem câncer tem direito a começar o tratamento (cirurgia, quimioterapia ou radioterapia) em até 60 dias depois do diagnóstico, e a fazer os exames que confirmam a doença em até 30 dias. Se o hospital for em outra cidade, o SUS paga o transporte.",
+      "condicao": {
+        "f": "m.cancer"
+      },
+      "valor": "Tratamento de graça, com prazo garantido por lei",
+      "ondeIr": [
+        "ubs",
+        "prefeitura",
+        "defensoria"
+      ],
+      "comoPedir": [
+        "Com o diagnóstico, peça à UBS o encaminhamento para um hospital de tratamento de câncer.",
+        "Anote a data do diagnóstico. Se passar de 60 dias sem começar o tratamento, procure a Ouvidoria do SUS (136) ou a Defensoria Pública.",
+        "Para tratamento em outra cidade, peça na Secretaria de Saúde o TFD (transporte e ajuda de custo)."
+      ],
+      "documentos": [
+        "sus",
+        "laudo_doenca",
+        "foto",
+        "endereco"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 1,
+      "fonte": {
+        "nome": "Lei 12.732/2012 e Lei 13.896/2019",
+        "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2012/lei/l12732.htm"
+      },
+      "baseLegal": "Lei 12.732/2012 (60 dias); Lei 13.896/2019 (30 dias para exames)",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "doenca_grave_direitos",
+      "titulo": "Direitos de quem tem doença grave",
+      "esfera": "federal",
+      "categoria": "renda",
+      "porMembro": true,
+      "resumo": "Câncer, HIV, doença grave do rim, do coração ou do fígado, tuberculose, hanseníase, doença mental grave, esclerose múltipla, Parkinson, cegueira e paralisia dão direitos especiais: auxílio do INSS sem precisar ter contribuído 12 meses, aposentadoria ou pensão sem desconto de Imposto de Renda, e (no câncer e no HIV) saque do FGTS e do PIS.",
+      "condicao": {
+        "f": "m.doencaGrave"
+      },
+      "valor": "Varia conforme a situação de cada pessoa",
+      "ondeIr": [
+        "inss",
+        "caixa_fgts"
+      ],
+      "comoPedir": [
+        "Peça ao médico um laudo com o nome da doença e o CID.",
+        "Se a doença impede de trabalhar e a pessoa contribui ou contribuiu para o INSS: peça o auxílio por incapacidade no Meu INSS ou pelo 135.",
+        "Quem é aposentado ou pensionista: peça a isenção do Imposto de Renda no Meu INSS.",
+        "Câncer ou HIV: peça o saque do FGTS e do PIS no aplicativo FGTS ou na Caixa."
+      ],
+      "documentos": [
+        "laudo_doenca",
+        "foto",
+        "cpf_todos",
+        "ctps"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "INSS",
+        "url": "https://meu.inss.gov.br"
+      },
+      "baseLegal": "Lei 8.213/1991 art. 26 e 151; Lei 7.713/1988 art. 6º XIV; Lei 8.036/1990 art. 20",
+      "verificadoEm": "2026-10-21"
+    },
+    {
+      "id": "farmacia_minas",
+      "titulo": "Remédios caros de graça (Farmácia de Minas)",
+      "esfera": "estadual",
+      "categoria": "saude",
+      "porMembro": true,
+      "resumo": "O SUS de Minas fornece de graça remédios caros para doenças como esclerose múltipla, hepatite, epilepsia, Alzheimer, Parkinson, doença renal crônica, transtornos mentais graves e doenças raras, conforme os protocolos do Ministério da Saúde.",
+      "condicao": {
+        "f": "m.altoCusto"
+      },
+      "valor": "Remédio de graça todo mês",
+      "ondeIr": [
+        "ubs",
+        "farmacia_minas"
+      ],
+      "comoPedir": [
+        "Peça ao médico (do SUS ou particular) o laudo LME, a receita e os exames exigidos para o remédio.",
+        "Entregue tudo na Farmácia de Minas ou na Secretaria de Saúde da sua cidade.",
+        "Depois de aprovado, retire o remédio todo mês e renove o laudo quando pedirem."
+      ],
+      "documentos": [
+        "lme",
+        "foto",
+        "cpf_todos",
+        "sus",
+        "endereco"
+      ],
+      "requerCadUnico": false,
+      "prioridade": 2,
+      "fonte": {
+        "nome": "Secretaria de Estado de Saúde de MG",
+        "url": "https://www.saude.mg.gov.br"
+      },
+      "baseLegal": "Componente Especializado da Assistência Farmacêutica (Portaria de Consolidação GM/MS 2/2017)",
+      "aviso": "Nem todo remédio está na lista. O médico ou a farmácia confirmam se o seu está.",
       "verificadoEm": "2026-10-21"
     }
   ],

@@ -53,7 +53,7 @@ test('Todo programa do arquivo aparece para alguma família (nenhuma regra morta
   for (const m of modelos) calc(m.f).res.forEach(r => vistos.add(r.pr.id));
   const extras = [
     familia([{ idade: 30, renda: 1200, pcd: true, fonte: 'bpc' }].map(p => ({ ...p, fonte: 'formal' })).concat([{ idade: 20, pcd: true, renda: SM, fonte: 'bpc' }])),
-    familia([{ idade: 75, renda: 0, incontinencia: true, doencas: ['diabetes'], semDocumento: true }], { saude: { especialista: true, dentista: true, mental: true }, sit: { justica: true, emergencia: true } }),
+    familia([{ idade: 75, renda: 0, incontinencia: true, doencas: ['diabetes', 'cancer', 'esclerose'], semDocumento: true }], { saude: { especialista: true, dentista: true, mental: true }, sit: { justica: true, emergencia: true } }),
     familia([{ idade: 30, renda: SM * 1.5 }, { idade: 30 }]),
     familia([{ idade: 40, renda: 0 }, { idade: 19, estudo: 'eja', rede: 'publica' }])
   ];
