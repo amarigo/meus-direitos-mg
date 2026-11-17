@@ -14,7 +14,10 @@ permissions:
 
 jobs:
   testar-e-publicar:
-    runs-on: ubuntu-latest
+    # Ubuntu fixo: em 16/11/2026 a ubuntu-latest virou 26.04 e o Playwright 1.56.1 não tem
+    # Chromium para ela ("Playwright does not support chromium on ubuntu26.04-x64").
+    # Só trocar para uma versão nova do Ubuntu depois de atualizar o Playwright.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
