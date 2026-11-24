@@ -150,7 +150,7 @@ test('Questionário para WhatsApp: todas as perguntas, copiar e link do WhatsApp
   await pg.goto(srv.url);
   await pg.click('#abrir-questionario');
   const t = await pg.textContent('#texto-questionario');
-  for (const trecho of ['CEP', 'Ponto de referência', 'Outro telefone para recado', 'antes dos descontos', 'Benefício de Prestação Continuada', 'Câncer', 'Prefiro não responder', 'CadÚnico', 'Bolsa Família', 'emergência', 'não responda por aqui', 'DOCUMENTOS']) assert.ok(t.includes(trecho), 'questionário sem: ' + trecho);
+  for (const trecho of ['CEP', 'Ponto de referência', 'Outro telefone para recado', 'antes dos descontos', 'BPC/LOAS (salário mínimo do INSS', 'Câncer', 'Prefiro não responder', 'CadÚnico', 'Bolsa Família', 'emergência', 'não responda por aqui', 'DOCUMENTOS']) assert.ok(t.includes(trecho), 'questionário sem: ' + trecho);
   const href = await pg.getAttribute('#whatsapp-questionario', 'href');
   assert.ok(href.startsWith('https://wa.me/?text='));
   assert.equal(decodeURIComponent(href.split('text=')[1]), t);

@@ -56,7 +56,7 @@
   function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 4000); }
 
   const PARENTESCOS = ['Responsável pela família', 'Esposa / marido / companheiro(a)', 'Filho(a)', 'Enteado(a)', 'Neto(a)', 'Pai / mãe', 'Sogro(a)', 'Irmão / irmã', 'Avô / avó', 'Outro parente', 'Não é parente'];
-  const FONTES = [['sem', 'Não tem renda'], ['formal', 'Trabalho com carteira assinada'], ['informal', 'Trabalho sem carteira, bico ou por conta própria'], ['aposentadoria', 'Aposentadoria ou pensão do INSS'], ['bpc', 'Benefício de Prestação Continuada, BPC/LOAS (salário mínimo do INSS para idoso ou pessoa com deficiência)'], ['outro', 'Outra renda (aluguel, ajuda de parente, pensão alimentícia)']];
+  const FONTES = [['sem', 'Não tem renda'], ['formal', 'Trabalho com carteira assinada'], ['informal', 'Trabalho sem carteira, bico ou por conta própria'], ['aposentadoria', 'Aposentadoria ou pensão do INSS'], ['bpc', 'BPC/LOAS (salário mínimo do INSS para idoso ou pessoa com deficiência)'], ['outro', 'Outra renda (aluguel, ajuda de parente, pensão alimentícia)']];
   const ESTUDOS = [['nao', 'Não estuda'], ['creche', 'Creche ou pré-escola'], ['fundamental', 'Ensino fundamental (1º ao 9º ano)'], ['medio', 'Ensino médio'], ['eja', 'EJA (supletivo)'], ['superior', 'Faculdade ou curso técnico']];
   const SEXOS = [['', 'Escolha'], ['F', 'Feminino'], ['M', 'Masculino'], ['O', 'Outro'], ['N', 'Prefiro não responder']];
   const GRAVES = [['cancer', 'Câncer'], ['hiv', 'HIV / aids'], ['renal', 'Doença nos rins (rim parado, hemodiálise)'], ['coracao', 'Doença grave do coração'], ['hepatite', 'Hepatite ou doença grave do fígado'], ['tuberculose', 'Tuberculose'], ['hanseniase', 'Hanseníase'], ['mental_grave', 'Doença mental grave (esquizofrenia, transtorno bipolar e outras)'], ['alzheimer', 'Alzheimer ou demência'], ['epilepsia', 'Epilepsia (convulsões)'], ['esclerose', 'Esclerose múltipla'], ['cegueira', 'Cegueira'], ['paralisia', 'Paralisia'], ['rara', 'Doença rara ou que precisa de remédio muito caro']];
@@ -108,7 +108,7 @@
       (!EM_MOLDURA && !instalado && eventoInstalar ? '<div class="btns"><button type="button" class="sun" id="instalar">Instalar no celular ou computador</button></div>' : '') +
       (!EM_MOLDURA && !instalado && !eventoInstalar && ehIOS ? '<p class="hint">Para instalar no iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início".</p>' : '') +
       '<section class="card stack tight" id="seguranca"><h3>Seus dados estão seguros</h3>' +
-      '<p>As respostas ficam só neste aparelho. Nada é enviado pela internet.</p>' +
+      '<p>As respostas ficam só neste aparelho. Só o CEP, se você digitar, é consultado no site ViaCEP para achar a rua.</p>' +
       (sessao ? '<p class="ok">Protegido com senha. Os dados estão guardados com criptografia.</p>'
         : '<p class="sub">Em computador ou celular usado por outras pessoas (CRAS, lan house, parente), crie uma senha ou apague os dados quando terminar.</p>') +
       '<div class="btns">' + (S.disponivel() ? (sessao ? '<button type="button" class="small" id="tirar-senha">Tirar a senha</button><button type="button" class="small" id="bloquear">Bloquear agora</button>' : '<button type="button" class="small" id="criar-senha">Proteger com senha</button>') : '') +
@@ -293,14 +293,14 @@
       '<div class="grid2"><label class="q">Data de nascimento<small id="' + pre + 'idade">' + (id != null ? id + ' anos' : 'dia/mês/ano, ex.: 25/03/1980') + '</small><input type="text" inputmode="numeric" autocomplete="off" id="' + pre + 'nasc" data-p="' + i + '" data-k="nascTxt" maxlength="10" placeholder="dd/mm/aaaa" value="' + esc(p.nascTxt || M.dataParaTexto(p.nasc)) + '"></label>' +
       '<label class="q">Sexo' + sel('sexo', SEXOS, p.sexo) + '</label></div>' +
       '<div class="grid2"><div class="stack tight"><label class="q">CPF <span class="obrig">(obrigatório)</span><small>Vai no relatório e nas cartas para os órgãos.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'cpf" data-p="' + i + '" data-k="cpf" placeholder="000.000.000-00" value="' + esc(p.cpf) + '"' + (p.semCpf ? ' disabled' : '') + '></label>' + chk('semCpf', 'Ainda não tem CPF') + '</div>' +
-      '<div class="stack tight"><label class="q">NIS <span class="obrig">(obrigatório)</span><small>Número do CadÚnico. Está na folha do CadÚnico, no cartão do Bolsa Família ou é o PIS da carteira de trabalho.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'nis" data-p="' + i + '" data-k="nis" placeholder="000.00000.00-0" value="' + esc(p.nis) + '"' + (p.semNis ? ' disabled' : '') + '></label>' + chk('semNis', 'Não tem NIS ou não sabe o número') + '</div></div>' +
+      '<div class="stack tight"><label class="q">NIS <span class="obrig">(obrigatório)</span><small>Número do CadÚnico. Está na folha do CadÚnico ou no cartão do Bolsa Família. Também pode ser o PIS da carteira de trabalho.</small><input type="text" inputmode="numeric" maxlength="14" autocomplete="off" id="' + pre + 'nis" data-p="' + i + '" data-k="nis" placeholder="000.00000.00-0" value="' + esc(p.nis) + '"' + (p.semNis ? ' disabled' : '') + '></label>' + chk('semNis', 'Não tem NIS ou não sabe o número') + '</div></div>' +
       (i > 0 ? '<label class="q">O que é do responsável' + sel('parentesco', [['', 'Escolha']].concat(PARENTESCOS.slice(1).map(x => [x, x])), p.parentesco) + '</label>' : '') +
       '<label class="q">De onde vem o dinheiro desta pessoa' + sel('fonte', FONTES, p.fonte) + '</label>' +
       '<details class="ajuda"><summary>O que é cada uma?</summary><ul class="sub">' +
       '<li><b>Aposentadoria ou pensão do INSS:</b> benefício de quem pagou o INSS (trabalhou com carteira ou contribuiu), ou pensão deixada por alguém que morreu.</li>' +
       '<li><b>Benefício de Prestação Continuada (BPC/LOAS):</b> um salário mínimo pago todo mês pelo INSS para pessoa com 65 anos ou mais, ou pessoa com deficiência, de família pobre, mesmo sem nunca ter pago o INSS. Não tem 13º salário.</li>' +
       '<li><b>Bico ou por conta própria:</b> faxina, venda, obra, roça, aplicativo, qualquer trabalho sem carteira assinada.</li></ul></details>' +
-      '<div class="grid2"><label class="q">Quanto ganha por mês, antes dos descontos (R$)<small>É o valor bruto: o salário antes de tirar INSS, vale-transporte e outros descontos (no contracheque aparece como "total de vencimentos"). Se o valor muda, coloque a média. Não conte o Bolsa Família.</small><input type="text" inputmode="decimal" maxlength="12" id="' + pre + 'renda" data-p="' + i + '" data-k="renda" value="' + esc(p.renda) + '" placeholder="0"' + (p.fonte === 'sem' ? ' disabled' : '') + '></label></div>' +
+      '<div class="grid2"><label class="q">Quanto ganha por mês (R$)<small>Valor antes dos descontos. Se muda todo mês, coloque a média. Não conte o Bolsa Família.</small><input type="text" inputmode="decimal" maxlength="12" id="' + pre + 'renda" data-p="' + i + '" data-k="renda" value="' + esc(p.renda) + '" placeholder="0"' + (p.fonte === 'sem' ? ' disabled' : '') + '></label></div>' +
       '<div class="grid2"><label class="q">Estuda?' + sel('estudo', ESTUDOS, p.estudo) + '</label>' +
       (p.estudo !== 'nao' ? '<label class="q">Escola' + sel('rede', [['publica', 'Pública (do governo)'], ['particular', 'Particular']], p.rede) + '</label>' : '') + '</div>' +
       '<div class="choices">' + chk('pcd', 'Tem alguma deficiência ou doença que impede de trabalhar ou estudar por muito tempo') +
@@ -408,7 +408,7 @@
     const ruaNum = [F.rua || F.endereco, F.numero].filter(Boolean).join(', ');
     return [ruaNum, F.complemento, F.bairro, F.cidade ? F.cidade + ' - MG' : '', F.cep ? 'CEP ' + F.cep : ''].filter(Boolean).join(', ');
   }
-  const ROTULO_FONTE = f => ((FONTES.find(e => e[0] === f) || [])[1] || '').split(' (')[0].toLowerCase();
+  const ROTULO_FONTE = f => { const t = ((FONTES.find(e => e[0] === f) || [])[1] || '').split(' (')[0]; return /^[A-Z]{2}/.test(t) ? t : t.toLowerCase(); }; // sigla (BPC/LOAS) fica em maiúsculas
   function linhaPessoa(x, i) {
     const id = idade(x.nasc);
     const partes = [x.nome + (id !== null ? ', ' + id + ' anos' : '') + (i === 0 ? ' (responsável)' : x.parentesco ? ' (' + x.parentesco.toLowerCase() + ')' : '')];
