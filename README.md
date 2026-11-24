@@ -65,7 +65,7 @@ Cidades: em `municipios`, pelo código IBGE, com `cras`, `extras`, `fonte` e `ve
 
 ## Segurança
 - Política de segurança rígida (CSP): só código do próprio site; nenhum script, fonte ou serviço de terceiros.
-- Sem cadastro, sem servidor, sem rastreamento. O app só acessa a internet para baixar regras.json e a assinatura e, se a pessoa digitar o CEP, para consultar o ViaCEP (só o CEP é enviado).
+- Sem cadastro, sem servidor, sem rastreamento. O app só acessa a internet para baixar regras.json e a assinatura e, se a pessoa digitar o CEP, para consultar o ViaCEP (do que a pessoa preenche, só o CEP é enviado).
 - Senha opcional: PBKDF2-SHA256 (310 mil rodadas) + AES-GCM 256; bloqueio automático após 10 minutos; espera após 5 erros.
 - Atualizações de regras assinadas com ECDSA P-256 e validadas antes de usar; versões antigas são recusadas.
 - Fontes: Atkinson Hyperlegible e Bricolage Grotesque (SIL Open Font License), guardadas no próprio app.

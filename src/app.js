@@ -570,7 +570,7 @@
         const s2 = document.getElementById('cep-status'); if (s2) { s2.textContent = 'Endereço encontrado. Confira e coloque o número.'; s2.hidden = false; }
         const n = document.getElementById(txtOk(r.logradouro) ? 'numero' : 'rua'); if (n) n.focus();
       }
-    } catch (e) { if (meu === cepPedido) msg(EM_MOLDURA ? 'Nesta prévia o acesso à internet fica bloqueado, por isso o CEP não é procurado. No aplicativo instalado (site) a busca funciona. Preencha à mão.' : 'Não foi possível procurar o CEP agora (sem conexão com o site dos Correios). Preencha à mão.'); }
+    } catch (e) { if (meu === cepPedido) msg(EM_MOLDURA ? 'Nesta prévia o acesso à internet fica bloqueado, por isso o CEP não é procurado. No aplicativo instalado (site) a busca funciona. Preencha à mão.' : 'Não foi possível procurar o CEP agora (sem conexão com o site ViaCEP). Preencha à mão.'); }
   }
 
   function render() {
