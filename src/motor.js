@@ -329,6 +329,8 @@
   // ---------- Validação do arquivo de regras ----------
   // Usada antes de aceitar uma atualização baixada da internet. Devolve lista de problemas (vazia = ok).
   const FATOS_FAMILIA = ['n', 'rendaTotal', 'rpc', 'rpcBPC', 'algumBPC', 'algumaGestante', 'criancas0a6', 'jovens7a17', 'gestantes', 'nutrizes', 'precisaSaude', 'precisaEspecialista', 'precisaDentista', 'precisaSaudeMental', 'precisaJustica', 'violencia', 'situacaoRua', 'agricultor', 'pescador', 'indigena', 'emergencia', 'semCasaPropria', 'aguaCopasa', 'aguaNaoSei', 'contaLuzOutroNome', 'zonaRural', 'municipio', 'recebeBF', 'cadunico', 'cadOk'];
+  // Fatos que podem ficar sem valor (null), por exemplo idade sem data de nascimento.
+  const FATOS_ANULAVEIS = ['m.idade'];
   const FATOS_MEMBRO = ['idade', 'sexo', 'pcd', 'gestante', 'nutriz', 'estudo', 'redePublica', 'medioCompleto', 'renda', 'fonte', 'recebeBPC', 'trabalhoFormal', 'demitido', 'incontinencia', 'doencas', 'temRemedio', 'semDocumento', 'cancer', 'hiv', 'doencaGrave', 'altoCusto', 'aposentado'];
   const LIMITES = ['quartoSM', 'meioSM', 'umSM', 'doisSM', 'tresSM'];
   const OPS = ['<=', '<', '>=', '>', '==', '!=', 'in'];
@@ -352,11 +354,14 @@
     if (!Array.isArray(r.programas) || r.programas.length < 5) { erros.push('lista de programas ausente ou curta'); return erros; }
     const nomesParam = new Set(Object.keys(p).concat(LIMITES));
     const ids = new Set();
-    const checarCond = (c, onde, porMembro) => {
+    // negado = a condição está dentro de um número ímpar de "not".
+    const checarCond = (c, onde, porMembro, negado) => {
       if (!c || typeof c !== 'object') { erros.push(onde + ': condição vazia'); return; }
-      if (c.all || c.any) { const l = c.all || c.any; if (!Array.isArray(l) || !l.length) erros.push(onde + ': all/any vazio'); else l.forEach(x => checarCond(x, onde, porMembro)); return; }
-      if (c.not) { checarCond(c.not, onde, porMembro); return; }
+      if (c.all || c.any) { const l = c.all || c.any; if (!Array.isArray(l) || !l.length) erros.push(onde + ': all/any vazio'); else l.forEach(x => checarCond(x, onde, porMembro, negado)); return; }
+      if (c.not) { checarCond(c.not, onde, porMembro, !negado); return; }
       if (typeof c.f !== 'string') { erros.push(onde + ': falta f'); return; }
+      // Comparação com valor que pode ser desconhecido dá falso; com "not" viraria verdadeiro e prometeria direito sem saber.
+      if (negado && c.op && FATOS_ANULAVEIS.includes(c.f)) erros.push(onde + ': "not" em comparação com ' + c.f + ', que pode ser desconhecido (escreva a condição sem "not")');
       if (c.f.startsWith('m.')) {
         if (!porMembro) erros.push(onde + ': usa ' + c.f + ' mas não é porMembro');
         if (!FATOS_MEMBRO.includes(c.f.slice(2))) erros.push(onde + ': fato desconhecido ' + c.f);

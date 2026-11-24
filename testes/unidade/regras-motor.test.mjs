@@ -139,3 +139,34 @@ test('Endereço de versões antigas vira rua', () => {
   const f = Motor.normalizarFamilia({ endereco: 'Rua A, 10', pessoas: [{ nome: 'x' }] });
   assert.equal(f.rua, 'Rua A, 10');
 });
+
+// Auditoria #7 e #19: casos de borda que protegem contra direito falso.
+test('"not" com valor desconhecido: avaliar dá verdadeiro, por isso validarRegras recusa', () => {
+  const cond = { not: { f: 'm.idade', op: '<', v: 18 } };
+  // Comportamento atual do motor: sem idade, a comparação dá falso e o "not" vira verdadeiro.
+  assert.equal(avaliar(cond, {}, { m: { idade: null } }), true);
+  const r = structuredClone(REGRAS);
+  const pr = r.programas.find(p => p.porMembro);
+  pr.condicao = { all: [pr.condicao, cond] };
+  assert.ok(Motor.validarRegras(r).some(e => e.includes('"not" em comparação com m.idade')));
+  // Dois "not" se anulam: aceito.
+  pr.condicao = { not: { not: { f: 'm.idade', op: '<', v: 18 } } };
+  assert.ok(!Motor.validarRegras(r).some(e => e.includes('"not" em comparação')));
+  // "not" em fato que sempre tem valor (sim/não) continua aceito.
+  pr.condicao = { not: { f: 'm.recebeBPC' } };
+  assert.ok(!Motor.validarRegras(r).some(e => e.includes('"not" em comparação')));
+});
+test('as regras atuais passam na validação (nenhum "not" perigoso)', () => {
+  assert.deepEqual(Motor.validarRegras(REGRAS), []);
+});
+test('Copasa: 65% até a linha do Bolsa Família (inclusive), 55% acima', () => {
+  const lim = REGRAS.parametros.linhaPobrezaBF;
+  const noLimite = prog(familia([{ idade: 30, renda: lim * 2 }, { idade: 30 }], { agua: 'copasa' }), 'copasa_social');
+  assert.match(noLimite.valor, /65%/);
+  const acima = prog(familia([{ idade: 30, renda: lim * 2 + 0.02 }, { idade: 30 }], { agua: 'copasa' }), 'copasa_social');
+  assert.match(acima.valor, /55%/);
+});
+test('Bolsa Família: Regra de Proteção vale com renda exatamente de meio salário por pessoa', () => {
+  const p = prog(familia([{ idade: 30, renda: SM }, { idade: 30 }], { bf: 'sim' }), 'bolsa_familia');
+  assert.equal(p?.status, 'talvez');
+});

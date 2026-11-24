@@ -16,8 +16,9 @@ self.addEventListener('fetch', e => {
     return;
   }
   // Aplicativo: usa a cópia guardada na hora e atualiza por trás.
+  // Sem internet e sem cópia: só a abertura de página recebe o index.html; fonte ou ícone que faltar dá erro, não HTML.
   e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => {
-    const rede = fetch(e.request).then(r => { if (r.ok) { const c = r.clone(); caches.open(CACHE).then(k => k.put(e.request, c)); } return r; }).catch(() => hit || caches.match('./index.html'));
+    const rede = fetch(e.request).then(r => { if (r.ok) { const c = r.clone(); caches.open(CACHE).then(k => k.put(e.request, c)); } return r; }).catch(() => hit || (e.request.mode === 'navigate' ? caches.match('./index.html') : new Response('', { status: 504 })));
     return hit || rede;
   }));
 });

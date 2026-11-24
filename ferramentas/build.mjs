@@ -50,6 +50,10 @@ const hash = createHash('sha256');
 for (const f of ['index.html', 'estilo.css', 'motor.js', 'seguranca.js', 'app.js', 'regras.json']) hash.update(readFileSync(dist + f));
 writeFileSync(dist + 'sw.js', ler('sw.js').replace('__VERSAO__', hash.digest('hex').slice(0, 12)));
 writeFileSync(dist + '.nojekyll', '');
+// Para buscadores: pode indexar tudo; uma página só.
+const ENDERECO = 'https://amarigo.github.io/meus-direitos-mg/';
+writeFileSync(dist + 'robots.txt', 'User-agent: *\nAllow: /\nSitemap: ' + ENDERECO + 'sitemap.xml\n');
+writeFileSync(dist + 'sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>' + ENDERECO + '</loc><lastmod>' + regras.atualizadoEm + '</lastmod></url>\n</urlset>\n');
 
 // ----- prévia (arquivo único) -----
 const previa = raiz + 'dist-previa/';

@@ -15,7 +15,7 @@ pronto para imprimir, com um pedido já escrito para cada órgão (CRAS, posto d
 - **Questionário para WhatsApp** e **formulário em papel para imprimir** (A4): quem ajuda uma família manda as perguntas
   ou entrega a folha, e depois preenche o app com as respostas.
 - Funciona **sem internet** depois de aberto uma vez, no **celular e no computador** (pode ser instalado).
-- Os dados da família **ficam só no aparelho**. Nada é enviado. Dá para proteger com **senha** (criptografia AES-256)
+- Os dados da família **ficam só no aparelho**. Só o CEP, se a pessoa digitar, é consultado no ViaCEP. Dá para proteger com **senha** (criptografia AES-256)
   e apagar tudo com um toque.
 - As regras ficam em um arquivo separado e **assinado**. Os aparelhos baixam a versão nova sozinhos quando têm internet
   e recusam qualquer arquivo sem a assinatura do projeto.
@@ -65,7 +65,7 @@ Cidades: em `municipios`, pelo código IBGE, com `cras`, `extras`, `fonte` e `ve
 
 ## Segurança
 - Política de segurança rígida (CSP): só código do próprio site; nenhum script, fonte ou serviço de terceiros.
-- Sem cadastro, sem servidor, sem rastreamento. O único acesso à internet é baixar `regras.json` e a assinatura.
+- Sem cadastro, sem servidor, sem rastreamento. O app só acessa a internet para baixar regras.json e a assinatura e, se a pessoa digitar o CEP, para consultar o ViaCEP (do que a pessoa preenche, só o CEP é enviado).
 - Senha opcional: PBKDF2-SHA256 (310 mil rodadas) + AES-GCM 256; bloqueio automático após 10 minutos; espera após 5 erros.
 - Atualizações de regras assinadas com ECDSA P-256 e validadas antes de usar; versões antigas são recusadas.
 - Fontes: Atkinson Hyperlegible e Bricolage Grotesque (SIL Open Font License), guardadas no próprio app.
