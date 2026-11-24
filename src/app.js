@@ -80,11 +80,22 @@
   // ---------- Telas ----------
   const PASSOS = ['inicio', 'casa', 'pessoas', 'saude', 'situacao', 'resultado'];
   const view = document.getElementById('view');
-  function irPara(i) { passo = Math.max(0, Math.min(PASSOS.length - 1, i)); salvar(); render(); try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {} }
+  function irPara(i) { passo = Math.max(0, Math.min(PASSOS.length - 1, i)); salvar(); render(); focarTitulo(true); }
+  // Depois de trocar de tela: leva o foco ao título (o leitor de tela lê só ele) e volta ao topo.
+  function focarTitulo(suave) {
+    if (!bloqueado && tela !== 'criar-senha') {
+      const t = view.querySelector('h1, h2');
+      if (t) { t.setAttribute('tabindex', '-1'); try { t.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    // Quem pediu menos movimento no aparelho não vê a rolagem animada.
+    let menos = false; try { menos = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    try { window.scrollTo({ top: 0, behavior: suave && !menos ? 'smooth' : 'auto' }); } catch (e) { window.scrollTo(0, 0); }
+  }
   function renderSteps() {
     const el = document.getElementById('steps');
     if (bloqueado || tela || passo === 0 || typeof passo === 'string') { el.innerHTML = ''; return; }
-    el.innerHTML = PASSOS.slice(1).map((_, i) => '<span class="' + (i < passo ? 'on' : '') + '"></span>').join('');
+    const total = PASSOS.length - 1;
+    el.innerHTML = '<p class="passo-txt">Passo ' + passo + ' de ' + total + '</p><div class="barras" aria-hidden="true">' + PASSOS.slice(1).map((_, i) => '<span class="' + (i < passo ? 'on' : '') + '"></span>').join('') + '</div>';
   }
   function radio(name, val, label, atual) { return '<label class="choice"><input type="radio" name="' + name + '" value="' + val + '"' + (atual === val ? ' checked' : '') + '><span>' + label + '</span></label>'; }
   function check(id, label, atual, extra) { return '<label class="choice"><input type="checkbox" id="' + id + '" data-k="' + id + '"' + (atual ? ' checked' : '') + '><span>' + label + (extra ? '<br><small class="sub">' + extra + '</small>' : '') + '</span></label>'; }
@@ -727,11 +738,11 @@
       case 'limpar-sim': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'terminar': apagarTudo(); render(); toast('Todos os dados foram apagados deste aparelho.'); break;
       case 'add-pessoa': if (F.pessoas.length < 20) { F.pessoas.push(M.novaPessoa(false)); salvar(); rerender('p' + (F.pessoas.length - 1) + '_nome'); } break;
-      case 'abrir-formulario': passo = 'formulario'; salvar(); render(); window.scrollTo(0, 0); break;
-      case 'abrir-questionario': passo = 'questionario'; salvar(); render(); window.scrollTo(0, 0); break;
+      case 'abrir-formulario': passo = 'formulario'; salvar(); render(); focarTitulo(false); break;
+      case 'abrir-questionario': passo = 'questionario'; salvar(); render(); focarTitulo(false); break;
       case 'copiar-questionario': copiarTexto(document.getElementById('texto-questionario'), 'Questionário copiado. Cole na conversa do WhatsApp.'); break;
-      case 'abrir-documentos': passo = 'documentos'; salvar(); render(); window.scrollTo(0, 0); break;
-      case 'abrir-relatorio': passo = 'relatorio'; salvar(); render(); window.scrollTo(0, 0); break;
+      case 'abrir-documentos': passo = 'documentos'; salvar(); render(); focarTitulo(false); break;
+      case 'abrir-relatorio': passo = 'relatorio'; salvar(); render(); focarTitulo(false); break;
       case 'imprimir': try { window.print(); } catch (err) {} break;
       case 'avancar': {
         if (PASSOS[passo] === 'pessoas') {

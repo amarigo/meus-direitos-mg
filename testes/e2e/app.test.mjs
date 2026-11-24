@@ -180,3 +180,14 @@ test('Doença grave marcada mostra os direitos no resultado', async () => {
   assert.ok(progs.includes('tratamento_cancer') && progs.includes('doenca_grave_direitos'));
   await ctx.close();
 });
+
+test('Leitor de tela: a tela não é lida inteira; o foco vai ao título e o passo aparece escrito', async () => {
+  const { ctx, pg, erros } = await abrir({ reducedMotion: 'reduce' });
+  assert.equal(await pg.getAttribute('main', 'aria-live'), null);
+  await pg.click('#comecar');
+  assert.match(await pg.textContent('#steps'), /Passo 1 de 5/);
+  assert.equal(await pg.evaluate(() => document.activeElement.tagName), 'H2');
+  assert.match(await pg.evaluate(() => document.activeElement.textContent), /Onde vocês moram/);
+  assert.deepEqual(erros, []);
+  await ctx.close();
+});
